@@ -10,9 +10,18 @@
 // k K - king
 
 typedef struct{
+  int x, y;
+}BOARD_Vec2;
+
+typedef struct{
   char board[8][8];
 
   int onTurn;
+  int win;
+
+  BOARD_Vec2 selectedPiece;
+  BOARD_Vec2 kingPosW;
+  BOARD_Vec2 kingPosB;
 
   int canCastleWK;
   int canCastleWQ;
@@ -26,5 +35,7 @@ typedef struct{
 
 BOARD_Board BOARD_SetupBoard(char* fen);
 void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy);
+
+int BOARD_IsCheck(BOARD_Board* board, int color);
 
 #endif

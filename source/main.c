@@ -7,10 +7,14 @@ int SCREEN_HEIGHT;
 int TS;
 Texture2D tileset;
 
+#define DIM_W 1000
+#define DIM_H 800
+
 int main(void)
 {
-  SCREEN_WIDTH = 1000;
-  SCREEN_HEIGHT = 800;
+  float scale = 1.2f;
+  SCREEN_WIDTH = DIM_W*scale;
+  SCREEN_HEIGHT = DIM_H*scale;
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, ":)");
   // int display = GetCurrentMonitor();
   // SCREEN_WIDTH = GetMonitorWidth(display);

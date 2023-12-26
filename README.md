@@ -2,9 +2,9 @@
 - using raylib and C
 ### todo 
     [] create basics
-        [] project setup
-        [] render board
-        [] render pieces
+        [x] project setup
+        [x] render board
+        [x] render pieces
         [] create debug panel
     [] create game of chess
         [] moving pieces

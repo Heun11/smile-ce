@@ -5,6 +5,10 @@
 BOARD_Board BOARD_SetupBoard(char* fen)
 {
   BOARD_Board board;
+
+  board.win = 0;
+  board.selectedPiece.x = -1;
+  board.selectedPiece.y = -1;
   
   for(int i=0;i<8;i++){
     for(int j=0;j<8;j++){
@@ -34,6 +38,14 @@ BOARD_Board BOARD_SetupBoard(char* fen)
       }
       else{
         board.board[rank][file] = symbol;
+        if(symbol=='K'){
+          board.kingPosW.x = file;
+          board.kingPosW.y = rank;
+        }
+        if(symbol=='k'){
+          board.kingPosB.x = file;
+          board.kingPosB.y = rank;
+        }
         file++;
       }
     }
@@ -62,6 +74,15 @@ BOARD_Board BOARD_SetupBoard(char* fen)
     }
   }
 
+  // printing board
+  printf("Show Board:\n\n");
+  for(int i=0;i<8;i++){
+    for(int j=0;j<8;j++){
+      printf("%c ", board.board[i][j]);
+    }
+    printf("\n");
+  }
+  
   return board;
 }
 
@@ -137,5 +158,24 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
       }
     }
   }
+
+  for(int i=0;i<8;i++){
+    DrawText(TextFormat("%c", (char)(i+0x61)), offx+i*TS, SCREEN_HEIGHT-TS/2, TS/3, (Color){ 150, 150, 150, 255 });
+    DrawText(TextFormat("%d", (i+0x1)), offx-TS/3, SCREEN_HEIGHT-TS*(i+1), TS/3, (Color){ 150, 150, 150, 255 });
+  }
 }
 
+int BOARD_IsCheck(BOARD_Board* board, int color)
+{
+  int x, y;
+  if(color>0){
+    x = board->kingPosW.x;
+    y = board->kingPosW.y;
+  }
+  else{
+    x = board->kingPosB.x;
+    y = board->kingPosB.y;
+  }
+
+  return 0;
+}
