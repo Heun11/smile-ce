@@ -12,7 +12,8 @@ Texture2D tileset;
 
 int main(void)
 {
-  float scale = 1.2f;
+  // float scale = 1.2f;
+  float scale = 0.8f;
   SCREEN_WIDTH = DIM_W*scale;
   SCREEN_HEIGHT = DIM_H*scale;
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, ":)");
@@ -27,13 +28,14 @@ int main(void)
   TS = SCREEN_HEIGHT/9;
   tileset = LoadTexture("resources/chess.png");
 
-  BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-
+  // BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
+  BOARD_Board board = BOARD_SetupBoard("k6q/8/8/8/8/1R1K1q2/8/8 b");
   while (!WindowShouldClose()){
     BeginDrawing();
     ClearBackground((Color){10,10,10,255});
 
-    BOARD_DrawBoard(&board, TS/2, TS/2); 
+    BOARD_DrawBoard(&board, TS/2, TS/2);
+    printf("%d\n", BOARD_IsCheck(&board, 1));
 
     SetWindowTitle(TextFormat(":) - FPS:%d", GetFPS()));
 

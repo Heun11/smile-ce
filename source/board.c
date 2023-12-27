@@ -1,6 +1,9 @@
 #include "board.h"
 #include "main.h"
+#include <ctype.h>
 #include <raylib.h>
+
+#define BOARD_PIECEWC(piece, color) ((color>0)?toupper(piece):tolower(piece))
 
 BOARD_Board BOARD_SetupBoard(char* fen)
 {
@@ -175,6 +178,112 @@ int BOARD_IsCheck(BOARD_Board* board, int color)
   else{
     x = board->kingPosB.x;
     y = board->kingPosB.y;
+  }
+
+  // pawn
+  if(color>0){
+    // white
+    if(x>0 && y>0 && board->board[y-1][x-1]=='p'){
+      return 1;
+    }
+    if(x<7 && y>0 && board->board[y-1][x+1]=='p'){
+      return 1;
+    }
+  }
+  else{
+    // black
+    if(x>0 && y<7 && board->board[y+1][x-1]=='P'){
+      return 1;
+    }
+    if(x<7 && y<7 && board->board[y+1][x+1]=='P'){
+      return 1;
+    }
+  }
+
+  // rook & queen (horizontal & vertical)
+  int fromEdgeX = 7-x;
+  int fromEdgeY = 7-y;
+  int result = 0;
+
+  // horizontal
+  for(int i=fromEdgeX-7;(i+x)<8;i++){
+    if(i==0 && result==1){
+      break;
+    }
+    if(board->board[y][x+i]==BOARD_PIECEWC('r', color*-1) || board->board[y][x+i]==BOARD_PIECEWC('q', color*-1)){
+      result = 1;
+    }
+    if(board->board[y][x+i]!=' ' && board->board[y][x+i]!=BOARD_PIECEWC('r',color*-1) 
+    && board->board[y][x+i]!=BOARD_PIECEWC('q',color*-1) && i!=0){
+      result = 0;
+      if(i>0){
+        break;
+      }
+    }
+  }
+
+  if(result>0){return 1;};
+
+  // vertical
+  for(int i=fromEdgeY-7;(i+y)<8;i++){
+    if(i==0 && result==1){
+      break;
+    }
+    if(board->board[y+i][x]==BOARD_PIECEWC('r', color*-1) || board->board[y+i][x]==BOARD_PIECEWC('q', color*-1)){
+      result = 1;
+    }
+    if(board->board[y+i][x]!=' ' && board->board[y+i][x]!=BOARD_PIECEWC('r',color*-1) 
+    && board->board[y+i][x]!=BOARD_PIECEWC('q',color*-1) && i!=0){
+      result = 0;
+      if(i>0){
+        break;
+      }
+    }
+  }
+  
+  if(result>0){return 1;};
+
+  // bishop & queen (diagonal)
+  // int startX = 0, startY = 0;
+  //
+  // if(fromEdgeX>fromEdgeY){
+  //   startX = fromEdgeX+(startY-y-1);
+  // }
+  // else{
+  //   startY = fromEdgeY+(startX-x-1);
+  // }
+  //
+  // printf("%d %d\n", startX, startY);
+  // for(int i=0;(startX+i)<8 && (startY+i)<8;i++){
+  //   // printf("%d %d\n", startX+i, startY+i);
+  //   if(board->board[startY+i][startX+i]==BOARD_PIECEWC('b', color*-1) || board->board[startY+i][startX+i]==BOARD_PIECEWC('q', color*-1)){
+  //     // printf("- %d %d\n", startX+i, startY+i);
+  //     return 1;
+  //   }
+  // }
+
+  // startX = 0, startY = 7;
+  //
+  // // startX = fromEdgeX+(startY-y-1);
+  // startY = 7-(fromEdgeY-1)-(startX-x-1);
+  //
+  // printf("%d %d %d %d\n", startX, startY, fromEdgeX, 9-fromEdgeY);
+  // for(int i=0;(startX+i)<8 && (startY+i)<8;i++){
+  //   // printf("%d %d\n", startX+i, startY+i);
+  //   // if(board->board[startY+i][startX+i]==BOARD_PIECEWC('b', color*-1) || board->board[startY+i][startX+i]==BOARD_PIECEWC('q', color*-1)){
+  //   //   return 1;
+  //   // }
+  // }
+  
+  // knight
+  int xMoves[8] = {-2, -2, -1, -1, +1, +1, +2, +2};
+  int yMoves[8] = {-1, +1, -2, +2, -2, +2, +1, -1};
+  for(int i=0;i<8;i++){
+    if(x+xMoves[i]>=0 && x+xMoves[i]<=7 && y+yMoves[i]>=0 && y+yMoves[i]<=7){
+      if(board->board[y+yMoves[i]][x+xMoves[i]]==BOARD_PIECEWC('n', color*-1)){
+        return 1;
+      }
+    }
   }
 
   return 0;
