@@ -29,13 +29,16 @@ int main(void)
   tileset = LoadTexture("resources/chess.png");
 
   // BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-  BOARD_Board board = BOARD_SetupBoard("k1q3b1/3Q4/8/8/8/1K6/8/8 b");
+  BOARD_Board board = BOARD_SetupBoard("8/8/8/8/3k4/2K5/8/8 b");
   while (!WindowShouldClose()){
     BeginDrawing();
     ClearBackground((Color){10,10,10,255});
 
     BOARD_DrawBoard(&board, TS/2, TS/2);
-    printf("%d\n", BOARD_IsCheck(&board, 1));
+    
+    if(IsMouseButtonPressed(0)){
+      BOARD_MakeMove(&board, TS/2, TS/2);
+    }
 
     SetWindowTitle(TextFormat(":) - FPS:%d", GetFPS()));
 

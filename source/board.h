@@ -14,6 +14,11 @@ typedef struct{
 }BOARD_Vec2;
 
 typedef struct{
+  int len;
+  BOARD_Vec2* moves;
+}BOARD_Moves;
+
+typedef struct{
   char board[8][8];
 
   int onTurn;
@@ -37,5 +42,7 @@ BOARD_Board BOARD_SetupBoard(char* fen);
 void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy);
 
 int BOARD_IsCheck(BOARD_Board* board, int color);
+BOARD_Moves BOARD_GenerateMoves(BOARD_Board* board);
+void BOARD_MakeMove(BOARD_Board* board, int ox, int oy);
 
 #endif

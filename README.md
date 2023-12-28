@@ -8,7 +8,7 @@
         [] create debug panel
     [] create game of chess
         [] moving pieces
-            [] isCheck
+            [x] isCheck
             [] generatePossibleMoves
         [] capturing pieces
         [] fancy moves (en passant, castle)

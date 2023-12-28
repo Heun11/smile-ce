@@ -312,5 +312,37 @@ int BOARD_IsCheck(BOARD_Board* board, int color)
     }
   }
 
+  // king check
+  for(int i=-1;i<=1;i++){
+    for(int j=-1;j<=1;j++){
+      if(x+i>=0 && x+i<8 && y+i>=0 && y+i<8 && board->board[y+j][x+i]==BOARD_PIECEWC('k', color*-1)){
+        return 1;
+      }
+    }
+  }
+
   return 0;
+}
+
+BOARD_Moves BOARD_GenerateMoves(BOARD_Board* board)
+{
+  BOARD_Moves moves = {0, NULL};
+  if(board->selectedPiece.x<0 || board->selectedPiece.y<0){
+    return moves;
+  }
+
+  return moves;
+}
+
+void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
+{
+  if(board->selectedPiece.x<0 || board->selectedPiece.y<0){
+    int mx = GetMouseX();
+    int my = GetMouseY();
+
+    int px = (mx-ox)/TS;
+    int py = (my-oy)/TS;
+
+    printf("%d %d\n", px, py);
+  }
 }
