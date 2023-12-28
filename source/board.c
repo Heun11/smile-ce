@@ -2,6 +2,7 @@
 #include "main.h"
 #include <ctype.h>
 #include <raylib.h>
+#include <stdio.h>
 
 #define BOARD_PIECEWC(piece, color) ((color>0)?toupper(piece):tolower(piece))
 
@@ -244,37 +245,62 @@ int BOARD_IsCheck(BOARD_Board* board, int color)
   if(result>0){return 1;};
 
   // bishop & queen (diagonal)
-  // int startX = 0, startY = 0;
-  //
-  // if(fromEdgeX>fromEdgeY){
-  //   startX = fromEdgeX+(startY-y-1);
-  // }
-  // else{
-  //   startY = fromEdgeY+(startX-x-1);
-  // }
-  //
-  // printf("%d %d\n", startX, startY);
-  // for(int i=0;(startX+i)<8 && (startY+i)<8;i++){
-  //   // printf("%d %d\n", startX+i, startY+i);
-  //   if(board->board[startY+i][startX+i]==BOARD_PIECEWC('b', color*-1) || board->board[startY+i][startX+i]==BOARD_PIECEWC('q', color*-1)){
-  //     // printf("- %d %d\n", startX+i, startY+i);
-  //     return 1;
-  //   }
-  // }
+  // start topleft
+  int startX = 0, startY = 0;
 
-  // startX = 0, startY = 7;
-  //
-  // // startX = fromEdgeX+(startY-y-1);
-  // startY = 7-(fromEdgeY-1)-(startX-x-1);
-  //
-  // printf("%d %d %d %d\n", startX, startY, fromEdgeX, 9-fromEdgeY);
-  // for(int i=0;(startX+i)<8 && (startY+i)<8;i++){
-  //   // printf("%d %d\n", startX+i, startY+i);
-  //   // if(board->board[startY+i][startX+i]==BOARD_PIECEWC('b', color*-1) || board->board[startY+i][startX+i]==BOARD_PIECEWC('q', color*-1)){
-  //   //   return 1;
-  //   // }
-  // }
+  if(x>y){
+    startX = x-y;
+  }
+  else{
+    startY = y-x;
+  }
+
+  for(int i=0;(startX+i)<8 && (startY+i)<8;i++){
+    if(board->board[startY+i][startX+i]==BOARD_PIECEWC('k', color) && result==1){
+      break;
+    }
+    if(board->board[startY+i][startX+i]==BOARD_PIECEWC('b', color*-1) || board->board[startY+i][startX+i]==BOARD_PIECEWC('q', color*-1)){
+      result = 1;
+    }
+    if(board->board[startY+i][startX+i]!=' ' && board->board[startY+i][startX+i]!=BOARD_PIECEWC('b',color*-1) 
+    && board->board[startY+i][startX+i]!=BOARD_PIECEWC('q',color*-1) && i!=0){
+      result = 0;
+      if(startX+i>x && startY+i>y){
+        break;
+      }
+    }
+  }
   
+  if(result>0){return 1;};
+  
+  // start bottomleft
+  startX = 0, startY = 7;
+
+  if(x>fromEdgeY){
+    startX = x-fromEdgeY;
+  }
+  else{
+    startY = abs((fromEdgeY-x)-7);
+  }
+
+  for(int i=0;(startX+i)<8 && (startY-i)>=0;i++){
+    if(board->board[startY-i][startX+i]==BOARD_PIECEWC('k', color) && result==1){
+      break;
+    }
+    if(board->board[startY-i][startX+i]==BOARD_PIECEWC('b', color*-1) || board->board[startY-i][startX+i]==BOARD_PIECEWC('q', color*-1)){
+      result = 1;
+    }
+    if(board->board[startY-i][startX+i]!=' ' && board->board[startY-i][startX+i]!=BOARD_PIECEWC('b',color*-1) 
+    && board->board[startY-i][startX+i]!=BOARD_PIECEWC('q',color*-1) && i!=0){
+      result = 0;
+      if(startX+i>x && startY-i>y){
+        break;
+      }
+    }
+  }
+  
+  if(result>0){return 1;};
+
   // knight
   int xMoves[8] = {-2, -2, -1, -1, +1, +1, +2, +2};
   int yMoves[8] = {-1, +1, -2, +2, -2, +2, +1, -1};
