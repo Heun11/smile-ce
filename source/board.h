@@ -35,6 +35,7 @@ typedef struct{
 }BOARD_Board;
 
 #include "raylib.h"
+#include "main.h"
 #include <string.h>
 #include <ctype.h>
 
@@ -43,6 +44,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy);
 
 int BOARD_IsCheck(BOARD_Board* board, int color);
 BOARD_Moves BOARD_GenerateMoves(BOARD_Board* board);
+void BOARD_AppendMove(BOARD_Board* board, BOARD_Moves* moves, int nx, int ny);
 void BOARD_MakeMove(BOARD_Board* board, int ox, int oy);
 
 #endif

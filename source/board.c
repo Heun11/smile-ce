@@ -1,10 +1,7 @@
 #include "board.h"
-#include "main.h"
-#include <ctype.h>
-#include <raylib.h>
-#include <stdio.h>
 
 #define BOARD_PIECEWC(piece, color) ((color>0)?toupper(piece):tolower(piece))
+#define BOARD_GETC(piece) ((isupper(piece))?1:-1)
 
 BOARD_Board BOARD_SetupBoard(char* fen)
 {
@@ -100,6 +97,10 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
       }
       else{
         DrawRectangle(offx+j*TS, offy+i*TS, TS, TS, (Color){ 80, 80, 80, 255 });
+      }
+
+      if(j==board->selectedPiece.x && i==board->selectedPiece.y){
+        DrawRectangle(offx+j*TS, offy+i*TS, TS, TS, (Color){ 20, 20, 200, 125 });
       }
 
       switch (board->board[i][j]){
@@ -324,6 +325,25 @@ int BOARD_IsCheck(BOARD_Board* board, int color)
   return 0;
 }
 
+void BOARD_AppendMove(BOARD_Board* board, BOARD_Moves* moves, int nx, int ny)
+{
+  int x = board->selectedPiece.x;
+  int y = board->selectedPiece.y;
+  char p = board->board[y][x];
+  int color = board->onTurn;
+  
+  int prev = board->board[ny][nx];
+  
+  board->board[ny][nx] = p;
+  board->board[y][x] = ' ';
+  if(!BOARD_IsCheck(board, color)){
+    moves->len++;
+    moves->moves[moves->len-1] = (BOARD_Vec2){nx, ny};
+  }
+  board->board[ny][nx] = prev;
+  board->board[y][x] = p;
+}
+
 BOARD_Moves BOARD_GenerateMoves(BOARD_Board* board)
 {
   BOARD_Moves moves = {0, NULL};
@@ -331,18 +351,199 @@ BOARD_Moves BOARD_GenerateMoves(BOARD_Board* board)
     return moves;
   }
 
+  moves.moves = (BOARD_Vec2*)malloc(sizeof(BOARD_Vec2)*30);
+
+  int x = board->selectedPiece.x;
+  int y = board->selectedPiece.y;
+  char p = board->board[y][x];
+  int color = board->onTurn;
+  int r=0, l=0, u=0, d=0;
+
+  // pawn movement
+  if(p==BOARD_PIECEWC('p', color)){
+    if((float)y-(2.5f*(float)color)==3.5f && board->board[y-2*color][x]==' '){
+      BOARD_AppendMove(board, &moves, x, y-2*color);
+    }
+    if(y-1*color>=0 && y-1*color<8 && board->board[y-1*color][x]==' '){
+      BOARD_AppendMove(board, &moves, x, y-1*color);
+    }
+    if(y-1*color>=0 && y-1*color<8 && x+1>=0 && x+1<8 && BOARD_GETC(board->board[y-1*color][x+1])==color*-1 && board->board[y-1*color][x+1]!=' '){
+      BOARD_AppendMove(board, &moves, x+1, y-1*color);
+    }
+    if(y-1*color>=0 && y-1*color<8 && x-1>=0 && x-1<8 && BOARD_GETC(board->board[y-1*color][x-1])==color*-1 && board->board[y-1*color][x]-1!=' '){
+      BOARD_AppendMove(board, &moves, x-1, y-1*color);
+    }
+  }
+  // rook movement
+  r=1, l=1, u=1, d=1;
+  if(p==BOARD_PIECEWC('r', color) || p==BOARD_PIECEWC('q', color)){
+    for(int i=1;i<8;i++){
+      if(x+i<8 && r){
+        if(board->board[y][x+i]==' '){
+          BOARD_AppendMove(board, &moves, x+i, y);
+        }
+        else if(BOARD_GETC(board->board[y][x+i])==color){
+          r = 0;
+        }
+        else if(BOARD_GETC(board->board[y][x+i])==color*-1){
+          BOARD_AppendMove(board, &moves, x+i, y);
+          r = 0;
+        }
+      }
+      if(x-i>=0 && l){
+        if(board->board[y][x-i]==' '){
+          BOARD_AppendMove(board, &moves, x-i, y);
+        }
+        else if(BOARD_GETC(board->board[y][x-i])==color){
+          l = 0;
+        }
+        else if(BOARD_GETC(board->board[y][x-i])==color*-1){
+          BOARD_AppendMove(board, &moves, x-i, y);
+          l = 0;
+        }
+      }
+
+      if(y+i<8 && d){
+        if(board->board[y+i][x]==' '){
+          BOARD_AppendMove(board, &moves, x, y+i);
+        }
+        else if(BOARD_GETC(board->board[y+i][x])==color){
+          d = 0;
+        }
+        else if(BOARD_GETC(board->board[y+i][x])==color*-1){
+          BOARD_AppendMove(board, &moves, x, y+i);
+          d = 0;
+        }
+      }
+      if(y-i>=0 && u){
+        if(board->board[y-i][x]==' '){
+          BOARD_AppendMove(board, &moves, x, y-i);
+        }
+        else if(BOARD_GETC(board->board[y-i][x])==color){
+          u = 0;
+        }
+        else if(BOARD_GETC(board->board[y-i][x])==color*-1){
+          BOARD_AppendMove(board, &moves, x, y-i);
+          u = 0;
+        }
+      }
+    }
+  }
+  // bishop movement
+  r=1, l=1, u=1, d=1;
+  if(p==BOARD_PIECEWC('b', color) || p==BOARD_PIECEWC('q', color)){
+    for(int i=1;i<8;i++){
+      if(x+i<8 && y+i<8 && r){
+        if(board->board[y+i][x+i]==' '){
+          BOARD_AppendMove(board, &moves, x+i, y+i);
+        }
+        else if(BOARD_GETC(board->board[y+i][x+i])==color){
+          r = 0;
+        }
+        else if(BOARD_GETC(board->board[y+i][x+i])==color*-1){
+          BOARD_AppendMove(board, &moves, x+i, y+i);
+          r = 0;
+        }
+      }
+      if(x-i>=0 && y+i<8 && l){
+        if(board->board[y+i][x-i]==' '){
+          BOARD_AppendMove(board, &moves, x-i, y+i);
+        }
+        else if(BOARD_GETC(board->board[y+i][x-i])==color){
+          l = 0;
+        }
+        else if(BOARD_GETC(board->board[y+i][x-i])==color*-1){
+          BOARD_AppendMove(board, &moves, x-i, y+i);
+          l = 0;
+        }
+      }
+
+      if(x+i<8 && y-i>=0 && u){
+        if(board->board[y-i][x+i]==' '){
+          BOARD_AppendMove(board, &moves, x+i, y-i);
+        }
+        else if(BOARD_GETC(board->board[y-i][x+i])==color){
+          u = 0;
+        }
+        else if(BOARD_GETC(board->board[y-i][x+i])==color*-1){
+          BOARD_AppendMove(board, &moves, x+i, y-i);
+          u = 0;
+        }
+      }
+      if(x-i>=0 && y-i>=0 && d){
+        if(board->board[y-i][x-i]==' '){
+          BOARD_AppendMove(board, &moves, x-i, y-i);
+        }
+        else if(BOARD_GETC(board->board[y-i][x-i])==color){
+          d = 0;
+        }
+        else if(BOARD_GETC(board->board[y-i][x-i])==color*-1){
+          BOARD_AppendMove(board, &moves, x-i, y-i);
+          d = 0;
+        }
+      }
+    }
+  }
+  // knight movement
+  if(p==BOARD_PIECEWC('n', color)){
+    int xMoves[8] = {-2, -2, -1, -1, +1, +1, +2, +2};
+    int yMoves[8] = {-1, +1, -2, +2, -2, +2, +1, -1};
+    for(int i=0;i<8;i++){
+      if(y+yMoves[i]<8 && y+yMoves[i]>=0 && x+xMoves[i]<8 && x+xMoves[i]>=0 
+      && (board->board[y+yMoves[i]][x+xMoves[i]]==' ' || !(BOARD_GETC(board->board[y+yMoves[i]][x+xMoves[i]])==color))){
+        BOARD_AppendMove(board, &moves, x+xMoves[i], y+yMoves[i]);
+      }
+    }
+  }
+  // king movement
+  if(p==BOARD_PIECEWC('k', color)){
+    for(int i=-1;i<=1;i++){
+      for(int j=-1;j<=1;j++){
+        if(y+i<8 && y+i>=0 && x+j<8 && x+j>=0 && !(i==0 && j==0)
+        && (board->board[y+i][x+j]==' ' || !(BOARD_GETC(board->board[y+i][x+j])==color))){
+          BOARD_AppendMove(board, &moves, x+j, y+i);
+        }
+      }  
+    }
+  }
+
   return moves;
 }
 
 void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
 {
-  if(board->selectedPiece.x<0 || board->selectedPiece.y<0){
-    int mx = GetMouseX();
-    int my = GetMouseY();
+  int mx = GetMouseX();
+  int my = GetMouseY();
 
-    int px = (mx-ox)/TS;
-    int py = (my-oy)/TS;
+  int px = (mx-ox)/TS;
+  int py = (my-oy)/TS;
 
-    printf("%d %d\n", px, py);
+
+  if(IsMouseButtonPressed(0)){
+    if(board->selectedPiece.x<0 || board->selectedPiece.y<0){
+      if(px>=0 && px<8 && py>=0 && py<8 && board->board[py][px]!=' ' && BOARD_GETC(board->board[py][px])==board->onTurn){
+        board->selectedPiece = (BOARD_Vec2){px, py};
+      }
+    }
+    else{
+      // printf("%d %d\n", px, py);
+      if(px<0 || px>=8 || py<0 || py>=8 || board->board[py][px]==' '){
+        board->selectedPiece = (BOARD_Vec2){-1, -1};
+      }
+      else{
+        
+      }
+    }
+  }
+
+  // TODO -> when move the king store its new position !!!
+  if(board->selectedPiece.x>=0 && board->selectedPiece.y>=0){
+    BOARD_Moves moves = BOARD_GenerateMoves(board);
+    for(int i=0;i<moves.len;i++){
+      DrawRectangle(ox+moves.moves[i].x*TS, oy+moves.moves[i].y*TS, TS, TS, (Color){ 200, 100, 100, 155 });
+    }
+    free(moves.moves);
   }
 }
+
+
