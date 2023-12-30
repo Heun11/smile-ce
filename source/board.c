@@ -1,4 +1,5 @@
 #include "board.h"
+#include <stdio.h>
 
 #define BOARD_PIECEWC(piece, color) ((color>0)?toupper(piece):tolower(piece))
 #define BOARD_GETC(piece) ((isupper(piece))?1:-1)
@@ -298,14 +299,14 @@ int BOARD_IsCheck(BOARD_Board* board, int color)
     }
     if(board->board[startY-i][startX+i]==BOARD_PIECEWC('b', color*-1) || board->board[startY-i][startX+i]==BOARD_PIECEWC('q', color*-1)){
       result = 1;
-      if(startX+i>x && startY-i>y){
+      if(startX+i>x && startY-i<y){
         break;
       }
     }
     if(board->board[startY-i][startX+i]!=' ' && board->board[startY-i][startX+i]!=BOARD_PIECEWC('b',color*-1) 
     && board->board[startY-i][startX+i]!=BOARD_PIECEWC('q',color*-1) && i!=0){
       result = 0;
-      if(startX+i>x && startY-i>y){
+      if(startX+i>x && startY-i<y){
         break;
       }
     }
@@ -587,8 +588,10 @@ void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
                 if(py==board->enPassant.y && px==board->enPassant.x){
                   board->board[board->enPassant.y+1*BOARD_GETC(board->board[py][px])][board->enPassant.x] = ' ';
                 }
-                board->enPassant = (BOARD_Vec2){-1,-1};
               }
+            }
+            if(board->enPassantColor!=board->onTurn){
+              board->enPassant = (BOARD_Vec2){-1,-1};
             }
 
             board->selectedPiece = (BOARD_Vec2){-1,-1};
@@ -609,7 +612,6 @@ void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
     }
   }
 
-  // TODO -> when move the king store its new position !!!
   if(board->selectedPiece.x>=0 && board->selectedPiece.y>=0){
     BOARD_Moves moves = BOARD_GenerateMoves(board);
     for(int i=0;i<moves.len;i++){

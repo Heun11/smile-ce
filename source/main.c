@@ -29,7 +29,7 @@ int main(void)
   tileset = LoadTexture("resources/chess.png");
 
   BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-  // BOARD_Board board = BOARD_SetupBoard("1b6/2B5/8/3rk1R1/8/8/8/K7 w");
+  // BOARD_Board board = BOARD_SetupBoard("8/k7/5b2/8/8/3P4/1K6/8 w");
   while (!WindowShouldClose()){
     BeginDrawing();
     ClearBackground((Color){10,10,10,255});
