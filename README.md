@@ -11,7 +11,9 @@
             [x] isCheck
             [x] generatePossibleMoves
         [x] capturing pieces
-        [] fancy moves (en passant, castle)
+        [] fancy moves 
+            [x] en passant 
+            [] castle
         [] winning
     [] create engine
         [] setup code (try with random moves)

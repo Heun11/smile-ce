@@ -149,12 +149,10 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
           y = 1;
           break;
         case 'K':
-          DrawRectangle(offx+j*TS, offy+i*TS, TS, TS, (Color){ 200, 200, 80, 255 });
           x = 5;
           y = 0;
           break;
         case 'k':
-          DrawRectangle(offx+j*TS, offy+i*TS, TS, TS, (Color){ 80, 200, 200, 255 });
           x = 5;
           y = 1;
           break;
@@ -398,6 +396,10 @@ BOARD_Moves BOARD_GenerateMoves(BOARD_Board* board)
     if(y-1*color>=0 && y-1*color<8 && x-1>=0 && BOARD_GETC(board->board[y-1*color][x-1])==color*-1 && !(board->board[y-1*color][x-1]==' ')){
       BOARD_AppendMove(board, &moves, x-1, y-1*color);
     }
+
+    if(x-1>=0 && x+1<8 && y-1*color>=0 && y-1*color<8 && (x-1==board->enPassant.x || x+1==board->enPassant.x) && y-1*color==board->enPassant.y){
+      BOARD_AppendMove(board, &moves, board->enPassant.x, y-1*color);
+    }
   }
   // rook movement
   r=1, l=1, u=1, d=1;
@@ -562,7 +564,7 @@ void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
         BOARD_Moves moves = BOARD_GenerateMoves(board);
         for(int i=0;i<moves.len;i++){
           if(px==moves.moves[i].x && py==moves.moves[i].y){
-             moved = 1;
+            moved = 1;
             printf("make move\n");
             
             board->board[py][px] = board->board[board->selectedPiece.y][board->selectedPiece.x];
@@ -573,6 +575,20 @@ void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
             }
             if(board->board[py][px]=='K'){
               board->kingPosW = (BOARD_Vec2){px, py};
+            }
+
+            if(board->board[py][px]=='p' || board->board[py][px]=='P'){
+              if(abs(board->selectedPiece.y-py)==2){
+                board->enPassant = (BOARD_Vec2){px, board->selectedPiece.y-1*BOARD_GETC(board->board[py][px])};
+                board->enPassantColor = BOARD_GETC(board->board[py][px]);
+                // printf("mozny en passant %d %d\n", board->enPassant.x, board->enPassant.y);
+              }
+              else if(board->enPassantColor!=board->onTurn){
+                if(py==board->enPassant.y && px==board->enPassant.x){
+                  board->board[board->enPassant.y+1*BOARD_GETC(board->board[py][px])][board->enPassant.x] = ' ';
+                }
+                board->enPassant = (BOARD_Vec2){-1,-1};
+              }
             }
 
             board->selectedPiece = (BOARD_Vec2){-1,-1};

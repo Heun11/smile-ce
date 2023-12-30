@@ -28,6 +28,9 @@ typedef struct{
   BOARD_Vec2 kingPosW;
   BOARD_Vec2 kingPosB;
 
+  BOARD_Vec2 enPassant;
+  int enPassantColor;
+
   int canCastleWK;
   int canCastleWQ;
   int canCastleBK;
