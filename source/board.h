@@ -31,6 +31,8 @@ typedef struct{
   BOARD_Vec2 enPassant;
   int enPassantColor;
 
+  char promotion;
+
   int canCastleWK;
   int canCastleWQ;
   int canCastleBK;

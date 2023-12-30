@@ -33,6 +33,7 @@ int main(void)
   while (!WindowShouldClose()){
     BeginDrawing();
     ClearBackground((Color){10,10,10,255});
+    // ClearBackground((Color){220, 220,220,255});
 
     BOARD_DrawBoard(&board, TS/2, TS/2);
    

@@ -1,4 +1,5 @@
 #include "board.h"
+#include "main.h"
 #include <stdio.h>
 
 #define BOARD_PIECEWC(piece, color) ((color>0)?toupper(piece):tolower(piece))
@@ -9,8 +10,9 @@ BOARD_Board BOARD_SetupBoard(char* fen)
   BOARD_Board board;
 
   board.win = 0;
-  board.selectedPiece.x = -1;
-  board.selectedPiece.y = -1;
+  board.selectedPiece = (BOARD_Vec2){-1,-1};
+  board.enPassant = (BOARD_Vec2){-1,-1};
+  board.promotion = 'q';
   
   for(int i=0;i<8;i++){
     for(int j=0;j<8;j++){
@@ -106,56 +108,43 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
 
       switch (board->board[i][j]){
         case ' ':
-          x = -1;
-          y = -1;
+          x = -1, y = -1;
           break;
         case 'P':
-          x = 0;
-          y = 0;
+          x = 0, y = 0;
           break;
         case 'p':
-          x = 0;
-          y = 1;
+          x = 0, y = 1;
           break;
         case 'R':
-          x = 1;
-          y = 0;
+          x = 1, y = 0;
           break;
         case 'r':
-          x = 1;
-          y = 1;
+          x = 1, y = 1;
           break;
         case 'N':
-          x = 2;
-          y = 0;
+          x = 2, y = 0;
           break;
         case 'n':
-          x = 2;
-          y = 1;
+          x = 2, y = 1;
           break;
         case 'B':
-          x = 3;
-          y = 0;
+          x = 3, y = 0;
           break;
         case 'b':
-          x = 3;
-          y = 1;
+          x = 3, y = 1;
           break;
         case 'Q':
-          x = 4;
-          y = 0;
+          x = 4, y = 0;
           break;
         case 'q':
-          x = 4;
-          y = 1;
+          x = 4, y = 1;
           break;
         case 'K':
-          x = 5;
-          y = 0;
+          x = 5, y = 0;
           break;
         case 'k':
-          x = 5;
-          y = 1;
+          x = 5, y = 1;
           break;
       }
       if(x>-1 && y>-1){
@@ -169,6 +158,32 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
     DrawText(TextFormat("%c", (char)(i+0x61)), offx+i*TS, SCREEN_HEIGHT-TS/2, TS/3, (Color){ 150, 150, 150, 255 });
     DrawText(TextFormat("%d", (i+0x1)), offx-TS/3, SCREEN_HEIGHT-TS*(i+1), TS/3, (Color){ 150, 150, 150, 255 });
   }
+
+  int i;
+  switch (board->promotion){
+    case 'q':
+      i=0;
+      break;
+    case 'b':
+      i=1;
+      break;
+    case 'n':
+      i=2;
+      break;
+    case 'r':
+      i=3;
+      break;
+  }
+  DrawRectangle(SCREEN_WIDTH-(int)(TS*1.5), offy+TS*i, TS, TS, (Color){ 170, 50, 160, 125 });
+
+  DrawTexturePro(tileset, (Rectangle){4*TILE_SIZE_REAL, 0, TILE_SIZE_REAL, TILE_SIZE_REAL}, 
+    (Rectangle){SCREEN_WIDTH-(int)(TS*1.5), offy+TS*0, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+  DrawTexturePro(tileset, (Rectangle){3*TILE_SIZE_REAL, 0, TILE_SIZE_REAL, TILE_SIZE_REAL}, 
+    (Rectangle){SCREEN_WIDTH-(int)(TS*1.5), offy+TS*1, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+  DrawTexturePro(tileset, (Rectangle){2*TILE_SIZE_REAL, 0, TILE_SIZE_REAL, TILE_SIZE_REAL}, 
+    (Rectangle){SCREEN_WIDTH-(int)(TS*1.5), offy+TS*2, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+  DrawTexturePro(tileset, (Rectangle){1*TILE_SIZE_REAL, 0, TILE_SIZE_REAL, TILE_SIZE_REAL}, 
+    (Rectangle){SCREEN_WIDTH-(int)(TS*1.5), offy+TS*3, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
 }
 
 int BOARD_IsCheck(BOARD_Board* board, int color)
@@ -385,11 +400,11 @@ BOARD_Moves BOARD_GenerateMoves(BOARD_Board* board)
 
   // pawn movement
   if(p==BOARD_PIECEWC('p', color)){
-    if((float)y-(2.5f*(float)color)==3.5f && board->board[y-2*color][x]==' '){
-      BOARD_AppendMove(board, &moves, x, y-2*color);
-    }
     if(y-1*color>=0 && y-1*color<8 && board->board[y-1*color][x]==' '){
       BOARD_AppendMove(board, &moves, x, y-1*color);
+      if((float)y-(2.5f*(float)color)==3.5f && board->board[y-2*color][x]==' '){
+        BOARD_AppendMove(board, &moves, x, y-2*color);
+      }
     }
     if(y-1*color>=0 && y-1*color<8 && x+1<8 && BOARD_GETC(board->board[y-1*color][x+1])==color*-1 && !(board->board[y-1*color][x+1]==' ')){
       BOARD_AppendMove(board, &moves, x+1, y-1*color);
@@ -554,11 +569,42 @@ void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
       if(px>=0 && px<8 && py>=0 && py<8 && board->board[py][px]!=' ' && BOARD_GETC(board->board[py][px])==board->onTurn){
         board->selectedPiece = (BOARD_Vec2){px, py};
       }
+      else{
+        if(mx>=SCREEN_WIDTH-(int)(TS*1.5) && mx<=SCREEN_WIDTH-(int)(TS*1.5)+TS){
+          if(my>=oy+TS*0 && my<=oy+TS*1){
+            board->promotion = 'q';
+          }
+          if(my>=oy+TS*1 && my<=oy+TS*2){
+            board->promotion = 'b';
+          }
+          if(my>=oy+TS*2 && my<=oy+TS*3){
+            board->promotion = 'n';
+          }
+          if(my>=oy+TS*3 && my<=oy+TS*4){
+            board->promotion = 'r';
+          }
+        }
+      }
     }
     else{
       // printf("%d %d\n", px, py);
       if(px<0 || px>=8 || py<0 || py>=8){
         board->selectedPiece = (BOARD_Vec2){-1, -1};
+
+        if(mx>=SCREEN_WIDTH-(int)(TS*1.5) && mx<=SCREEN_WIDTH-(int)(TS*1.5)+TS){
+          if(my>=oy+TS*0 && my<=oy+TS*1){
+            board->promotion = 'q';
+          }
+          if(my>=oy+TS*1 && my<=oy+TS*2){
+            board->promotion = 'b';
+          }
+          if(my>=oy+TS*2 && my<=oy+TS*3){
+            board->promotion = 'n';
+          }
+          if(my>=oy+TS*3 && my<=oy+TS*4){
+            board->promotion = 'r';
+          }
+        }
       }
       else{
         int moved = 0;
@@ -588,6 +634,9 @@ void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
                 if(py==board->enPassant.y && px==board->enPassant.x){
                   board->board[board->enPassant.y+1*BOARD_GETC(board->board[py][px])][board->enPassant.x] = ' ';
                 }
+              }
+              if(py==0 || py==7){
+                board->board[py][px] = BOARD_PIECEWC(board->promotion, BOARD_GETC(board->board[py][px]));
               }
             }
             if(board->enPassantColor!=board->onTurn){
