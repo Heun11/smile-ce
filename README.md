@@ -7,10 +7,10 @@
         [x] render pieces
         [] create debug panel
     [] create game of chess
-        [] moving pieces
+        [] basic moving pieces
             [x] isCheck
-            [] generatePossibleMoves
-        [] capturing pieces
+            [x] generatePossibleMoves
+        [x] capturing pieces
         [] fancy moves (en passant, castle)
         [] winning
     [] create engine

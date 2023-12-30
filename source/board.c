@@ -149,10 +149,12 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
           y = 1;
           break;
         case 'K':
+          DrawRectangle(offx+j*TS, offy+i*TS, TS, TS, (Color){ 200, 200, 80, 255 });
           x = 5;
           y = 0;
           break;
         case 'k':
+          DrawRectangle(offx+j*TS, offy+i*TS, TS, TS, (Color){ 80, 200, 200, 255 });
           x = 5;
           y = 1;
           break;
@@ -214,6 +216,9 @@ int BOARD_IsCheck(BOARD_Board* board, int color)
     }
     if(board->board[y][x+i]==BOARD_PIECEWC('r', color*-1) || board->board[y][x+i]==BOARD_PIECEWC('q', color*-1)){
       result = 1;
+      if(i>0){
+        break;
+      }
     }
     if(board->board[y][x+i]!=' ' && board->board[y][x+i]!=BOARD_PIECEWC('r',color*-1) 
     && board->board[y][x+i]!=BOARD_PIECEWC('q',color*-1) && i!=0){
@@ -223,16 +228,18 @@ int BOARD_IsCheck(BOARD_Board* board, int color)
       }
     }
   }
-
   if(result>0){return 1;};
 
-  // vertical
+  // // vertical
   for(int i=fromEdgeY-7;(i+y)<8;i++){
     if(i==0 && result==1){
       break;
     }
     if(board->board[y+i][x]==BOARD_PIECEWC('r', color*-1) || board->board[y+i][x]==BOARD_PIECEWC('q', color*-1)){
       result = 1;
+      if(i>0){
+        break;
+      }
     }
     if(board->board[y+i][x]!=' ' && board->board[y+i][x]!=BOARD_PIECEWC('r',color*-1) 
     && board->board[y+i][x]!=BOARD_PIECEWC('q',color*-1) && i!=0){
@@ -242,7 +249,7 @@ int BOARD_IsCheck(BOARD_Board* board, int color)
       }
     }
   }
-  
+
   if(result>0){return 1;};
 
   // bishop & queen (diagonal)
@@ -262,6 +269,9 @@ int BOARD_IsCheck(BOARD_Board* board, int color)
     }
     if(board->board[startY+i][startX+i]==BOARD_PIECEWC('b', color*-1) || board->board[startY+i][startX+i]==BOARD_PIECEWC('q', color*-1)){
       result = 1;
+      if(startX+i>x && startY+i>y){
+        break;
+      }
     }
     if(board->board[startY+i][startX+i]!=' ' && board->board[startY+i][startX+i]!=BOARD_PIECEWC('b',color*-1) 
     && board->board[startY+i][startX+i]!=BOARD_PIECEWC('q',color*-1) && i!=0){
@@ -271,7 +281,7 @@ int BOARD_IsCheck(BOARD_Board* board, int color)
       }
     }
   }
-  
+
   if(result>0){return 1;};
   
   // start bottomleft
@@ -290,6 +300,9 @@ int BOARD_IsCheck(BOARD_Board* board, int color)
     }
     if(board->board[startY-i][startX+i]==BOARD_PIECEWC('b', color*-1) || board->board[startY-i][startX+i]==BOARD_PIECEWC('q', color*-1)){
       result = 1;
+      if(startX+i>x && startY-i>y){
+        break;
+      }
     }
     if(board->board[startY-i][startX+i]!=' ' && board->board[startY-i][startX+i]!=BOARD_PIECEWC('b',color*-1) 
     && board->board[startY-i][startX+i]!=BOARD_PIECEWC('q',color*-1) && i!=0){
@@ -299,7 +312,7 @@ int BOARD_IsCheck(BOARD_Board* board, int color)
       }
     }
   }
-  
+
   if(result>0){return 1;};
 
   // knight
@@ -336,9 +349,21 @@ void BOARD_AppendMove(BOARD_Board* board, BOARD_Moves* moves, int nx, int ny)
   
   board->board[ny][nx] = p;
   board->board[y][x] = ' ';
-  if(!BOARD_IsCheck(board, color)){
+  if(board->board[ny][nx]=='k'){
+    board->kingPosB = (BOARD_Vec2){nx, ny};
+  }
+  if(board->board[ny][nx]=='K'){
+    board->kingPosW = (BOARD_Vec2){nx, ny};
+  }
+  if(BOARD_IsCheck(board, color)==0){
     moves->len++;
     moves->moves[moves->len-1] = (BOARD_Vec2){nx, ny};
+  }
+  if(board->board[ny][nx]=='k'){
+    board->kingPosB = (BOARD_Vec2){x, y};
+  }
+  if(board->board[ny][nx]=='K'){
+    board->kingPosW = (BOARD_Vec2){x, y};
   }
   board->board[ny][nx] = prev;
   board->board[y][x] = p;
@@ -367,10 +392,10 @@ BOARD_Moves BOARD_GenerateMoves(BOARD_Board* board)
     if(y-1*color>=0 && y-1*color<8 && board->board[y-1*color][x]==' '){
       BOARD_AppendMove(board, &moves, x, y-1*color);
     }
-    if(y-1*color>=0 && y-1*color<8 && x+1>=0 && x+1<8 && BOARD_GETC(board->board[y-1*color][x+1])==color*-1 && board->board[y-1*color][x+1]!=' '){
+    if(y-1*color>=0 && y-1*color<8 && x+1<8 && BOARD_GETC(board->board[y-1*color][x+1])==color*-1 && !(board->board[y-1*color][x+1]==' ')){
       BOARD_AppendMove(board, &moves, x+1, y-1*color);
     }
-    if(y-1*color>=0 && y-1*color<8 && x-1>=0 && x-1<8 && BOARD_GETC(board->board[y-1*color][x-1])==color*-1 && board->board[y-1*color][x]-1!=' '){
+    if(y-1*color>=0 && y-1*color<8 && x-1>=0 && BOARD_GETC(board->board[y-1*color][x-1])==color*-1 && !(board->board[y-1*color][x-1]==' ')){
       BOARD_AppendMove(board, &moves, x-1, y-1*color);
     }
   }
@@ -499,7 +524,10 @@ BOARD_Moves BOARD_GenerateMoves(BOARD_Board* board)
   if(p==BOARD_PIECEWC('k', color)){
     for(int i=-1;i<=1;i++){
       for(int j=-1;j<=1;j++){
-        if(y+i<8 && y+i>=0 && x+j<8 && x+j>=0 && !(i==0 && j==0)
+        if(i==0 && j==0){
+          continue;
+        }
+        if(y+i<8 && y+i>=0 && x+j<8 && x+j>=0 
         && (board->board[y+i][x+j]==' ' || !(BOARD_GETC(board->board[y+i][x+j])==color))){
           BOARD_AppendMove(board, &moves, x+j, y+i);
         }
@@ -518,7 +546,6 @@ void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
   int px = (mx-ox)/TS;
   int py = (my-oy)/TS;
 
-
   if(IsMouseButtonPressed(0)){
     if(board->selectedPiece.x<0 || board->selectedPiece.y<0){
       if(px>=0 && px<8 && py>=0 && py<8 && board->board[py][px]!=' ' && BOARD_GETC(board->board[py][px])==board->onTurn){
@@ -527,11 +554,41 @@ void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
     }
     else{
       // printf("%d %d\n", px, py);
-      if(px<0 || px>=8 || py<0 || py>=8 || board->board[py][px]==' '){
+      if(px<0 || px>=8 || py<0 || py>=8){
         board->selectedPiece = (BOARD_Vec2){-1, -1};
       }
       else{
-        
+        int moved = 0;
+        BOARD_Moves moves = BOARD_GenerateMoves(board);
+        for(int i=0;i<moves.len;i++){
+          if(px==moves.moves[i].x && py==moves.moves[i].y){
+             moved = 1;
+            printf("make move\n");
+            
+            board->board[py][px] = board->board[board->selectedPiece.y][board->selectedPiece.x];
+            board->board[board->selectedPiece.y][board->selectedPiece.x] = ' ';
+
+            if(board->board[py][px]=='k'){
+              board->kingPosB = (BOARD_Vec2){px, py};
+            }
+            if(board->board[py][px]=='K'){
+              board->kingPosW = (BOARD_Vec2){px, py};
+            }
+
+            board->selectedPiece = (BOARD_Vec2){-1,-1};
+
+            board->onTurn *= -1;
+          }
+        }
+        if(!moved && board->board[py][px]!=' '){
+          if(board->board[py][px]!=' ' && BOARD_GETC(board->board[py][px])==board->onTurn){
+            board->selectedPiece = (BOARD_Vec2){px, py};
+          }
+          else{
+            board->selectedPiece = (BOARD_Vec2){-1, -1};
+          }
+        }
+        free(moves.moves);   
       }
     }
   }
