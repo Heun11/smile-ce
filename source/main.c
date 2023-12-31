@@ -1,6 +1,7 @@
 #include "main.h"
 #include "board.h"
 #include <raylib.h>
+#include <stdio.h>
 
 int SCREEN_WIDTH;
 int SCREEN_HEIGHT;
@@ -39,6 +40,10 @@ int main(void)
    
     // printf("White ischeck %d\n", BOARD_IsCheck(&board, 1));
     // printf("Black ischeck %d\n", BOARD_IsCheck(&board, -1));
+    // printf("bq %d\n", board.canCastleBQ);
+    // printf("bk %d\n", board.canCastleBK);
+    // printf("wq %d\n", board.canCastleWQ);
+    // printf("wk %d\n\n", board.canCastleWK);
     BOARD_MakeMove(&board, TS/2, TS/2);
 
     SetWindowTitle(TextFormat(":) - FPS:%d", GetFPS()));

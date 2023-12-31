@@ -96,10 +96,10 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
   for(int i=0;i<8;i++){
     for(int j=0;j<8;j++){
       if((i+j)%2==0){
-        DrawRectangle(offx+j*TS, offy+i*TS, TS, TS, (Color){ 200, 200, 200, 255 });
+        DrawRectangle(offx+j*TS, offy+i*TS, TS, TS, (Color){ 247, 243, 220, 255 });
       }
       else{
-        DrawRectangle(offx+j*TS, offy+i*TS, TS, TS, (Color){ 80, 80, 80, 255 });
+        DrawRectangle(offx+j*TS, offy+i*TS, TS, TS, (Color){ 51, 107, 163, 255 });
       }
 
       if(j==board->selectedPiece.x && i==board->selectedPiece.y){
@@ -551,6 +551,109 @@ BOARD_Moves BOARD_GenerateMoves(BOARD_Board* board)
         }
       }  
     }
+    int can = 1;
+    if(color==1){
+      if(board->canCastleWQ){
+        for(int i=-3;i<0;i++){
+          if(board->board[y][x+i]==' '){
+            char piece = board->board[y][x+i];
+            board->board[y][x+i] = BOARD_PIECEWC('k', color);
+            board->board[y][x] = ' ';
+            if(BOARD_IsCheck(board, color)){
+              can = 0;
+              board->board[y][x+i] = piece;
+              board->board[y][x] = BOARD_PIECEWC('k', color);
+              break;
+            }
+            board->board[y][x+i] = piece;
+            board->board[y][x] = BOARD_PIECEWC('k', color);
+          }
+          else{
+            can = 0;
+            break;
+          }
+        }
+        if(can){
+          BOARD_AppendMove(board, &moves, 0, y);
+        }
+      }
+      can = 1;
+      if(board->canCastleWK){
+        for(int i=1;i<3;i++){
+          if(board->board[y][x+i]==' '){
+            char piece = board->board[y][x+i];
+            board->board[y][x+i] = BOARD_PIECEWC('k', color);
+            board->board[y][x] = ' ';
+            if(BOARD_IsCheck(board, color)){
+              can = 0;
+              board->board[y][x+i] = piece;
+              board->board[y][x] = BOARD_PIECEWC('k', color);
+              break;
+            }
+            board->board[y][x+i] = piece;
+            board->board[y][x] = BOARD_PIECEWC('k', color);
+          }
+          else{
+            can = 0;
+            break;
+          }
+        }
+        if(can){
+          BOARD_AppendMove(board, &moves, 7, y);
+        }
+      }
+    }
+    else{
+      if(board->canCastleBQ){
+        for(int i=-3;i<0;i++){
+          if(board->board[y][x+i]==' '){
+            char piece = board->board[y][x+i];
+            board->board[y][x+i] = BOARD_PIECEWC('k', color);
+            board->board[y][x] = ' ';
+            if(BOARD_IsCheck(board, color)){
+              can = 0;
+              board->board[y][x+i] = piece;
+              board->board[y][x] = BOARD_PIECEWC('k', color);
+              break;
+            }
+            board->board[y][x+i] = piece;
+            board->board[y][x] = BOARD_PIECEWC('k', color);
+          }
+          else{
+            can = 0;
+            break;
+          }
+        }
+        if(can){
+          BOARD_AppendMove(board, &moves, 0, y);
+        }
+      }
+      can = 1;
+      if(board->canCastleBK){
+        for(int i=1;i<3;i++){
+          if(board->board[y][x+i]==' '){
+            char piece = board->board[y][x+i];
+            board->board[y][x+i] = BOARD_PIECEWC('k', color);
+            board->board[y][x] = ' ';
+            if(BOARD_IsCheck(board, color)){
+              can = 0;
+              board->board[y][x+i] = piece;
+              board->board[y][x] = BOARD_PIECEWC('k', color);
+              break;
+            }
+            board->board[y][x+i] = piece;
+            board->board[y][x] = BOARD_PIECEWC('k', color);
+          }
+          else{
+            can = 0;
+            break;
+          }
+        }
+        if(can){
+          BOARD_AppendMove(board, &moves, 7, y);
+        }
+      }
+    }
   }
 
   return moves;
@@ -628,7 +731,6 @@ void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
               if(abs(board->selectedPiece.y-py)==2){
                 board->enPassant = (BOARD_Vec2){px, board->selectedPiece.y-1*BOARD_GETC(board->board[py][px])};
                 board->enPassantColor = BOARD_GETC(board->board[py][px]);
-                // printf("mozny en passant %d %d\n", board->enPassant.x, board->enPassant.y);
               }
               else if(board->enPassantColor!=board->onTurn){
                 if(py==board->enPassant.y && px==board->enPassant.x){
@@ -641,6 +743,63 @@ void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
             }
             if(board->enPassantColor!=board->onTurn){
               board->enPassant = (BOARD_Vec2){-1,-1};
+            }
+
+            if(board->board[py][px]=='r' || board->board[py][px]=='R'){
+              if(BOARD_GETC(board->board[py][px])==-1){
+                if(board->canCastleBQ && board->selectedPiece.x==0){
+                  board->canCastleBQ = 0;
+                }
+                if(board->canCastleBK && board->selectedPiece.x==7){
+                  board->canCastleBK = 0;
+                }
+              }
+              if(BOARD_GETC(board->board[py][px])==1){
+                if(board->canCastleWQ && board->selectedPiece.x==0){
+                  board->canCastleWQ = 0;
+                }
+                if(board->canCastleWK && board->selectedPiece.x==7){
+                  board->canCastleWK = 0;
+                }
+              }
+            }
+
+            if(board->board[py][px]=='K'){
+              if(px==0 && py==7){
+                printf("castle na q");
+                board->kingPosW = (BOARD_Vec2){2, 7};
+                board->board[py][px] = ' ';
+                board->board[board->kingPosW.y][board->kingPosW.x] = 'K';
+                board->board[7][3] = 'R';
+              }
+              else if(px==7 && py==7){
+                printf("castle na k");
+                board->kingPosW = (BOARD_Vec2){6, 7};
+                board->board[py][px] = ' ';
+                board->board[board->kingPosW.y][board->kingPosW.x] = 'K';
+                board->board[7][5] = 'R';
+              }
+              board->canCastleWK = 0;
+              board->canCastleWQ = 0;
+            }
+
+            if(board->board[py][px]=='k'){
+              if(px==0 && py==0){
+                printf("castle na q");
+                board->kingPosB = (BOARD_Vec2){2, 0};
+                board->board[py][px] = ' ';
+                board->board[board->kingPosB.y][board->kingPosB.x] = 'k';
+                board->board[0][3] = 'r';
+              }
+              else if(px==7 && py==0){
+                printf("castle na k");
+                board->kingPosB = (BOARD_Vec2){6, 0};
+                board->board[py][px] = ' ';
+                board->board[board->kingPosB.y][board->kingPosB.x] = 'k';
+                board->board[0][5] = 'r';
+              }
+              board->canCastleBK = 0;
+              board->canCastleBQ = 0;
             }
 
             board->selectedPiece = (BOARD_Vec2){-1,-1};

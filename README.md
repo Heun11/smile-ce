@@ -11,11 +11,11 @@
             [x] isCheck
             [x] generatePossibleMoves
         [x] capturing pieces
-        [] fancy moves 
-            [] promotion
+        [x] fancy moves 
+            [x] promotion
             [x] en passant 
-            [] castle
-        [] winning
+            [x] castle
+        [] winning (checkmate & stalemate)
     [] create engine
         [] setup code (try with random moves)
         [] code basc minimax
