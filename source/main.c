@@ -1,7 +1,4 @@
 #include "main.h"
-#include "board.h"
-#include <raylib.h>
-#include <stdio.h>
 
 int SCREEN_WIDTH;
 int SCREEN_HEIGHT;
@@ -30,21 +27,31 @@ int main(void)
   tileset = LoadTexture("resources/chess.png");
 
   BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-  // BOARD_Board board = BOARD_SetupBoard("8/k7/5b2/8/8/3P4/1K6/8 w");
+  // BOARD_Board board = BOARD_SetupBoard("k7/7R/8/8/8/8/8/2R3K1 w");
+  int result;
+
   while (!WindowShouldClose()){
     BeginDrawing();
     ClearBackground((Color){10,10,10,255});
-    // ClearBackground((Color){220, 220,220,255});
 
-    BOARD_DrawBoard(&board, TS/2, TS/2);
-   
-    // printf("White ischeck %d\n", BOARD_IsCheck(&board, 1));
-    // printf("Black ischeck %d\n", BOARD_IsCheck(&board, -1));
-    // printf("bq %d\n", board.canCastleBQ);
-    // printf("bk %d\n", board.canCastleBK);
-    // printf("wq %d\n", board.canCastleWQ);
-    // printf("wk %d\n\n", board.canCastleWK);
-    BOARD_MakeMove(&board, TS/2, TS/2);
+    result = BOARD_IsGameEnd(&board, board.onTurn);
+    if(result==0){
+      BOARD_DrawBoard(&board, TS/2, TS/2);
+      BOARD_MakeMove(&board, TS/2, TS/2);
+    }
+    else{
+      if(result==1){
+        if(board.onTurn==1){
+          DrawText("Black won by checkmate", TS, TS*2, TS/2, WHITE);
+        }
+        else{
+          DrawText("White won by checkmate", TS, TS*2, TS/2, WHITE);
+        }
+      }
+      else{
+        DrawText("Game is Draw by stalemate", TS, TS*2, TS/2, WHITE);
+      }
+    }
 
     SetWindowTitle(TextFormat(":) - FPS:%d", GetFPS()));
 

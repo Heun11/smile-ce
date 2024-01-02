@@ -1,6 +1,4 @@
 #include "board.h"
-#include "main.h"
-#include <stdio.h>
 
 #define BOARD_PIECEWC(piece, color) ((color>0)?toupper(piece):tolower(piece))
 #define BOARD_GETC(piece) ((isupper(piece))?1:-1)
@@ -184,6 +182,37 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
     (Rectangle){SCREEN_WIDTH-(int)(TS*1.5), offy+TS*2, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
   DrawTexturePro(tileset, (Rectangle){1*TILE_SIZE_REAL, 0, TILE_SIZE_REAL, TILE_SIZE_REAL}, 
     (Rectangle){SCREEN_WIDTH-(int)(TS*1.5), offy+TS*3, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+}
+
+int BOARD_IsGameEnd(BOARD_Board *board, int color)
+{
+  // 0 -> nie
+  // 1 -> checkmate
+  // 2 -> stalemate
+
+  BOARD_Moves possible_moves;
+  
+  for(int i=0;i<8;i++){
+    for(int j=0;j<8;j++){
+      // board.board[i][j]
+      BOARD_Vec2 selectedPiece = board->selectedPiece;
+      board->selectedPiece = (BOARD_Vec2){j,i};
+      possible_moves = BOARD_GenerateMoves(board);
+      board->selectedPiece = selectedPiece;
+
+      if(possible_moves.len>0){
+        return 0;
+      }
+      free(possible_moves.moves);
+    }
+  }
+
+  if(BOARD_IsCheck(board, color)){
+    return 1;
+  }
+  else{
+    return 2;
+  }
 }
 
 int BOARD_IsCheck(BOARD_Board* board, int color)

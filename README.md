@@ -1,12 +1,12 @@
 # Smile Chess engine :)
 - using raylib and C
 ### todo 
-    [] create basics
+    [x] create basics
         [x] project setup
         [x] render board
         [x] render pieces
-        [] create debug panel
-    [] create game of chess
+        [?] create debug panel
+    [x] create game of chess
         [x] basic moving pieces
             [x] isCheck
             [x] generatePossibleMoves
@@ -15,7 +15,7 @@
             [x] promotion
             [x] en passant 
             [x] castle
-        [] winning (checkmate & stalemate)
+        [x] winning (checkmate & stalemate)
     [] create engine
         [] setup code (try with random moves)
         [] code basc minimax
