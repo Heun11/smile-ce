@@ -21,7 +21,7 @@ WIN_LINK_FLAGS = -L$(RAYLIB)/lib -l:libraylib.a -mwindows -lwinmm
 WIN_INCL_FLAGS = -I$(RAYLIB)/include/
 
 all: win linux
-	@echo "Compiling for both linux and windows"
+	@echo "\033[1;33m ~> Compiling for both linux and windows"
 
 linux: $(NAME)
 
@@ -40,4 +40,14 @@ $(WIN_OBJDIR)/%.o:$(SRCDIR)/%.c
 	$(WIN_CC) $(CFLAGS) -o $@ -c $(WIN_INCL_FLAGS) $<
 
 clean:
-	rm $(WIN_OBJDIR)/*.o $(LINUX_OBJDIR)/*.o
+	@echo "\033[1;31m ~> Cleaning objects files and executables\033[1;0m"
+	-rm $(WIN_OBJDIR)/*.o $(LINUX_OBJDIR)/*.o main main.exe
+
+git:
+	make clean
+	@echo "\033[1;33m ~> Adding to git\033[1;0m"
+	git add .
+	@echo "\033[1;32m ~> Making commit to git\033[1;0m"
+	git commit
+	@echo "\033[1;34m ~> Pushing to github\033[1;0m"
+	git push

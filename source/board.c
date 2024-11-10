@@ -1,4 +1,6 @@
 #include "board.h"
+#include <stdio.h>
+#include "engine.h"
 
 #define BOARD_PIECEWC(piece, color) ((color>0)?toupper(piece):tolower(piece))
 #define BOARD_GETC(piece) ((isupper(piece))?1:-1)
@@ -696,165 +698,174 @@ void BOARD_MakeMove(BOARD_Board* board, int ox, int oy)
   int px = (mx-ox)/TS;
   int py = (my-oy)/TS;
 
-  if(IsMouseButtonPressed(0)){
-    if(board->selectedPiece.x<0 || board->selectedPiece.y<0){
-      if(px>=0 && px<8 && py>=0 && py<8 && board->board[py][px]!=' ' && BOARD_GETC(board->board[py][px])==board->onTurn){
-        board->selectedPiece = (BOARD_Vec2){px, py};
+  if(board->onTurn>0){
+    if(IsMouseButtonPressed(0)){
+      if(board->selectedPiece.x<0 || board->selectedPiece.y<0){
+        if(px>=0 && px<8 && py>=0 && py<8 && board->board[py][px]!=' ' && BOARD_GETC(board->board[py][px])==board->onTurn){
+          board->selectedPiece = (BOARD_Vec2){px, py};
+        }
+        else{
+          if(mx>=SCREEN_WIDTH-(int)(TS*1.5) && mx<=SCREEN_WIDTH-(int)(TS*1.5)+TS){
+            if(my>=oy+TS*0 && my<=oy+TS*1){
+              board->promotion = 'q';
+            }
+            if(my>=oy+TS*1 && my<=oy+TS*2){
+              board->promotion = 'b';
+            }
+            if(my>=oy+TS*2 && my<=oy+TS*3){
+              board->promotion = 'n';
+            }
+            if(my>=oy+TS*3 && my<=oy+TS*4){
+              board->promotion = 'r';
+            }
+          }
+        }
       }
       else{
-        if(mx>=SCREEN_WIDTH-(int)(TS*1.5) && mx<=SCREEN_WIDTH-(int)(TS*1.5)+TS){
-          if(my>=oy+TS*0 && my<=oy+TS*1){
-            board->promotion = 'q';
+        // printf("%d %d\n", px, py);
+        if(px<0 || px>=8 || py<0 || py>=8){
+          board->selectedPiece = (BOARD_Vec2){-1, -1};
+
+          if(mx>=SCREEN_WIDTH-(int)(TS*1.5) && mx<=SCREEN_WIDTH-(int)(TS*1.5)+TS){
+            if(my>=oy+TS*0 && my<=oy+TS*1){
+              board->promotion = 'q';
+            }
+            if(my>=oy+TS*1 && my<=oy+TS*2){
+              board->promotion = 'b';
+            }
+            if(my>=oy+TS*2 && my<=oy+TS*3){
+              board->promotion = 'n';
+            }
+            if(my>=oy+TS*3 && my<=oy+TS*4){
+              board->promotion = 'r';
+            }
           }
-          if(my>=oy+TS*1 && my<=oy+TS*2){
-            board->promotion = 'b';
+        }
+        else{
+          int moved = 0;
+          BOARD_Moves moves = BOARD_GenerateMoves(board);
+          for(int i=0;i<moves.len;i++){
+            if(px==moves.moves[i].x && py==moves.moves[i].y){
+              moved = 1;
+              printf("make move\n");
+              
+              board->board[py][px] = board->board[board->selectedPiece.y][board->selectedPiece.x];
+              board->board[board->selectedPiece.y][board->selectedPiece.x] = ' ';
+
+              if(board->board[py][px]=='k'){
+                board->kingPosB = (BOARD_Vec2){px, py};
+              }
+              if(board->board[py][px]=='K'){
+                board->kingPosW = (BOARD_Vec2){px, py};
+              }
+
+              if(board->board[py][px]=='p' || board->board[py][px]=='P'){
+                if(abs(board->selectedPiece.y-py)==2){
+                  board->enPassant = (BOARD_Vec2){px, board->selectedPiece.y-1*BOARD_GETC(board->board[py][px])};
+                  board->enPassantColor = BOARD_GETC(board->board[py][px]);
+                }
+                else if(board->enPassantColor!=board->onTurn){
+                  if(py==board->enPassant.y && px==board->enPassant.x){
+                    board->board[board->enPassant.y+1*BOARD_GETC(board->board[py][px])][board->enPassant.x] = ' ';
+                  }
+                }
+                if(py==0 || py==7){
+                  board->board[py][px] = BOARD_PIECEWC(board->promotion, BOARD_GETC(board->board[py][px]));
+                }
+              }
+              if(board->enPassantColor!=board->onTurn){
+                board->enPassant = (BOARD_Vec2){-1,-1};
+              }
+
+              if(board->board[py][px]=='r' || board->board[py][px]=='R'){
+                if(BOARD_GETC(board->board[py][px])==-1){
+                  if(board->canCastleBQ && board->selectedPiece.x==0){
+                    board->canCastleBQ = 0;
+                  }
+                  if(board->canCastleBK && board->selectedPiece.x==7){
+                    board->canCastleBK = 0;
+                  }
+                }
+                if(BOARD_GETC(board->board[py][px])==1){
+                  if(board->canCastleWQ && board->selectedPiece.x==0){
+                    board->canCastleWQ = 0;
+                  }
+                  if(board->canCastleWK && board->selectedPiece.x==7){
+                    board->canCastleWK = 0;
+                  }
+                }
+              }
+
+              if(board->board[py][px]=='K'){
+                if(px==0 && py==7){
+                  printf("castle na q");
+                  board->kingPosW = (BOARD_Vec2){2, 7};
+                  board->board[py][px] = ' ';
+                  board->board[board->kingPosW.y][board->kingPosW.x] = 'K';
+                  board->board[7][3] = 'R';
+                }
+                else if(px==7 && py==7){
+                  printf("castle na k");
+                  board->kingPosW = (BOARD_Vec2){6, 7};
+                  board->board[py][px] = ' ';
+                  board->board[board->kingPosW.y][board->kingPosW.x] = 'K';
+                  board->board[7][5] = 'R';
+                }
+                board->canCastleWK = 0;
+                board->canCastleWQ = 0;
+              }
+
+              if(board->board[py][px]=='k'){
+                if(px==0 && py==0){
+                  printf("castle na q");
+                  board->kingPosB = (BOARD_Vec2){2, 0};
+                  board->board[py][px] = ' ';
+                  board->board[board->kingPosB.y][board->kingPosB.x] = 'k';
+                  board->board[0][3] = 'r';
+                }
+                else if(px==7 && py==0){
+                  printf("castle na k");
+                  board->kingPosB = (BOARD_Vec2){6, 0};
+                  board->board[py][px] = ' ';
+                  board->board[board->kingPosB.y][board->kingPosB.x] = 'k';
+                  board->board[0][5] = 'r';
+                }
+                board->canCastleBK = 0;
+                board->canCastleBQ = 0;
+              }
+
+              board->selectedPiece = (BOARD_Vec2){-1,-1};
+
+              board->onTurn *= -1;
+            }
           }
-          if(my>=oy+TS*2 && my<=oy+TS*3){
-            board->promotion = 'n';
+          if(!moved && board->board[py][px]!=' '){
+            if(board->board[py][px]!=' ' && BOARD_GETC(board->board[py][px])==board->onTurn){
+              board->selectedPiece = (BOARD_Vec2){px, py};
+            }
+            else{
+              board->selectedPiece = (BOARD_Vec2){-1, -1};
+            }
           }
-          if(my>=oy+TS*3 && my<=oy+TS*4){
-            board->promotion = 'r';
-          }
+          free(moves.moves);   
         }
       }
     }
-    else{
-      // printf("%d %d\n", px, py);
-      if(px<0 || px>=8 || py<0 || py>=8){
-        board->selectedPiece = (BOARD_Vec2){-1, -1};
 
-        if(mx>=SCREEN_WIDTH-(int)(TS*1.5) && mx<=SCREEN_WIDTH-(int)(TS*1.5)+TS){
-          if(my>=oy+TS*0 && my<=oy+TS*1){
-            board->promotion = 'q';
-          }
-          if(my>=oy+TS*1 && my<=oy+TS*2){
-            board->promotion = 'b';
-          }
-          if(my>=oy+TS*2 && my<=oy+TS*3){
-            board->promotion = 'n';
-          }
-          if(my>=oy+TS*3 && my<=oy+TS*4){
-            board->promotion = 'r';
-          }
-        }
+    if(board->selectedPiece.x>=0 && board->selectedPiece.y>=0){
+      BOARD_Moves moves = BOARD_GenerateMoves(board);
+      for(int i=0;i<moves.len;i++){
+        DrawRectangle(ox+moves.moves[i].x*TS, oy+moves.moves[i].y*TS, TS, TS, (Color){ 200, 100, 100, 155 });
       }
-      else{
-        int moved = 0;
-        BOARD_Moves moves = BOARD_GenerateMoves(board);
-        for(int i=0;i<moves.len;i++){
-          if(px==moves.moves[i].x && py==moves.moves[i].y){
-            moved = 1;
-            printf("make move\n");
-            
-            board->board[py][px] = board->board[board->selectedPiece.y][board->selectedPiece.x];
-            board->board[board->selectedPiece.y][board->selectedPiece.x] = ' ';
-
-            if(board->board[py][px]=='k'){
-              board->kingPosB = (BOARD_Vec2){px, py};
-            }
-            if(board->board[py][px]=='K'){
-              board->kingPosW = (BOARD_Vec2){px, py};
-            }
-
-            if(board->board[py][px]=='p' || board->board[py][px]=='P'){
-              if(abs(board->selectedPiece.y-py)==2){
-                board->enPassant = (BOARD_Vec2){px, board->selectedPiece.y-1*BOARD_GETC(board->board[py][px])};
-                board->enPassantColor = BOARD_GETC(board->board[py][px]);
-              }
-              else if(board->enPassantColor!=board->onTurn){
-                if(py==board->enPassant.y && px==board->enPassant.x){
-                  board->board[board->enPassant.y+1*BOARD_GETC(board->board[py][px])][board->enPassant.x] = ' ';
-                }
-              }
-              if(py==0 || py==7){
-                board->board[py][px] = BOARD_PIECEWC(board->promotion, BOARD_GETC(board->board[py][px]));
-              }
-            }
-            if(board->enPassantColor!=board->onTurn){
-              board->enPassant = (BOARD_Vec2){-1,-1};
-            }
-
-            if(board->board[py][px]=='r' || board->board[py][px]=='R'){
-              if(BOARD_GETC(board->board[py][px])==-1){
-                if(board->canCastleBQ && board->selectedPiece.x==0){
-                  board->canCastleBQ = 0;
-                }
-                if(board->canCastleBK && board->selectedPiece.x==7){
-                  board->canCastleBK = 0;
-                }
-              }
-              if(BOARD_GETC(board->board[py][px])==1){
-                if(board->canCastleWQ && board->selectedPiece.x==0){
-                  board->canCastleWQ = 0;
-                }
-                if(board->canCastleWK && board->selectedPiece.x==7){
-                  board->canCastleWK = 0;
-                }
-              }
-            }
-
-            if(board->board[py][px]=='K'){
-              if(px==0 && py==7){
-                printf("castle na q");
-                board->kingPosW = (BOARD_Vec2){2, 7};
-                board->board[py][px] = ' ';
-                board->board[board->kingPosW.y][board->kingPosW.x] = 'K';
-                board->board[7][3] = 'R';
-              }
-              else if(px==7 && py==7){
-                printf("castle na k");
-                board->kingPosW = (BOARD_Vec2){6, 7};
-                board->board[py][px] = ' ';
-                board->board[board->kingPosW.y][board->kingPosW.x] = 'K';
-                board->board[7][5] = 'R';
-              }
-              board->canCastleWK = 0;
-              board->canCastleWQ = 0;
-            }
-
-            if(board->board[py][px]=='k'){
-              if(px==0 && py==0){
-                printf("castle na q");
-                board->kingPosB = (BOARD_Vec2){2, 0};
-                board->board[py][px] = ' ';
-                board->board[board->kingPosB.y][board->kingPosB.x] = 'k';
-                board->board[0][3] = 'r';
-              }
-              else if(px==7 && py==0){
-                printf("castle na k");
-                board->kingPosB = (BOARD_Vec2){6, 0};
-                board->board[py][px] = ' ';
-                board->board[board->kingPosB.y][board->kingPosB.x] = 'k';
-                board->board[0][5] = 'r';
-              }
-              board->canCastleBK = 0;
-              board->canCastleBQ = 0;
-            }
-
-            board->selectedPiece = (BOARD_Vec2){-1,-1};
-
-            board->onTurn *= -1;
-          }
-        }
-        if(!moved && board->board[py][px]!=' '){
-          if(board->board[py][px]!=' ' && BOARD_GETC(board->board[py][px])==board->onTurn){
-            board->selectedPiece = (BOARD_Vec2){px, py};
-          }
-          else{
-            board->selectedPiece = (BOARD_Vec2){-1, -1};
-          }
-        }
-        free(moves.moves);   
-      }
+      free(moves.moves);
     }
   }
+  else{
+    printf("random ai tah xd\n");
+    
+    ENGINE_MakeRandomMove(board);
 
-  if(board->selectedPiece.x>=0 && board->selectedPiece.y>=0){
-    BOARD_Moves moves = BOARD_GenerateMoves(board);
-    for(int i=0;i<moves.len;i++){
-      DrawRectangle(ox+moves.moves[i].x*TS, oy+moves.moves[i].y*TS, TS, TS, (Color){ 200, 100, 100, 155 });
-    }
-    free(moves.moves);
+    board->onTurn *= -1;
   }
 }
 
