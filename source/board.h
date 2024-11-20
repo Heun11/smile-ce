@@ -1,6 +1,9 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include "stdint.h"
+#include <stdint.h>
+
 // pieces using FEN
 // p P - pawn
 // r R - rook
@@ -10,33 +13,39 @@
 // k K - king
 
 typedef struct{
-  int x, y;
+  uint8_t x, y;
 }BOARD_Vec2;
 
 typedef struct{
-  int len;
-  BOARD_Vec2* moves;
+  uint8_t len;
+  BOARD_Vec2 moves[27]; // najviac tahov co sa da spravit (queen)
 }BOARD_Moves;
 
 typedef struct{
   char board[8][8];
 
-  int onTurn;
-  int win;
-
   BOARD_Vec2 selectedPiece;
   BOARD_Vec2 kingPosW;
   BOARD_Vec2 kingPosB;
 
-  BOARD_Vec2 enPassant;
-  int enPassantColor;
-
   char promotion;
+  
+  BOARD_Vec2 enPassant;
 
-  int canCastleWK;
-  int canCastleWQ;
-  int canCastleBK;
-  int canCastleBQ;
+  char bools;
+
+  // bools: kazdy bit je jeden bool (v takomto poradi, odhora dole) 
+  // 0
+  // b
+  // 0
+  // enPassantColor;
+  // onTurn;
+  // win;
+  // canCastleWK;
+  // canCastleWQ;
+  // canCastleBK;
+  // canCastleBQ;
+
 }BOARD_Board;
 
 #include "raylib.h"
@@ -47,10 +56,8 @@ typedef struct{
 BOARD_Board BOARD_SetupBoard(char* fen);
 void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy);
 
-int BOARD_IsGameEnd(BOARD_Board *board, int color);
-int BOARD_IsCheck(BOARD_Board* board, int color);
-BOARD_Moves BOARD_GenerateMoves(BOARD_Board* board);
-void BOARD_AppendMove(BOARD_Board* board, BOARD_Moves* moves, int nx, int ny);
-void BOARD_MakeMove(BOARD_Board* board, int ox, int oy);
+
+uint8_t BOARD_GetBoolFromBools(uint8_t bool_8, uint8_t index);
+void BOARD_SetBoolFromBools(uint8_t* bool_8, uint8_t index, uint8_t value);
 
 #endif
