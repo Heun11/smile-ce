@@ -1,4 +1,5 @@
 #include "main.h"
+#include "util.h"
 
 int SCREEN_WIDTH;
 int SCREEN_HEIGHT;
@@ -28,20 +29,20 @@ int main(void)
 
   BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
   // BOARD_Board board = BOARD_SetupBoard("k7/7R/8/8/8/8/8/2R3K1 w");
-  int result;
+  uint8_t result = 0;
 
   while (!WindowShouldClose()){
     BeginDrawing();
     ClearBackground((Color){10,10,10,255});
 
-    result = BOARD_IsGameEnd(&board, board.onTurn);
+    // result = BOARD_IsGameEnd(&board, board.onTurn);
     if(result==0){
-      BOARD_DrawBoard(&board, TS/2, TS/2);
-      BOARD_MakeMove(&board, TS/2, TS/2);
+      // BOARD_DrawBoard(&board, TS/2, TS/2);
+      // BOARD_MakeMove(&board, TS/2, TS/2);
     }
     else{
       if(result==1){
-        if(board.onTurn==1){
+        if(UTIL_GetBoolFromBools(board.bools, 5)){
           DrawText("Black won by checkmate", TS, TS*2, TS/2, WHITE);
         }
         else{
