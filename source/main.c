@@ -25,10 +25,10 @@ int main(void)
   SetTargetFPS(60);
 
   TS = SCREEN_HEIGHT/9;
-  tileset = LoadTexture("resources/chess.png");
+  tileset = LoadTexture("resources/chess-fancy.png");
 
   BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-  // BOARD_Board board = BOARD_SetupBoard("k7/7R/8/8/8/8/8/2R3K1 w");
+  // BOARD_Board board = BOARD_SetupBoard("8/3q4/6b1/3R4/n7/3K2N1/8/8 w");
   uint8_t result = 0;
 
   while (!WindowShouldClose()){
@@ -37,7 +37,7 @@ int main(void)
 
     // result = BOARD_IsGameEnd(&board, board.onTurn);
     if(result==0){
-      // BOARD_DrawBoard(&board, TS/2, TS/2);
+      BOARD_DrawBoard(&board, TS/2, TS/2);
       // BOARD_MakeMove(&board, TS/2, TS/2);
     }
     else{

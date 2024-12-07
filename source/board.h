@@ -45,8 +45,10 @@ typedef struct{
   // canCastleBK;     1
   // canCastleBQ;     0
 
-  uint64_t white_pawns, white_rooks, white_knights, white_bishops, white_queens, white_king;
-  uint64_t black_pawns, black_rooks, black_knights, black_bishops, black_queens, black_king;
+  uint64_t white_pawns, white_rooks, white_knights, 
+           white_bishops, white_queens, white_king;
+  uint64_t black_pawns, black_rooks, black_knights, 
+           black_bishops, black_queens, black_king;
   uint64_t white_pieces, black_pieces, all_pieces;
 
 }BOARD_Board;

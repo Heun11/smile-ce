@@ -1,4 +1,5 @@
 #include "board.h"
+#include "main.h"
 #include "util.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -11,7 +12,7 @@ void BOARD_PrintBitmaps(BOARD_Board* board)
   // printf("%ld %ld %ld %ld %ld %ld \n", 
   //   board->white_pawns, board->white_rooks, board->white_knights, board->white_bishops, board->white_queens, board->white_king);
 
-  printf("=========================WHITE=PIECES===========================\n");
+  printf("=========================WHITE=PIECES===========================\n\n");
   
   printf("PAWNS:                  ROOKS:                  KNIGHTS:        \n");
   for(int8_t i=0;i<8;i++){
@@ -44,7 +45,7 @@ void BOARD_PrintBitmaps(BOARD_Board* board)
     printf("\n");
   }
 
-  printf("=========================BLACK=PIECES===========================\n");
+  printf("\n=========================BLACK=PIECES===========================\n\n");
 
   printf("PAWNS:                  ROOKS:                  KNIGHTS:        \n");
   for(int8_t i=0;i<8;i++){
@@ -75,7 +76,7 @@ void BOARD_PrintBitmaps(BOARD_Board* board)
     printf("\n");
   }
 
-  printf("===========================ALL=PIECES===========================\n");
+  printf("\n===========================ALL=PIECES===========================\n\n");
 
   printf("WHITE:                  BLACK:                  ALL:        \n");
   for(int8_t i=0;i<8;i++){
@@ -98,8 +99,10 @@ BOARD_Board BOARD_SetupBoard(char* fen)
   BOARD_Board board;
   board.bools = 1<<4;
   
-  board.white_pawns=0, board.white_rooks=0, board.white_knights=0, board.white_bishops=0, board.white_queens=0, board.white_king=0;
-  board.black_pawns=0, board.black_rooks=0, board.black_knights=0, board.black_bishops=0, board.black_queens=0, board.black_king=0;
+  board.white_pawns=0, board.white_rooks=0, board.white_knights=0, 
+    board.white_bishops=0, board.white_queens=0, board.white_king=0;
+  board.black_pawns=0, board.black_rooks=0, board.black_knights=0, 
+    board.black_bishops=0, board.black_queens=0, board.black_king=0;
   board.white_pieces=0, board.black_pieces=0, board.all_pieces=0;
 
 
@@ -169,14 +172,93 @@ BOARD_Board BOARD_SetupBoard(char* fen)
     }
   }
 
-  board.white_pieces = board.white_pawns | board.white_rooks | board.white_knights | board.white_bishops | board.white_queens | board.white_king;
-  board.black_pieces = board.black_pawns | board.black_rooks | board.black_knights | board.black_bishops | board.black_queens | board.black_king;
+  board.white_pieces = board.white_pawns | board.white_rooks | board.white_knights | 
+    board.white_bishops | board.white_queens | board.white_king;
+  board.black_pieces = board.black_pawns | board.black_rooks | board.black_knights | 
+    board.black_bishops | board.black_queens | board.black_king;
   board.all_pieces = board.white_pieces | board.black_pieces;
 
   // printing board
   printf("Show Boards:\n\n");
   BOARD_PrintBitmaps(&board);
 
-
   return board;
+}
+
+void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
+{
+  uint8_t row, col;
+  uint64_t pos;
+
+  for(row=0;row<8;row++){
+    for(col=0;col<8;col++){
+
+      if((row+col)%2==0){
+        // DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){ 247, 243, 220, 255 });
+        DrawTexturePro(tileset, (Rectangle){6*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+          (Rectangle){offx+TS*col, offy+TS*row, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+      }
+      else{
+        // DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){ 51, 107, 163, 255 });
+        DrawTexturePro(tileset, (Rectangle){6*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+          (Rectangle){offx+TS*col, offy+TS*row, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+      }
+
+      pos = row*8+col;
+      
+      if((board->all_pieces>>pos)&1ULL){
+        if((board->white_pawns>>pos)&1ULL){
+          DrawTexturePro(tileset, (Rectangle){0*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row-TS*0.5, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+        }
+        if((board->white_rooks>>pos)&1ULL){
+          DrawTexturePro(tileset, (Rectangle){1*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row-TS*0.5, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+        }
+        if((board->white_knights>>pos)&1ULL){
+          DrawTexturePro(tileset, (Rectangle){2*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row-TS*0.5, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+        }
+        if((board->white_bishops>>pos)&1ULL){
+          DrawTexturePro(tileset, (Rectangle){3*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row-TS*0.5, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+        }
+        if((board->white_queens>>pos)&1ULL){
+          DrawTexturePro(tileset, (Rectangle){4*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row-TS*0.5, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+        }
+        if((board->white_king>>pos)&1ULL){
+          DrawTexturePro(tileset, (Rectangle){5*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row-TS*0.5, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+        }
+        
+        if((board->black_pawns>>pos)&1ULL){
+          DrawTexturePro(tileset, (Rectangle){0*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row-TS*0.5, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+        }
+        if((board->black_rooks>>pos)&1ULL){
+          DrawTexturePro(tileset, (Rectangle){1*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row-TS*0.5, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+        }
+        if((board->black_knights>>pos)&1ULL){
+          DrawTexturePro(tileset, (Rectangle){2*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row-TS*0.5, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+        }
+        if((board->black_bishops>>pos)&1ULL){
+          DrawTexturePro(tileset, (Rectangle){3*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row-TS*0.5, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+        }
+        if((board->black_queens>>pos)&1ULL){
+          DrawTexturePro(tileset, (Rectangle){4*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row-TS*0.5, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+        }
+        if((board->black_king>>pos)&1ULL){
+          DrawTexturePro(tileset, (Rectangle){5*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row-TS*0.5, TS, TS*1.5}, (Vector2){0,0}, 0, RAYWHITE);
+        }
+      }
+      
+      
+    }
+  }
 }
