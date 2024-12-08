@@ -5,8 +5,7 @@
 #include"stdio.h"
 #include"stdlib.h"
 
-// #define TILE_REAL_W 16
-// #define TILE_REAL_H 16
+#define TILE_REAL 16
 
 #define TILE_REAL_W 32
 #define TILE_REAL_H 42

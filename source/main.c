@@ -25,6 +25,7 @@ int main(void)
   SetTargetFPS(60);
 
   TS = SCREEN_HEIGHT/9;
+  // tileset = LoadTexture("resources/chess.png");
   tileset = LoadTexture("resources/chess-fancy.png");
 
   BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");

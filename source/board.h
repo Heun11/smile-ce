@@ -50,8 +50,13 @@ typedef struct{
   uint64_t black_pawns, black_rooks, black_knights, 
            black_bishops, black_queens, black_king;
   uint64_t white_pieces, black_pieces, all_pieces;
-
 }BOARD_Board;
+
+
+extern uint64_t BOARD_attackMask_Knight[64];
+extern uint64_t BOARD_attackMask_Rook[64];
+extern uint64_t BOARD_attackMask_Bishop[64];
+
 
 #include "raylib.h"
 #include "main.h"
