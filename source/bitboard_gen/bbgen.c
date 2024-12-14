@@ -9,36 +9,33 @@
 
 
 
-// King movement directions (row offset, column offset)
-const int king_offsets[8][2] = {
-    { 1,  0}, {-1,  0}, { 0,  1}, { 0, -1}, // Vertical and Horizontal
-    { 1,  1}, { 1, -1}, {-1,  1}, {-1, -1}  // Diagonals
-};
 
-// Function to check if a square is within bounds
-int is_within_bounds(int rank, int file) {
-    return rank >= 0 && rank < 8 && file >= 0 && file < 8;
-}
-
-// Function to generate king moves bitboard for a square
-U64 generate_king_mask(int square) {
+U64 generate_rook_mask(int square) {
     U64 mask = 0ULL;
 
     int rank = square / 8; // Row (0-7)
     int file = square % 8; // Column (0-7)
 
-    for (int i = 0; i < 8; i++) {
-        int new_rank = rank + king_offsets[i][0];
-        int new_file = file + king_offsets[i][1];
+    // Generate squares along the file (up and down)
+    for (int r = 0; r < 8; r++) {
+        if (r != rank) { // Skip the current square
+            int new_square = r * 8 + file;
+            mask |= (1ULL << new_square);
+        }
+    }
 
-        if (is_within_bounds(new_rank, new_file)) {
-            int new_square = new_rank * 8 + new_file;
+    // Generate squares along the rank (left and right)
+    for (int f = 0; f < 8; f++) {
+        if (f != file) { // Skip the current square
+            int new_square = rank * 8 + f;
             mask |= (1ULL << new_square);
         }
     }
 
     return mask;
 }
+
+
 
 
 
@@ -50,12 +47,28 @@ void split64to232(uint64_t original, uint32_t* dest_l, uint32_t* dest_h)
 }
 
 int main() {
-    U64 knight_masks[BOARD_SIZE];
+    U64 knight_masks[BOARD_SIZE] = {
+    0x8a80104000800020ULL, 0x1400020008001200ULL, 0x8000808004000200ULL, 0x8001008002000040ULL,
+    0x100100080002000ULL,  0x200200040100020ULL,  0x300080020080040ULL,  0x8200084001080080ULL,
+    0x4000808008004000ULL, 0x401000400220080ULL,  0x800080004000ULL,     0x200080080080ULL,
+    0x100080100080ULL,     0x400080200080ULL,     0x800080800400ULL,     0x800040008080ULL,
+    0x200040008080ULL,     0x800400080200040ULL,  0x800200200400ULL,     0x100200200080ULL,
+    0x200100200040ULL,     0x400080200020ULL,     0x800040008020ULL,     0x800200800400ULL,
+    0x1000800400080ULL,    0x8002000400100ULL,    0x8000802002004ULL,    0x80020008080040ULL,
+    0x80040020020080ULL,   0x80020040008020ULL,   0x80010040020040ULL,   0x80080008040040ULL,
+    0x802000404000ULL,     0x802000808000ULL,     0x804000800040ULL,     0x804000400040ULL,
+    0x800100800040ULL,     0x800100400040ULL,     0x802000400020ULL,     0x802000800040ULL,
+    0x804000400200ULL,     0x800800400200ULL,     0x800400800200ULL,     0x800400800100ULL,
+    0x800200800400ULL,     0x800200400400ULL,     0x800100800400ULL,     0x800100800200ULL,
+    0x800800400040ULL,     0x800400800040ULL,     0x800400400080ULL,     0x800400400100ULL,
+    0x800200400200ULL,     0x800200400100ULL,     0x800100400200ULL,     0x800100800100ULL,
+    0x800800400080ULL,     0x800800800100ULL,     0x800800400200ULL,     0x800800800200ULL,
+};
 
     // Generate knight masks for all squares
-    for (int square = 0; square < BOARD_SIZE; square++) {
-        knight_masks[square] = generate_king_mask(square);
-    }
+    // for (int square = 0; square < BOARD_SIZE; square++) {
+    //     knight_masks[square] = generate_rook_mask(square);
+    // }
 
 
     uint32_t* l = malloc(4);

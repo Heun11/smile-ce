@@ -12,6 +12,19 @@ void BOARD_PrintBitmaps(BOARD_Board* board)
 {
   // P R N
   // B Q K
+  
+  BITBOARD_Bitboard dest;
+  BITBOARD_Bitboard a = {{0x00000000,0x33333333}};
+  BITBOARD_Bitboard b = {{0x00000002,0x00000000}};
+
+  // 33333333 00000000 
+  // 00000000 00000002
+  //
+  // 66666666 00000000
+
+  BITBOARD_Multiply(&dest, &a, &b);
+
+  printf("0x %08x %08x\n", dest.half[1], dest.half[0]);
 
   printf("=========================WHITE=PIECES===========================\n\n");
   
