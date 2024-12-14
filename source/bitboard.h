@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+// bitboard struct
 typedef struct{
   uint32_t half[2]; // 0 - lower half | 1 - higher half
 }BITBOARD_Bitboard;
@@ -25,6 +26,7 @@ extern BITBOARD_Bitboard BITBOARD_Masks_bishop[64];             // Relevant bloc
 extern BITBOARD_Bitboard BITBOARD_Magics_bishop[64];            // Magic numbers for bishops
 extern BITBOARD_Bitboard BITBOARD_AttackTable_bishop[64][512];  // Precomputed bishop attack tables
 
+// functions
 void BITBOARD_SetBitToH(BITBOARD_Bitboard* bitboard, uint8_t bit_index);
 uint8_t BITBOARD_GetBit(BITBOARD_Bitboard* bitboard, uint8_t bit_index);
 void BITBOARD_BitwiseOR(BITBOARD_Bitboard* bitboard_dest, int num_of_bitboards, ...);  // bitboard_dest |= ...
