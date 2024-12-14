@@ -24,7 +24,7 @@ int main(void)
 
   SetTargetFPS(60);
 
-  TS = SCREEN_HEIGHT/9;
+  TS = SCREEN_HEIGHT*0.1;
   // tileset = LoadTexture("resources/chess.png");
   tileset = LoadTexture("resources/chess-fancy.png");
 
@@ -38,7 +38,7 @@ int main(void)
 
     // result = BOARD_IsGameEnd(&board, board.onTurn);
     if(result==0){
-      BOARD_DrawBoard(&board, TS/2, TS/2);
+      BOARD_DrawBoard(&board, TS, TS);
       // BOARD_MakeMove(&board, TS/2, TS/2);
     }
     else{

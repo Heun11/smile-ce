@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 #include <stdint.h>
+#include "bitboard.h"
 
 // pieces using FEN
 // p P - pawn
@@ -23,15 +24,6 @@
 #define INDEX_CCBQ 0
 
 typedef struct{
-  uint8_t x, y;
-}BOARD_Vec2;
-
-typedef struct{
-  uint8_t len;
-  BOARD_Vec2 moves[27]; // najviac tahov co sa da spravit (queen)
-}BOARD_Moves;
-
-typedef struct{
   uint8_t bools;
   // bools: kazdy bit je jeden bool (v takomto poradi, odhora dole) 
   // 0
@@ -48,9 +40,9 @@ typedef struct{
   // (info)                        (high) 1 | 0 (low)
   // 0b 11111111 11111111 00000000 00000000 | 00000000 00000000 11111111 11111111
 
-  uint32_t white_pawns[2], white_rooks[2], white_knights[2], white_bishops[2], white_queens[2], white_king[2];
-  uint32_t black_pawns[2], black_rooks[2], black_knights[2], black_bishops[2], black_queens[2], black_king[2];
-  uint32_t white_pieces[2], black_pieces[2], all_pieces[2];
+  BITBOARD_Bitboard white_pawns, white_rooks, white_knights, white_bishops, white_queens, white_king;
+  BITBOARD_Bitboard black_pawns, black_rooks, black_knights, black_bishops, black_queens, black_king;
+  BITBOARD_Bitboard white_pieces, black_pieces, all_pieces;
 }BOARD_Board;
 
 #include "raylib.h"

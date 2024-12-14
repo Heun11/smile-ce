@@ -25,14 +25,3 @@ uint8_t UTIL_GetBitFrom32(uint32_t bitmap, uint8_t bit_index)
   return bitmap>>bit_index&1;
 }
 
-////////////////////////////////////////////////////////////////////////////
-
-void UTIL_SetBitIn64Bitmap232ToH(uint32_t* bitmaps, uint8_t bit_index)
-{
-  if(bit_index<32){
-    *(bitmaps)|=((uint32_t)1<<bit_index);
-  }
-  else{
-    *(bitmaps+1)|=((uint32_t)1<<bit_index);
-  }
-}
