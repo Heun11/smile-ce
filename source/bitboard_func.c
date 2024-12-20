@@ -1,6 +1,19 @@
 #include "bitboard_func.h"
+#include "bitboard.h"
+#include "util.h"
 #include <stdint.h>
 #include <stdarg.h>
+#include <stdio.h>
+
+void BITBOARD_Print(BITBOARD_Bitboard* bitboard)
+{
+  printf("Bitboard: (0x%08llX%08llX)\n", bitboard->half[1], bitboard->half[0]);
+  for(uint8_t i=0;i<64;i++){
+    printf("%c ", BITBOARD_GetBit(bitboard, i)?'1':'-');
+    if((i+1)%8==0) printf("\n");
+  }
+  printf("\n");
+}
 
 void BITBOARD_SetBitToH(BITBOARD_Bitboard* bitboard, uint8_t bit_index)
 {
@@ -59,5 +72,77 @@ void BITBOARD_Multiply(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitb
 
   bitboard_dest->half[0] = (uint32_t)(temp & 0xFFFFFFFF);
   bitboard_dest->half[1] = (uint32_t)((temp >> 32) & 0xFFFFFFFF);
+}
+
+uint8_t BITBOARD_CountTrailingZeros(BITBOARD_Bitboard* bitboard)
+{
+  uint8_t tz = __builtin_ctz(bitboard->half[0]);
+  if(tz==32){
+    tz += __builtin_ctz(bitboard->half[1]);
+  }
+  return tz;
+}
+
+void BITBOARD_SetBitboardToBitboard(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard)
+{
+  bitboard_dest->half[0] = bitboard->half[0];
+  bitboard_dest->half[1] = bitboard->half[1];
+}
+
+void BITBOARD_RightShift(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard, uint8_t shift)
+{
+  *bitboard_dest = (BITBOARD_Bitboard){{0, 0}};
+
+  if (shift >= 64) {
+    bitboard_dest->half[0] = 0;
+    bitboard_dest->half[1] = 0;
+  } else if (shift >= 32) {
+    bitboard_dest->half[0] = bitboard->half[1] >> (shift - 32);
+    bitboard_dest->half[1] = 0;
+  } else {
+    bitboard_dest->half[0] = (bitboard->half[0] >> shift) | (bitboard->half[1] << (32 - shift));
+    bitboard_dest->half[1] = bitboard->half[1] >> shift;
+  }
+}
+
+void BITBOARD_LeftShift(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard, uint8_t shift)
+{
+  *bitboard_dest = (BITBOARD_Bitboard){{0, 0}};
+
+  if (shift >= 64) {
+    bitboard_dest->half[0] = 0;
+    bitboard_dest->half[1] = 0;
+  } else if (shift >= 32) {
+    bitboard_dest->half[1] = bitboard->half[0] << (shift - 32);
+    bitboard_dest->half[0] = 0;
+  } else {
+      bitboard_dest->half[1] = (bitboard->half[1] << shift) | (bitboard->half[0] >> (32 - shift));
+      bitboard_dest->half[0] = bitboard->half[0] << shift;
+  }
+}
+
+void BITBOARD_GetAttackMask_bishop(BITBOARD_Bitboard* bitboard_dest, uint8_t square, BITBOARD_Bitboard* bitboard_occupancy)
+{
+  // mask = bishop_attack_table[square][((occupancy & bishop_magics[square]) * bishop_magics[square]) >> (64 - 9)];
+
+  // TATO FUNKCIA NEFUNGUJE A NEMAM ANI TUCHA PRECO (pravdepodobne mam zly attack_table alebo magics)
+
+  BITBOARD_Bitboard temp1, temp2, temp3;
+  BITBOARD_SetBitboardToBitboard(&temp1, bitboard_occupancy);
+  BITBOARD_Print(&temp1);
+  BITBOARD_BitwiseAND(&temp1, 1, &BITBOARD_Masks_bishop[square]);
+  BITBOARD_Print(&temp1);
+  BITBOARD_Print(&BITBOARD_Magics_bishop[square]);
+  BITBOARD_Multiply(&temp2, &temp1, &BITBOARD_Magics_bishop[square]);
+  BITBOARD_Print(&temp2);
+  BITBOARD_RightShift(&temp3, &temp2, 64-BITBOARD_RELEVANT_BITS_BISHOP);
+  BITBOARD_Print(&temp3);
+  BITBOARD_SetBitboardToBitboard(bitboard_dest, &BITBOARD_AttackTable_bishop[square][temp3.half[0]]);
+  BITBOARD_Print(&BITBOARD_AttackTable_bishop[square][temp3.half[0]]);
+}
+
+void BITBOARD_GetAttackMask_rook(BITBOARD_Bitboard* bitboard_dest, uint8_t square, BITBOARD_Bitboard* bitboard_occupancy)
+{
+
 }
 

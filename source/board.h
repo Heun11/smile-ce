@@ -49,9 +49,12 @@ typedef struct{
 #include "main.h"
 #include <string.h>
 #include <ctype.h>
+#include "bitboard.h"
 
 void BOARD_PrintBitmaps(BOARD_Board* board);
 BOARD_Board BOARD_SetupBoard(char* fen);
 void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy);
+
+uint8_t BOARD_IsCheck(BOARD_Board* board, uint8_t isWhite);
 
 #endif

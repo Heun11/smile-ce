@@ -280,5 +280,46 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
   }
 }
 
+
 // ===================================== CHESS CALCULATIONS =====================================
+
+
+uint8_t BOARD_IsCheck(BOARD_Board* board, uint8_t isWhite)
+{
+  BITBOARD_Bitboard temp, temp1;
+  uint8_t kingSquare;
+
+  if(isWhite){
+    // white is on turn
+    kingSquare = BITBOARD_CountTrailingZeros(&board->white_king);
+
+    // pawn 
+    BITBOARD_SetBitboardToBitboard(&temp, &BITBOARD_AttackMasks_pawn[1][kingSquare]);
+    BITBOARD_BitwiseAND(&temp, 1, &board->black_pawns);
+    // BITBOARD_Print(&temp);
+    if(BITBOARD_IsBitboardTrue(temp)) return 1;
+
+    // knight 
+    BITBOARD_SetBitboardToBitboard(&temp, &BITBOARD_Masks_knight[kingSquare]);
+    BITBOARD_BitwiseAND(&temp, 1, &board->black_knights);
+    // BITBOARD_Print(&temp);
+    if(BITBOARD_IsBitboardTrue(temp)) return 1;
+
+    // diagonal (queen & bishop)
+    BITBOARD_GetAttackMask_bishop(&temp1, kingSquare, &board->all_pieces);
+    // BITBOARD_Print(&temp1);
+    temp = (BITBOARD_Bitboard){{0,0}};
+    BITBOARD_BitwiseOR(&temp, 2, &board->black_bishops, &board->black_queens);
+    BITBOARD_BitwiseAND(&temp, 1, &temp1);
+    if(BITBOARD_IsBitboardTrue(temp)) return 1;
+
+  }
+  else{ 
+    // black is on turn
+    kingSquare = BITBOARD_CountTrailingZeros(&board->black_king);
+  
+  }
+  return 0;
+}
+
 

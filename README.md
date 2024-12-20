@@ -1,10 +1,10 @@
 # Smile Chess engine :)
 - using raylib and C
 ### todo 
-    [] create basics
-        [] project setup
-        [] render board
-        [] render pieces
+    [x] create basics
+        [x] project setup
+        [x] render board
+        [x] render pieces
     [] create game of chess
         [] basic moving pieces
             [] isCheck
