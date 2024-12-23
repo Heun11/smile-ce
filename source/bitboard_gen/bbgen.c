@@ -1,267 +1,133 @@
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
-
-// #define U64 uint64_t
-// #define BOARD_SIZE 64
-//
-//
-//
-//
-//
-// #define MAX_BISHOP_MAGIC_ENTRIES 512 // Maximum possible table size for bishops
-// #define RELEVANT_BITS_BISHOP 9       // Maximum number of relevant bits for bishop occupancy
-//
-// // Directions for bishop movement
-// const int BISHOP_DIRECTIONS[4] = {9, 7, -9, -7};
-//
-// // Function to check if a square is within the board boundaries
-// int is_within_bounds(int rank, int file) {
-//     return rank >= 0 && rank < 8 && file >= 0 && file < 8;
-// }
-//
-// // Generate a bishop occupancy mask
-// U64 generate_bishop_mask(int square) {
-//     U64 mask = 0ULL;
-//
-//     int rank = square / 8;
-//     int file = square % 8;
-//
-//     for (int dir = 0; dir < 4; dir++) {
-//         int r = rank;
-//         int f = file;
-//         while (1) {
-//             r += BISHOP_DIRECTIONS[dir] / 8;
-//             f += BISHOP_DIRECTIONS[dir] % 8;
-//             if (!is_within_bounds(r, f)) break; // Stop if out of bounds
-//             if (r == 0 || r == 7 || f == 0 || f == 7) break; // Stop before edge
-//             mask |= (1ULL << (r * 8 + f));
-//         }
-//     }
-//
-//     return mask;
-// }
-//
-// // Generate all possible occupancies for a given bishop mask
-// int generate_occupancies(U64 mask, U64 *occupancies) {
-//     int bit_count = __builtin_popcountll(mask);
-//     int occupancy_count = 1 << bit_count;
-//
-//     for (int i = 0; i < occupancy_count; i++) {
-//         U64 occ = 0ULL;
-//         int bit_index = 0;
-//
-//         for (int j = 0; j < 64; j++) {
-//             if (mask & (1ULL << j)) {
-//                 if (i & (1 << bit_index)) {
-//                     occ |= (1ULL << j);
-//                 }
-//                 bit_index++;
-//             }
-//         }
-//         occupancies[i] = occ;
-//     }
-//
-//     return occupancy_count;
-// }
-//
-// // Generate the attack bitboard for a bishop
-// U64 generate_bishop_attack(int square, U64 occupancy) {
-//     U64 attacks = 0ULL;
-//
-//     int rank = square / 8;
-//     int file = square % 8;
-//
-//     for (int dir = 0; dir < 4; dir++) {
-//         int r = rank;
-//         int f = file;
-//         while (1) {
-//             r += BISHOP_DIRECTIONS[dir] / 8;
-//             f += BISHOP_DIRECTIONS[dir] % 8;
-//
-//             if (!is_within_bounds(r, f)) break; // Out of bounds
-//             attacks |= (1ULL << (r * 8 + f));
-//             if (occupancy & (1ULL << (r * 8 + f))) break; // Stop if blocker found
-//         }
-//     }
-//
-//     return attacks;
-// }
-//
-// // Function to find a magic number for a bishop square
-// U64 find_magic_number(int square, int relevant_bits) {
-//     U64 occupancies[512], attacks[512], used[512];
-//     memset(used, 0, sizeof(used));
-//
-//     U64 mask = generate_bishop_mask(square);
-//     int occupancy_count = generate_occupancies(mask, occupancies);
-//
-//     for (int i = 0; i < occupancy_count; i++) {
-//         attacks[i] = generate_bishop_attack(square, occupancies[i]);
-//     }
-//
-//     srand(time(NULL));
-//
-//     while (1) {
-//         U64 candidate = (rand() & 0xFFFF) | ((U64)(rand() & 0xFFFF) << 16) | ((U64)(rand() & 0xFFFF) << 32) |
-//                         ((U64)(rand() & 0xFFFF) << 48);
-//
-//         memset(used, 0, sizeof(used));
-//
-//         int success = 1;
-//         for (int i = 0; i < occupancy_count; i++) {
-//             int index = (occupancies[i] * candidate) >> (64 - relevant_bits);
-//
-//             if (used[index] == 0ULL) {
-//                 used[index] = attacks[i];
-//             } else if (used[index] != attacks[i]) {
-//                 success = 0;
-//                 break;
-//             }
-//         }
-//
-//         if (success) return candidate;
-//     }
-// }
-//
-//
-//
-//
-//
 // void split64to232(uint64_t original, uint32_t* dest_l, uint32_t* dest_h)
 // {
 //   *dest_l = (uint32_t)(original & 0xFFFFFFFF);    
 //   *dest_h = (uint32_t)((original >> 32) & 0xFFFFFFFF);
 // }
-//
-// int main() {
-//     U64 bishop_magics[BOARD_SIZE];
-//
-//     uint32_t* l = malloc(4);
-//     uint32_t* h = malloc(4);
-//
-//     // Print the generated knight masks
-//     printf("moja maska = {\n");
-//     for (int square = 0; square < BOARD_SIZE; square++) {
-//
-//       int relevant_bits = RELEVANT_BITS_BISHOP;
-//       bishop_magics[square] = find_magic_number(square, relevant_bits);
-//       
-//       split64to232(bishop_magics[square], l, h);
-//       printf("    (BITBOARD_Bitboard){{0x%08llX, 0x%08llX}}%s\n", *l, *h, (square < BOARD_SIZE - 1) ? "," : "");
-//     }
-//     printf("};\n");
-//
-//     free(l);
-//     free(h);
-//
-//     return 0;
-// }
-
-
-
+#include <stdlib.h>
 
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <stdio.h>
 
-#define U64 uint64_t
 #define BOARD_SIZE 64
-#define ROOK_ATTACK_TABLE_SIZE 4096
-#define RELEVANT_BITS_ROOK 12
+#define MAX_BISHOP_ATTACKS 512
 
-const int ROOK_DIRECTIONS[4] = {8, -8, 1, -1}; // Directions for rook moves
-
-// Precomputed magic numbers for rooks
-const U64 rook_magics[64] = {
-    0x8a80104000800020ULL, 0x1400020008001200ULL, 0x8008004002004100ULL, 0x280100100080084ULL,
-    0x8000808004000200ULL, 0x60004000800080ULL, 0x8100480080ULL, 0x280020001001080ULL,
-    0x101000208000400ULL, 0x800040008000ULL, 0x402000100080ULL, 0x802000400080ULL,
-    0x401000800040ULL, 0x408000800040ULL, 0x808000400020ULL, 0x800040008000ULL,
-    0x800200080010ULL, 0x800080400080ULL, 0x200040100080ULL, 0x800080801000ULL,
-    0x800040080080ULL, 0x10002000400080ULL, 0x800080200040ULL, 0x10000800040080ULL,
-    0x208000400080ULL, 0x4000802000400ULL, 0x800040008000ULL, 0x8002000800100ULL,
-    0x1001000200080ULL, 0x4000800800080ULL, 0x8000802000400ULL, 0x10004000800080ULL,
-    0x20008000800040ULL, 0x800200400080ULL, 0x8004000800080ULL, 0x1000400200080ULL,
-    0x2000800100080ULL, 0x8004002000100ULL, 0x1000800400080ULL, 0x8000401000800ULL,
-    0x200040200100ULL, 0x800100200100ULL, 0x800080401000ULL, 0x400800800040ULL,
-    0x800080008040ULL, 0x200020008040ULL, 0x100040008040ULL, 0x8002000200080ULL,
-    0x4000800080080ULL, 0x8001000400080ULL, 0x40008000800040ULL, 0x80004000800040ULL,
-    0x10002000800040ULL, 0x20004000800040ULL, 0x80008000400040ULL, 0x80008000400080ULL,
-    0x40008000400080ULL, 0x10008000400080ULL, 0x20008000400080ULL, 0x800400800080ULL,
-    0x1002000800100ULL, 0x80008080100080ULL, 0x4000400100080ULL, 0x8000800200080ULL
+// Provided bishop magic numbers
+uint64_t bishop_magic_numbers[64] = {
+    0x89a1121896040240ULL, 0x2004844802002010ULL, 0x2068080051921000ULL, 0x62880a0220200808ULL,
+    0x4042004000000ULL,    0x100822020200011ULL,  0xc00444222012000aULL, 0x28808801216001ULL,
+    0x400492088408100ULL,  0x201c401040c0084ULL,  0x840800910a0010ULL,   0x82080240060ULL,
+    0x2000840504006000ULL, 0x30010c4108405004ULL, 0x1008005410080802ULL, 0x8144042209100900ULL,
+    0x208081020014400ULL,  0x4800201208ca00ULL,   0xf18140408012008ULL,  0x1004002802102001ULL,
+    0x841000820080811ULL,  0x40200200a42008ULL,   0x800054042000ULL,     0x88010400410c9000ULL,
+    0x520040470104290ULL,  0x1004040051500081ULL, 0x2002081833080021ULL, 0x400c00c010142ULL,
+    0x941408200c002000ULL, 0x658810000806011ULL,  0x188071040440a00ULL,  0x4800404002011c00ULL,
+    0x104442040404200ULL,  0x511080202091021ULL,  0x4022401120400ULL,    0x80c0040400080120ULL,
+    0x8040010040820802ULL, 0x480810700020090ULL,  0x102008e00040242ULL,  0x809005202050100ULL,
+    0x8002024220104080ULL, 0x431008804142000ULL,  0x19001802081400ULL,   0x200014208040080ULL,
+    0x3308082008200100ULL, 0x41010500040c020ULL,  0x4012020c04210308ULL, 0x208220a202004080ULL,
+    0x111040120082000ULL,  0x6803040141280a00ULL, 0x2101004202410000ULL, 0x8200000041108022ULL,
+    0x21082088000ULL,      0x2410204010040ULL,    0x40100400809000ULL,   0x822088220820214ULL,
+    0x40808090012004ULL,   0x910224040218c9ULL,   0x402814422015008ULL,  0x814021148200820ULL,
+    0x2081080200140ULL,    0x4800201208ca00ULL,   0xf18140408012008ULL,  0x1004002802102001ULL
 };
 
-// Check if a square is within board boundaries
-int is_within_bounds(int rank, int file) {
-    return rank >= 0 && rank < 8 && file >= 0 && file < 8;
+// Attack masks and tables
+uint64_t bishop_attack_masks[64];
+uint64_t bishop_attack_table[64][MAX_BISHOP_ATTACKS];
+int bishop_shift[64];
+
+// Population count
+int pop_count(uint64_t x) {
+    int count = 0;
+    while (x) {
+        count += x & 1;
+        x >>= 1;
+    }
+    return count;
 }
 
-// Generate the rook attack mask for a given square
-U64 generate_rook_mask(int square) {
-    U64 mask = 0ULL;
+// Compute relevant bishop attack mask
+uint64_t calculate_bishop_attack_mask(int square) {
+    uint64_t mask = 0ULL;
     int rank = square / 8, file = square % 8;
 
-    for (int dir = 0; dir < 4; dir++) {
-        int r = rank, f = file;
-        while (1) {
-            r += ROOK_DIRECTIONS[dir] / 8;
-            f += ROOK_DIRECTIONS[dir] % 8;
-            if (!is_within_bounds(r, f)) break;
-            if (r == 0 || r == 7 || f == 0 || f == 7) break; // Stop at edges
-            mask |= (1ULL << (r * 8 + f));
+    for (int dr = -1; dr <= 1; dr += 2) {
+        for (int df = -1; df <= 1; df += 2) {
+            int r = rank + dr, f = file + df;
+            while (r >= 1 && r <= 6 && f >= 1 && f <= 6) {
+                mask |= (1ULL << (r * 8 + f));
+                r += dr;
+                f += df;
+            }
         }
     }
     return mask;
 }
 
-// Generate rook attacks given an occupancy bitboard
-U64 generate_rook_attack(int square, U64 occupancy) {
-    U64 attacks = 0ULL;
+// Generate all subsets of a mask
+void generate_occupancy_variations(uint64_t mask, uint64_t *variations, int *count) {
+    int num_bits = pop_count(mask);
+    *count = (1 << num_bits);
+
+    for (int i = 0; i < *count; i++) {
+        uint64_t occupancy = 0ULL;
+        int bit_index = 0;
+        for (int bit = 0; bit < 64; bit++) {
+            if (mask & (1ULL << bit)) {
+                if (i & (1 << bit_index)) {
+                    occupancy |= (1ULL << bit);
+                }
+                bit_index++;
+            }
+        }
+        variations[i] = occupancy;
+    }
+}
+
+// Generate bishop attacks
+uint64_t calculate_bishop_attacks(int square, uint64_t occupancy) {
+    uint64_t attacks = 0ULL;
     int rank = square / 8, file = square % 8;
 
-    for (int dir = 0; dir < 4; dir++) {
-        int r = rank, f = file;
-        while (1) {
-            r += ROOK_DIRECTIONS[dir] / 8;
-            f += ROOK_DIRECTIONS[dir] % 8;
-            if (!is_within_bounds(r, f)) break;
-            attacks |= (1ULL << (r * 8 + f));
-            if (occupancy & (1ULL << (r * 8 + f))) break; // Stop at blocker
+    for (int dr = -1; dr <= 1; dr += 2) {
+        for (int df = -1; df <= 1; df += 2) {
+            int r = rank + dr, f = file + df;
+            while (r >= 0 && r < 8 && f >= 0 && f < 8) {
+                attacks |= (1ULL << (r * 8 + f));
+                if (occupancy & (1ULL << (r * 8 + f))) break;
+                r += dr;
+                f += df;
+            }
         }
     }
     return attacks;
 }
 
-// Generate all possible occupancies and corresponding attack table
-void generate_rook_attack_table(U64 attack_table[64][ROOK_ATTACK_TABLE_SIZE]) {
-    for (int square = 0; square < 64; square++) {
-        U64 mask = generate_rook_mask(square);
-        int relevant_bits = __builtin_popcountll(mask);
-        int occupancy_count = 1 << relevant_bits;
+// Initialize bishop attack table and shifts
+void initialize_bishop_attacks() {
+    for (int square = 0; square < BOARD_SIZE; square++) {
+        // Compute attack mask
+        bishop_attack_masks[square] = calculate_bishop_attack_mask(square);
 
-        for (int i = 0; i < occupancy_count; i++) {
-            U64 occupancy = 0ULL;
-            int bit_index = 0;
+        // Compute shift amount
+        bishop_shift[square] = 64 - pop_count(bishop_attack_masks[square]);
 
-            for (int j = 0; j < 64; j++) {
-                if (mask & (1ULL << j)) {
-                    if (i & (1 << bit_index)) {
-                        occupancy |= (1ULL << j);
-                    }
-                    bit_index++;
-                }
-            }
+        // Generate attack table
+        uint64_t variations[MAX_BISHOP_ATTACKS];
+        int variation_count;
+        generate_occupancy_variations(bishop_attack_masks[square], variations, &variation_count);
 
-            int index = (occupancy * rook_magics[square]) >> (64 - RELEVANT_BITS_ROOK);
-            attack_table[square][index] = generate_rook_attack(square, occupancy);
+        for (int i = 0; i < variation_count; i++) {
+            uint64_t occupancy = variations[i];
+            uint64_t index = (occupancy * bishop_magic_numbers[square]) >> bishop_shift[square];
+            bishop_attack_table[square][index] = calculate_bishop_attacks(square, occupancy);
         }
     }
 }
+
+
+
 
 void split64to232(uint64_t original, uint32_t* dest_l, uint32_t* dest_h)
 {
@@ -269,47 +135,44 @@ void split64to232(uint64_t original, uint32_t* dest_l, uint32_t* dest_h)
   *dest_h = (uint32_t)((original >> 32) & 0xFFFFFFFF);
 }
 
-void print_bishop_attack_table(U64 attack_table[64][ROOK_ATTACK_TABLE_SIZE]) {
+int main() {
+    printf("Generating bishop attack table...\n");
+    initialize_bishop_attacks();
 
+    
     uint32_t* l = malloc(sizeof(uint32_t));
     uint32_t* h = malloc(sizeof(uint32_t));
 
     FILE* fp = fopen("out.txt", "w");
 
-    fprintf(fp, "U64 bishop_attack_table[64][512] = {\n");
-    for (int square = 0; square < 64; square++) {
-        fprintf(fp, " {\n");
-        for (int i = 0; i < ROOK_ATTACK_TABLE_SIZE; i++) {
-            split64to232(attack_table[square][i], l, h);
-            fprintf(fp,"    (BITBOARD_Bitboard){{0x%08llX, 0x%08llX}},", *l, *h);
-
-            if(i%3==0) fprintf(fp, "\n");
-            
+    fprintf(fp, "bitboard = {\n");
+    for(int i=0;i<64;i++){
+      fprintf(fp, "\t{\n");
+      for(int j=0;j<512;j++){
+        split64to232(bishop_attack_table[i][j], l, h);
+        fprintf(fp, "\t\t(BITBOARD_Bitboard){{0x%08llX, 0x%08llX}},", *l, *h);
+        if(j%3==0){
+          fprintf(fp, "\n");
         }
-        fprintf(fp, "\n\t},\n");
+      }
+      fprintf(fp, "\n\t},\n");
     }
     fprintf(fp, "};\n");
-
-    free(l);
-  free(h);
-  
-}
-
-int main() {
-    U64 bishop_attack_table[64][ROOK_ATTACK_TABLE_SIZE] = {0};
-    generate_rook_attack_table(bishop_attack_table);
-    print_bishop_attack_table(bishop_attack_table);
-    
-    uint32_t* l = malloc(sizeof(uint32_t));
-    uint32_t* h = malloc(sizeof(uint32_t));
-
-    printf("bitboard = {\n");
+   
+    printf("magics = {\n");
     for(int i=0;i<64;i++){
-      split64to232(rook_magics[i], l, h);
-      printf("\t(BITBOARD_Bitboard){{0x%08llX, 0x%08llX}},\n", *l, *h);
+      split64to232(bishop_magic_numbers[i], l, h);
+      printf("  (BITBOARD_Bitboard){{0x%08llX, 0x%08llX}},\n", *l, *h);
     }
     printf("};\n");
-    
+
+    printf("shift = {\n");
+    for(int i=0;i<64;i++){
+      printf("%d, ", bishop_shift[i]);
+      if((i+1)%8==0) printf("\n");
+    }
+    printf("};\n");
+
     free(l);
     free(h);
       

@@ -74,8 +74,11 @@ void BITBOARD_Multiply(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitb
   bitboard_dest->half[1] = (uint32_t)((temp >> 32) & 0xFFFFFFFF);
 }
 
-uint8_t BITBOARD_CountTrailingZeros(BITBOARD_Bitboard* bitboard)
+int8_t BITBOARD_CountTrailingZeros(BITBOARD_Bitboard* bitboard)
 {
+  if(bitboard->half[0]==0 && bitboard->half[1]==0){
+    return -1;
+  }
   uint8_t tz = __builtin_ctz(bitboard->half[0]);
   if(tz==32){
     tz += __builtin_ctz(bitboard->half[1]);
@@ -123,22 +126,14 @@ void BITBOARD_LeftShift(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bit
 
 void BITBOARD_GetAttackMask_bishop(BITBOARD_Bitboard* bitboard_dest, uint8_t square, BITBOARD_Bitboard* bitboard_occupancy)
 {
-  // mask = bishop_attack_table[square][((occupancy & bishop_magics[square]) * bishop_magics[square]) >> (64 - 9)];
-
-  // TATO FUNKCIA NEFUNGUJE A NEMAM ANI TUCHA PRECO (pravdepodobne mam zly attack_table alebo magics)
-
   BITBOARD_Bitboard temp1, temp2, temp3;
   BITBOARD_SetBitboardToBitboard(&temp1, bitboard_occupancy);
-  BITBOARD_Print(&temp1);
   BITBOARD_BitwiseAND(&temp1, 1, &BITBOARD_Masks_bishop[square]);
-  BITBOARD_Print(&temp1);
-  BITBOARD_Print(&BITBOARD_Magics_bishop[square]);
   BITBOARD_Multiply(&temp2, &temp1, &BITBOARD_Magics_bishop[square]);
-  BITBOARD_Print(&temp2);
-  BITBOARD_RightShift(&temp3, &temp2, 64-BITBOARD_RELEVANT_BITS_BISHOP);
-  BITBOARD_Print(&temp3);
+  BITBOARD_RightShift(&temp3, &temp2, BITBOARD_Shift_bishop[square]);
   BITBOARD_SetBitboardToBitboard(bitboard_dest, &BITBOARD_AttackTable_bishop[square][temp3.half[0]]);
-  BITBOARD_Print(&BITBOARD_AttackTable_bishop[square][temp3.half[0]]);
+  // printf("FINAL\n");
+  // BITBOARD_Print(&BITBOARD_AttackTable_bishop[square][temp3.half[0]]);
 }
 
 void BITBOARD_GetAttackMask_rook(BITBOARD_Bitboard* bitboard_dest, uint8_t square, BITBOARD_Bitboard* bitboard_occupancy)

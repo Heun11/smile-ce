@@ -18,9 +18,9 @@ extern BITBOARD_Bitboard BITBOARD_AttackMasks_pawn[2][64];
 // !!!!! IMPORTANT -> od tejto ciary som si neni isty ci je to dobre tak sa na to kukni
 
 extern BITBOARD_Bitboard BITBOARD_Masks_bishop[64];            
+extern uint8_t BITBOARD_Shift_bishop[64];
 extern BITBOARD_Bitboard BITBOARD_Magics_bishop[64];            
 extern BITBOARD_Bitboard BITBOARD_AttackTable_bishop[64][512];  
-#define BITBOARD_RELEVANT_BITS_BISHOP 9
 
 extern BITBOARD_Bitboard BITBOARD_Masks_rook[64];               
 extern BITBOARD_Bitboard BITBOARD_Magics_rook[64];              

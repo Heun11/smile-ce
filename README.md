@@ -1,6 +1,10 @@
 # Smile Chess engine :)
 - using raylib and C
-### todo 
+
+## important todo
+    [] prerobit attack table a magic numbery pre veze 
+
+### overall todo 
     [x] create basics
         [x] project setup
         [x] render board

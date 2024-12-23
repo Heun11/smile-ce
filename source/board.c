@@ -14,6 +14,17 @@ void BOARD_PrintBitmaps(BOARD_Board* board)
   // P R N
   // B Q K
 
+  // uint64_t res = 0x00000000ffffffff << (64-9);
+  // BITBOARD_Bitboard result;
+  // 
+  // BITBOARD_Multiply(&result, &(BITBOARD_Bitboard){{0, 0xffffffff}}, &(BITBOARD_Bitboard){{0x00000002, 0}});
+  // BITBOARD_RightShift(&result, &(BITBOARD_Bitboard){{0, 0xffffffff}}, 64-9);
+  // BITBOARD_LeftShift(&result, &(BITBOARD_Bitboard){{0xffffffff, 0}}, 64-9);
+  //
+  // printf("0x%016llX\n", res);
+  // BITBOARD_Print(&result);
+
+
   printf("=========================WHITE=PIECES===========================\n\n");
   
   printf("PAWNS:                  ROOKS:                  KNIGHTS:        \n");
@@ -287,7 +298,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
 uint8_t BOARD_IsCheck(BOARD_Board* board, uint8_t isWhite)
 {
   BITBOARD_Bitboard temp, temp1;
-  uint8_t kingSquare;
+  int8_t kingSquare;
 
   if(isWhite){
     // white is on turn
@@ -307,7 +318,6 @@ uint8_t BOARD_IsCheck(BOARD_Board* board, uint8_t isWhite)
 
     // diagonal (queen & bishop)
     BITBOARD_GetAttackMask_bishop(&temp1, kingSquare, &board->all_pieces);
-    // BITBOARD_Print(&temp1);
     temp = (BITBOARD_Bitboard){{0,0}};
     BITBOARD_BitwiseOR(&temp, 2, &board->black_bishops, &board->black_queens);
     BITBOARD_BitwiseAND(&temp, 1, &temp1);
