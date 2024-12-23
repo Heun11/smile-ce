@@ -23,8 +23,8 @@ extern BITBOARD_Bitboard BITBOARD_Magics_bishop[64];
 extern BITBOARD_Bitboard BITBOARD_AttackTable_bishop[64][512];  
 
 extern BITBOARD_Bitboard BITBOARD_Masks_rook[64];               
+extern uint8_t BITBOARD_Shift_rook[64];
 extern BITBOARD_Bitboard BITBOARD_Magics_rook[64];              
 extern BITBOARD_Bitboard BITBOARD_AttackTable_rook[64][4096];  
-#define BITBOARD_RELEVANT_BITS_ROOK 12
 
 #endif

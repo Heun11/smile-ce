@@ -318,8 +318,13 @@ uint8_t BOARD_IsCheck(BOARD_Board* board, uint8_t isWhite)
 
     // diagonal (queen & bishop)
     BITBOARD_GetAttackMask_bishop(&temp1, kingSquare, &board->all_pieces);
-    temp = (BITBOARD_Bitboard){{0,0}};
     BITBOARD_BitwiseOR(&temp, 2, &board->black_bishops, &board->black_queens);
+    BITBOARD_BitwiseAND(&temp, 1, &temp1);
+    if(BITBOARD_IsBitboardTrue(temp)) return 1;
+
+    // straight lines (queen & rook)
+    BITBOARD_GetAttackMask_rook(&temp1, kingSquare, &board->all_pieces);
+    BITBOARD_BitwiseOR(&temp, 2, &board->black_rooks, &board->black_queens);
     BITBOARD_BitwiseAND(&temp, 1, &temp1);
     if(BITBOARD_IsBitboardTrue(temp)) return 1;
 

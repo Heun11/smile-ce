@@ -29,7 +29,7 @@ int main(void)
   tileset = LoadTexture("resources/chess-fancy.png");
 
   // BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-  BOARD_Board board = BOARD_SetupBoard("8/8/8/8/3K4/8/8/q7 w");
+  BOARD_Board board = BOARD_SetupBoard("3r4/8/8/3K4/8/8/8/8 w");
   uint8_t result = 0;
 
   printf("%d\n", BOARD_IsCheck(&board, 1));
