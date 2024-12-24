@@ -1,20 +1,23 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include "stdint.h"
+#include <string.h>
 #include <stdint.h>
 #include "bitboard.h"
 
-// pieces using FEN
-// p P - pawn
-// r R - rook
-// n N - knight
-// b B - biship
-// q Q - queen
-// k K - king
-//
 // WHITE -> 1
 // BLACK -> 0
+
+typedef struct{
+  uint8_t from;
+  uint8_t to;
+  uint8_t promotion; // pre pesiakov
+}BOARD_Move;
+
+typedef struct{
+  BOARD_Move list[256]; // malo by to stacit xd
+  uint8_t count;
+}BOARD_MoveList;
 
 #define INDEX_ON_TURN 5
 #define INDEX_WIN 4
@@ -37,9 +40,10 @@ typedef struct{
   // canCastleBK;     1
   // canCastleBQ;     0
 
+  BOARD_MoveList moves;
+
   // (info)                        (high) 1 | 0 (low)
   // 0b 11111111 11111111 00000000 00000000 | 00000000 00000000 11111111 11111111
-
   BITBOARD_Bitboard white_pawns, white_rooks, white_knights, white_bishops, white_queens, white_king;
   BITBOARD_Bitboard black_pawns, black_rooks, black_knights, black_bishops, black_queens, black_king;
   BITBOARD_Bitboard white_pieces, black_pieces, all_pieces;
@@ -47,8 +51,6 @@ typedef struct{
 
 #include "raylib.h"
 #include "main.h"
-#include <string.h>
-#include <ctype.h>
 #include "bitboard.h"
 
 void BOARD_PrintBitmaps(BOARD_Board* board);

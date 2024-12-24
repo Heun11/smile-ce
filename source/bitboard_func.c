@@ -7,7 +7,7 @@
 
 void BITBOARD_Print(BITBOARD_Bitboard* bitboard)
 {
-  printf("Bitboard: (0x%08llX%08llX)\n", bitboard->half[1], bitboard->half[0]);
+  printf("Bitboard: (0x%08X%08X)\n", bitboard->half[1], bitboard->half[0]);
   for(uint8_t i=0;i<64;i++){
     printf("%c ", BITBOARD_GetBit(bitboard, i)?'1':'-');
     if((i+1)%8==0) printf("\n");

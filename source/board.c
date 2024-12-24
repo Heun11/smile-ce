@@ -4,6 +4,7 @@
 #include "util.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <ctype.h>
 #include "bitboard_func.h"
 
 
