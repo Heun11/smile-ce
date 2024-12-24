@@ -2,6 +2,7 @@
 #include "bitboard.h"
 #include "main.h"
 #include "util.h"
+#include <raylib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -14,17 +15,6 @@ void BOARD_PrintBitmaps(BOARD_Board* board)
 {
   // P R N
   // B Q K
-
-  // uint64_t res = 0x00000000ffffffff << (64-9);
-  // BITBOARD_Bitboard result;
-  // 
-  // BITBOARD_Multiply(&result, &(BITBOARD_Bitboard){{0, 0xffffffff}}, &(BITBOARD_Bitboard){{0x00000002, 0}});
-  // BITBOARD_RightShift(&result, &(BITBOARD_Bitboard){{0, 0xffffffff}}, 64-9);
-  // BITBOARD_LeftShift(&result, &(BITBOARD_Bitboard){{0xffffffff, 0}}, 64-9);
-  //
-  // printf("0x%016llX\n", res);
-  // BITBOARD_Print(&result);
-
 
   printf("=========================WHITE=PIECES===========================\n\n");
   
@@ -210,8 +200,9 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
         DrawTexturePro(tileset, (Rectangle){6*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
           (Rectangle){offx+TS*col, offy+TS*row, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
       }
-
+      
       pos = row*8+col;
+      DrawText(TextFormat("%d", pos), offx+TS*col, offy+TS*row, TS*0.2, WHITE);
 
       if(BITBOARD_GetBit(&board->all_pieces, pos)){
         if(BITBOARD_GetBit(&board->white_pawns, pos)){
@@ -373,4 +364,61 @@ uint8_t BOARD_IsCheck(BOARD_Board* board, uint8_t isWhite)
   return 0;
 }
 
+void BOARD_AddMove(BOARD_MoveList* moves, int8_t from, int8_t to)
+{
+  moves->list[moves->count].from = from;
+  moves->list[moves->count].to = to;
+  moves->list[moves->count].promotion = 0;
+  moves->count++;
+}
+
+void BOARD_PrintMoves(BOARD_MoveList* moves)
+{
+  printf("all possible moves (%d):\n", moves->count);
+  for(uint8_t i=0;i<moves->count;i++){
+    printf("move %d = %d -> %d (%d)\n", i, moves->list[i].from, moves->list[i].to, moves->list[i].promotion);
+  }
+  printf("\n");
+}
+
+void BOARD_GeneratePseudoMoves_Pawn(BOARD_Board* board, uint8_t isWhite)
+{
+  BITBOARD_Bitboard pawns, emptySquares, enemyPieces, temp, push;
+  BITBOARD_SetBitboardToBitboard(&pawns, (isWhite)?(&board->white_pawns):(&board->black_pawns));
+  BITBOARD_BitwiseNOT(&emptySquares, &board->all_pieces);
+  BITBOARD_SetBitboardToBitboard(&enemyPieces, (isWhite)?(&board->white_pieces):(&board->black_pieces));
+
+  while(BITBOARD_IsBitboardTrue(pawns)){
+    uint8_t pawnSquare = BITBOARD_CountTrailingZeros(&pawns);
+    BITBOARD_SetBitboardToBitboard(&temp, &pawns);
+    BITBOARD_Subtract(&temp, &temp, &(BITBOARD_Bitboard){{1,0}});
+    BITBOARD_BitwiseAND(&pawns, 1, &temp);
+    BITBOARD_Print(&pawns);
+
+    BITBOARD_LeftShift(&temp, &(BITBOARD_Bitboard){{1,0}}, pawnSquare);
+    if(isWhite){
+      BITBOARD_RightShift(&push, &temp, 8);
+    }else{
+      BITBOARD_LeftShift(&push, &temp, 8);
+    }
+    
+    BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
+    BITBOARD_BitwiseAND(&temp, 2, &push, &emptySquares);
+    if(BITBOARD_IsBitboardTrue(&temp)){
+      BOARD_AddMove(&board->moves, pawnSquare, BITBOARD_CountTrailingZeros(&push));
+
+    }
+
+  }
+}
+
+void BOARD_GeneratePseudoMoves(BOARD_Board* board)
+{
+  uint8_t isWhite = UTIL_GetBoolFromBools(board->bools, INDEX_ON_TURN);
+  board->moves.count = 0;
+
+  // generate moves for all all_pieces
+  BOARD_GeneratePseudoMoves_Pawn(board, isWhite);
+
+}
 

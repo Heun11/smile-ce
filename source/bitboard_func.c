@@ -62,6 +62,12 @@ void BITBOARD_BitwiseAND(BITBOARD_Bitboard* bitboard_dest, int num_of_bitboards,
   va_end(args);
 }
 
+void BITBOARD_BitwiseNOT(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard)
+{
+  bitboard_dest->half[0] = ~bitboard->half[0];
+  bitboard_dest->half[1] = ~bitboard->half[1];
+}
+
 void BITBOARD_Multiply(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard_a, BITBOARD_Bitboard* bitboard_b)
 {
   uint64_t low_low = (uint64_t)bitboard_a->half[0] * bitboard_b->half[0];   
@@ -72,6 +78,17 @@ void BITBOARD_Multiply(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitb
 
   bitboard_dest->half[0] = (uint32_t)(temp & 0xFFFFFFFF);
   bitboard_dest->half[1] = (uint32_t)((temp >> 32) & 0xFFFFFFFF);
+}
+
+void BITBOARD_Subtract(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard_a, BITBOARD_Bitboard* bitboard_b)
+{
+  if(bitboard_a->half[0]<bitboard_b->half[0]){
+    bitboard_dest->half[0] = (uint32_t)(bitboard_a->half[0] - bitboard_b->half[0]);
+    bitboard_a->half[1]--; 
+  }else{
+    bitboard_dest->half[0] = bitboard_a->half[0] - bitboard_b->half[0];
+  }
+  bitboard_dest->half[1] = bitboard_a->half[1] - bitboard_b->half[1];
 }
 
 int8_t BITBOARD_CountTrailingZeros(BITBOARD_Bitboard* bitboard)

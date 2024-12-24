@@ -9,9 +9,9 @@
 // BLACK -> 0
 
 typedef struct{
-  uint8_t from;
-  uint8_t to;
-  uint8_t promotion; // pre pesiakov
+  int8_t from;
+  int8_t to;
+  int8_t promotion; // pre pesiakov
 }BOARD_Move;
 
 typedef struct{
@@ -58,5 +58,9 @@ BOARD_Board BOARD_SetupBoard(char* fen);
 void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy);
 
 uint8_t BOARD_IsCheck(BOARD_Board* board, uint8_t isWhite);
+void BOARD_AddMove(BOARD_MoveList* moves, int8_t from, int8_t to);
+void BOARD_PrintMoves(BOARD_MoveList* moves);
+void BOARD_GeneratePseudoMoves_Pawn(BOARD_Board* board, uint8_t isWhite);
+void BOARD_GeneratePseudoMoves(BOARD_Board* board);
 
 #endif

@@ -7,13 +7,20 @@
 #define BITBOARD_IsBitboardTrue(bitboard) (bitboard.half[0]||bitboard.half[1])
 
 void BITBOARD_Print(BITBOARD_Bitboard* bitboard);
+
 void BITBOARD_SetBitToH(BITBOARD_Bitboard* bitboard, uint8_t bit_index);
 uint8_t BITBOARD_GetBit(BITBOARD_Bitboard* bitboard, uint8_t bit_index);
+
 void BITBOARD_BitwiseOR(BITBOARD_Bitboard* bitboard_dest, int num_of_bitboards, ...);  // bitboard_dest |= ...
 void BITBOARD_BitwiseAND(BITBOARD_Bitboard* bitboard_dest, int num_of_bitboards, ...); // bitboard_dest &= ...
+void BITBOARD_BitwiseNOT(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard);
+
 void BITBOARD_Multiply(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard_a, BITBOARD_Bitboard* bitboard_b); 
+void BITBOARD_Subtract(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard_a, BITBOARD_Bitboard* bitboard_b);
+
 int8_t BITBOARD_CountTrailingZeros(BITBOARD_Bitboard* bitboard);
 void BITBOARD_SetBitboardToBitboard(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard);
+
 void BITBOARD_RightShift(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard, uint8_t shift);
 void BITBOARD_LeftShift(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard, uint8_t shift);
 
