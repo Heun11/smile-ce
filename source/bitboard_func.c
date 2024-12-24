@@ -144,7 +144,7 @@ void BITBOARD_GetAttackMask_rook(BITBOARD_Bitboard* bitboard_dest, uint8_t squar
   BITBOARD_Multiply(&temp2, &temp1, &BITBOARD_Magics_rook[square]);
   BITBOARD_RightShift(&temp3, &temp2, BITBOARD_Shift_rook[square]);
   BITBOARD_SetBitboardToBitboard(bitboard_dest, &BITBOARD_AttackTable_rook[square][temp3.half[0]]);
-  printf("FINAL\n");
-  BITBOARD_Print(bitboard_dest);
+  // printf("FINAL\n");
+  // BITBOARD_Print(bitboard_dest);
 }
 

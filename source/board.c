@@ -328,11 +328,46 @@ uint8_t BOARD_IsCheck(BOARD_Board* board, uint8_t isWhite)
     BITBOARD_BitwiseAND(&temp, 1, &temp1);
     if(BITBOARD_IsBitboardTrue(temp)) return 1;
 
+    // king 
+    BITBOARD_SetBitboardToBitboard(&temp, &BITBOARD_Masks_king[kingSquare]);
+    BITBOARD_BitwiseAND(&temp, 1, &board->black_king);
+    // BITBOARD_Print(&temp);
+    if(BITBOARD_IsBitboardTrue(temp)) return 1;
+
   }
   else{ 
     // black is on turn
     kingSquare = BITBOARD_CountTrailingZeros(&board->black_king);
-  
+    
+    // pawn 
+    BITBOARD_SetBitboardToBitboard(&temp, &BITBOARD_AttackMasks_pawn[1][kingSquare]);
+    BITBOARD_BitwiseAND(&temp, 1, &board->white_pawns);
+    // BITBOARD_Print(&temp);
+    if(BITBOARD_IsBitboardTrue(temp)) return 1;
+
+    // knight 
+    BITBOARD_SetBitboardToBitboard(&temp, &BITBOARD_Masks_knight[kingSquare]);
+    BITBOARD_BitwiseAND(&temp, 1, &board->white_knights);
+    // BITBOARD_Print(&temp);
+    if(BITBOARD_IsBitboardTrue(temp)) return 1;
+
+    // diagonal (queen & bishop)
+    BITBOARD_GetAttackMask_bishop(&temp1, kingSquare, &board->all_pieces);
+    BITBOARD_BitwiseOR(&temp, 2, &board->white_bishops, &board->white_queens);
+    BITBOARD_BitwiseAND(&temp, 1, &temp1);
+    if(BITBOARD_IsBitboardTrue(temp)) return 1;
+
+    // straight lines (queen & rook)
+    BITBOARD_GetAttackMask_rook(&temp1, kingSquare, &board->all_pieces);
+    BITBOARD_BitwiseOR(&temp, 2, &board->white_rooks, &board->white_queens);
+    BITBOARD_BitwiseAND(&temp, 1, &temp1);
+    if(BITBOARD_IsBitboardTrue(temp)) return 1;
+
+    // king 
+    BITBOARD_SetBitboardToBitboard(&temp, &BITBOARD_Masks_king[kingSquare]);
+    BITBOARD_BitwiseAND(&temp, 1, &board->white_king);
+    // BITBOARD_Print(&temp);
+    if(BITBOARD_IsBitboardTrue(temp)) return 1; 
   }
   return 0;
 }

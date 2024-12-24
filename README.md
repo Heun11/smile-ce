@@ -1,10 +1,6 @@
 # Smile Chess engine :)
 - using raylib and C
 
-## important todo
-    [] prerobit attack table a magic numbery pre veze
-        [] nieco je zle ale neviem co (nikedy to da dobry attack mask a niekedy nie)
-
 ### overall todo 
     [x] create basics
         [x] project setup
@@ -12,7 +8,7 @@
         [x] render pieces
     [] create game of chess
         [] basic moving pieces
-            [] isCheck
+            [x] isCheck
             [] generatePossibleMoves
         [] capturing pieces
         [] fancy moves 

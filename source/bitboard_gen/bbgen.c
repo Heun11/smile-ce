@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define BOARD_SIZE 64
 #define MAX_ROOK_ATTACKS 4096
@@ -41,7 +42,7 @@ int rook_shift[64];
 int pop_count(uint64_t x) {
     int count = 0;
     while (x) {
-        count += x & 1;
+        count += (x & 1);
         x >>= 1;
     }
     return count;
@@ -53,12 +54,12 @@ uint64_t calculate_rook_attack_mask(int square) {
     int rank = square / 8, file = square % 8;
 
     // Horizontal (rank) moves
-    for (int f = file + 1; f <= 6; f++) mask |= (1ULL << (rank * 8 + f));
-    for (int f = file - 1; f >= 1; f--) mask |= (1ULL << (rank * 8 + f));
+    for (int f = file + 1; f < 7; f++) mask |= (1ULL << (rank * 8 + f));
+    for (int f = file - 1; f > 0; f--) mask |= (1ULL << (rank * 8 + f));
 
     // Vertical (file) moves
-    for (int r = rank + 1; r <= 6; r++) mask |= (1ULL << (r * 8 + file));
-    for (int r = rank - 1; r >= 1; r--) mask |= (1ULL << (r * 8 + file));
+    for (int r = rank + 1; r < 7; r++) mask |= (1ULL << (r * 8 + file));
+    for (int r = rank - 1; r > 0; r--) mask |= (1ULL << (r * 8 + file));
 
     return mask;
 }
@@ -134,17 +135,6 @@ void initialize_rook_attacks() {
     }
 }
 
-// Debugging helper
-void print_attack_mask(uint64_t mask) {
-    for (int rank = 7; rank >= 0; rank--) {
-        for (int file = 0; file < 8; file++) {
-            printf("%c", (mask & (1ULL << (rank * 8 + file))) ? '1' : '.');
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
 
 
 
@@ -163,6 +153,9 @@ int main() {
     uint32_t* h = malloc(sizeof(uint32_t));
 
     FILE* fp = fopen("out.txt", "w");
+    if(fp){
+      printf("file opened successfully\n");
+    }
 
     fprintf(fp, "bitboard = {\n");
     for(int i=0;i<64;i++){
@@ -185,15 +178,23 @@ int main() {
     }
     printf("};\n");
 
-    printf("shift = {\n");
+    printf("\nshift = {\n");
     for(int i=0;i<64;i++){
       printf("%d, ", rook_shift[i]);
       if((i+1)%8==0) printf("\n");
     }
     printf("};\n");
 
+    printf("masks = {\n");
+    for(int i=0;i<64;i++){
+      split64to232(rook_attack_masks[i], l, h);
+      printf("  (BITBOARD_Bitboard){{0x%08llX, 0x%08llX}},\n", *l, *h);
+    }
+    printf("};\n");
+
     free(l);
     free(h);
+    fclose(fp);
       
     return 0;
 }
