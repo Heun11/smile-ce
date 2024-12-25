@@ -61,6 +61,11 @@ uint8_t BOARD_IsCheck(BOARD_Board* board, uint8_t isWhite);
 void BOARD_AddMove(BOARD_MoveList* moves, int8_t from, int8_t to);
 void BOARD_PrintMoves(BOARD_MoveList* moves);
 void BOARD_GeneratePseudoMoves_Pawn(BOARD_Board* board, uint8_t isWhite);
+void BOARD_GeneratePseudoMoves_Knight(BOARD_Board* board, uint8_t isWhite);
+void BOARD_GeneratePseudoMoves_Bishop(BOARD_Board* board, uint8_t isWhite);
+void BOARD_GeneratePseudoMoves_Rook(BOARD_Board* board, uint8_t isWhite);
+void BOARD_GeneratePseudoMoves_Queen(BOARD_Board* board, uint8_t isWhite);
+void BOARD_GeneratePseudoMoves_King(BOARD_Board* board, uint8_t isWhite);
 void BOARD_GeneratePseudoMoves(BOARD_Board* board);
 
 #endif

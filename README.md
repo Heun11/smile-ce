@@ -1,6 +1,9 @@
 # Smile Chess engine :)
 - using raylib and C
 
+# IMPORTANT
+    -> ak to bude niekedy randomne hadzat seg fault, moze to byt isCheck (mozno tym ze som tam nemal ziadnych kingov xd)
+
 ### overall todo 
     [x] create basics
         [x] project setup

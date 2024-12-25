@@ -1,9 +1,15 @@
 #include "bitboard_func.h"
 #include "bitboard.h"
 #include "util.h"
+#include <raylib.h>
 #include <stdint.h>
 #include <stdarg.h>
 #include <stdio.h>
+
+uint8_t BITBOARD_IsBitboardTrue(BITBOARD_Bitboard* bitboard)
+{
+  return bitboard->half[0]||bitboard->half[1];
+}
 
 void BITBOARD_Print(BITBOARD_Bitboard* bitboard)
 {

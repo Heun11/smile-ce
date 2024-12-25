@@ -4,8 +4,7 @@
 #include "bitboard.h"
 #include <stdint.h>
 
-#define BITBOARD_IsBitboardTrue(bitboard) (bitboard.half[0]||bitboard.half[1])
-
+uint8_t BITBOARD_IsBitboardTrue(BITBOARD_Bitboard* bitboard);
 void BITBOARD_Print(BITBOARD_Bitboard* bitboard);
 
 void BITBOARD_SetBitToH(BITBOARD_Bitboard* bitboard, uint8_t bit_index);
