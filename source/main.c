@@ -28,14 +28,14 @@ int main(void)
   // tileset = LoadTexture("resources/chess.png");
   tileset = LoadTexture("resources/chess-fancy.png");
 
-  // BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-  BOARD_Board board = BOARD_SetupBoard("8/8/8/4Q3/8/k7/8/K7 w");
+  BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
+  // BOARD_Board board = BOARD_SetupBoard("8/2K5/8/8/8/k7/8/8 w");
   uint8_t result = 0;
 
   // debugging
   printf("%d\n", BOARD_IsCheck(&board, 1));
   BOARD_GeneratePseudoMoves(&board);
-  BOARD_PrintMoves(&board.moves);
+  BOARD_PrintMoves(&board.pseudoMoves);
   
   while (!WindowShouldClose()){
     BeginDrawing();

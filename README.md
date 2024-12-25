@@ -12,7 +12,8 @@
     [] create game of chess
         [] basic moving pieces
             [x] isCheck
-            [] generatePossibleMoves
+            [x] generate pseudo legal moves
+            [] filter legal moves
         [] capturing pieces
         [] fancy moves 
             [] promotion

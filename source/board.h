@@ -40,7 +40,7 @@ typedef struct{
   // canCastleBK;     1
   // canCastleBQ;     0
 
-  BOARD_MoveList moves;
+  BOARD_MoveList pseudoMoves;
 
   // (info)                        (high) 1 | 0 (low)
   // 0b 11111111 11111111 00000000 00000000 | 00000000 00000000 11111111 11111111
