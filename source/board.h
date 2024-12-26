@@ -19,6 +19,14 @@ typedef struct{
   uint8_t count;
 }BOARD_MoveList;
 
+typedef struct{
+  // (info)                        (high) 1 | 0 (low)
+  // 0b 11111111 11111111 00000000 00000000 | 00000000 00000000 11111111 11111111
+  BITBOARD_Bitboard white_pawns, white_rooks, white_knights, white_bishops, white_queens, white_king;
+  BITBOARD_Bitboard black_pawns, black_rooks, black_knights, black_bishops, black_queens, black_king;
+  BITBOARD_Bitboard white_pieces, black_pieces, all_pieces;
+}BOARD_BoardState;
+
 #define INDEX_ON_TURN 5
 #define INDEX_WIN 4
 #define INDEX_CCWK 3
@@ -41,12 +49,10 @@ typedef struct{
   // canCastleBQ;     0
 
   BOARD_MoveList pseudoMoves;
+  BOARD_MoveList legalMoves;
 
-  // (info)                        (high) 1 | 0 (low)
-  // 0b 11111111 11111111 00000000 00000000 | 00000000 00000000 11111111 11111111
-  BITBOARD_Bitboard white_pawns, white_rooks, white_knights, white_bishops, white_queens, white_king;
-  BITBOARD_Bitboard black_pawns, black_rooks, black_knights, black_bishops, black_queens, black_king;
-  BITBOARD_Bitboard white_pieces, black_pieces, all_pieces;
+  BOARD_BoardState boardCopy;
+  BOARD_BoardState board;
 }BOARD_Board;
 
 #include "raylib.h"
@@ -57,9 +63,11 @@ void BOARD_PrintBitmaps(BOARD_Board* board);
 BOARD_Board BOARD_SetupBoard(char* fen);
 void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy);
 
-uint8_t BOARD_IsCheck(BOARD_Board* board, uint8_t isWhite);
-void BOARD_AddMove(BOARD_MoveList* moves, int8_t from, int8_t to);
+uint8_t BOARD_IsCheck(BOARD_BoardState* board, uint8_t isWhite);
+void BOARD_AddMove(BOARD_MoveList* moves, int8_t from, int8_t to, int8_t promotion);
+void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite);
 void BOARD_PrintMoves(BOARD_MoveList* moves);
+void BOARD_InitBoardStateCopy(BOARD_Board* board);
 void BOARD_GeneratePseudoMoves_Pawn(BOARD_Board* board, uint8_t isWhite);
 void BOARD_GeneratePseudoMoves_Knight(BOARD_Board* board, uint8_t isWhite);
 void BOARD_GeneratePseudoMoves_Bishop(BOARD_Board* board, uint8_t isWhite);
@@ -67,5 +75,6 @@ void BOARD_GeneratePseudoMoves_Rook(BOARD_Board* board, uint8_t isWhite);
 void BOARD_GeneratePseudoMoves_Queen(BOARD_Board* board, uint8_t isWhite);
 void BOARD_GeneratePseudoMoves_King(BOARD_Board* board, uint8_t isWhite);
 void BOARD_GeneratePseudoMoves(BOARD_Board* board);
+void BOARD_FilterLegalMoves(BOARD_Board* board);
 
 #endif

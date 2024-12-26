@@ -1,5 +1,7 @@
 #include "main.h"
+#include "board.h"
 #include "util.h"
+#include <stdio.h>
 
 int SCREEN_WIDTH;
 int SCREEN_HEIGHT;
@@ -28,14 +30,18 @@ int main(void)
   // tileset = LoadTexture("resources/chess.png");
   tileset = LoadTexture("resources/chess-fancy.png");
 
-  BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-  // BOARD_Board board = BOARD_SetupBoard("8/2K5/8/8/8/k7/8/8 w");
+  // BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
+  BOARD_Board board = BOARD_SetupBoard("1r6/8/8/8/8/KQ5q/8/8 w");
   uint8_t result = 0;
 
   // debugging
-  printf("%d\n", BOARD_IsCheck(&board, 1));
+  printf("%d\n", BOARD_IsCheck(&board.board, 1));
   BOARD_GeneratePseudoMoves(&board);
+  printf("pseudo legal moves:\n");
   BOARD_PrintMoves(&board.pseudoMoves);
+  BOARD_FilterLegalMoves(&board);
+  printf("legal moves:\n");
+  BOARD_PrintMoves(&board.legalMoves);
   
   while (!WindowShouldClose()){
     BeginDrawing();
