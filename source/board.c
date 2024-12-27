@@ -383,7 +383,7 @@ void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
   BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, move->from);
   BITBOARD_LeftShift(&moveMask, &(BITBOARD_Bitboard){{1,0}}, move->to);
   BITBOARD_Subtract(&removeMask, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &pieceMask);
-
+  
   if(isWhite){
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
     BITBOARD_BitwiseAND(&temp, 2, &pieceMask, &board->white_pawns);
@@ -423,6 +423,15 @@ void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
     }
     BITBOARD_BitwiseAND(&board->white_pieces, 1, &removeMask);
     BITBOARD_BitwiseOR(&board->white_pieces, 1, &moveMask);
+
+    BITBOARD_Subtract(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &moveMask);
+    BITBOARD_BitwiseAND(&board->black_pieces, 1, &temp);
+    BITBOARD_BitwiseAND(&board->black_pawns, 1, &temp);
+    BITBOARD_BitwiseAND(&board->black_knights, 1, &temp);
+    BITBOARD_BitwiseAND(&board->black_bishops, 1, &temp);
+    BITBOARD_BitwiseAND(&board->black_rooks, 1, &temp);
+    BITBOARD_BitwiseAND(&board->black_queens, 1, &temp);
+    BITBOARD_BitwiseAND(&board->black_king, 1, &temp);
   } 
   else{
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
@@ -463,6 +472,15 @@ void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
     }
     BITBOARD_BitwiseAND(&board->black_pieces, 1, &removeMask);
     BITBOARD_BitwiseOR(&board->black_pieces, 1, &moveMask);
+    
+    BITBOARD_Subtract(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &moveMask);
+    BITBOARD_BitwiseAND(&board->white_pieces, 1, &temp);
+    BITBOARD_BitwiseAND(&board->white_pawns, 1, &temp);
+    BITBOARD_BitwiseAND(&board->white_knights, 1, &temp);
+    BITBOARD_BitwiseAND(&board->white_bishops, 1, &temp);
+    BITBOARD_BitwiseAND(&board->white_rooks, 1, &temp);
+    BITBOARD_BitwiseAND(&board->white_queens, 1, &temp);
+    BITBOARD_BitwiseAND(&board->white_king, 1, &temp);
   }
   BITBOARD_BitwiseAND(&board->all_pieces, 1, &removeMask);
   BITBOARD_BitwiseOR(&board->all_pieces, 1, &moveMask);
@@ -715,34 +733,55 @@ void BOARD_GeneratePseudoMoves(BOARD_Board* board)
 void BOARD_FilterLegalMoves(BOARD_Board* board)
 {
   board->legalMoves.count = 0;
+  int8_t can=0, square=-1;
   uint8_t isWhite = UTIL_GetBoolFromBools(board->bools, INDEX_ON_TURN);
 
   for(uint8_t i=0;i<board->pseudoMoves.count;i++){
+
+    /* 
+      * TODO -> tuto proste spravit ze ked ten piece vymazem tak automaticky to mozu byt vsetky tahy z toho policka
+    */
+
+
+    // if(can && square==board->pseudoMoves.list[i].from){
+    //   BOARD_AddMove(&board->legalMoves, board->pseudoMoves.list[i].from, board->pseudoMoves.list[i].to, board->pseudoMoves.list[i].promotion);
+    //   continue;
+    // }
+    // else if(square!=board->pseudoMoves.list[i].from){
+    //   BOARD_InitBoardStateCopy(board);
+    //   square = board->pseudoMoves.list[i].from;
+    //   
+    //   BITBOARD_Bitboard pieceMask=(BITBOARD_Bitboard){{0,0}}, removeMask;
+    //   BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, square);
+    //   BITBOARD_Subtract(&removeMask, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &pieceMask);
+    //
+    //   if(isWhite){
+    //     BITBOARD_BitwiseAND(&board->boardCopy.white_pieces, 1, &removeMask);
+    //     BITBOARD_BitwiseAND(&board->boardCopy.white_pawns, 1, &removeMask);
+    //     BITBOARD_BitwiseAND(&board->boardCopy.white_knights, 1, &removeMask);
+    //     BITBOARD_BitwiseAND(&board->boardCopy.white_bishops, 1, &removeMask);
+    //     BITBOARD_BitwiseAND(&board->boardCopy.white_rooks, 1, &removeMask);
+    //     BITBOARD_BitwiseAND(&board->boardCopy.white_queens, 1, &removeMask);
+    //     BITBOARD_BitwiseAND(&board->boardCopy.white_king, 1, &removeMask);
+    //   }
+    //   else{
+    //     BITBOARD_BitwiseAND(&board->boardCopy.black_pieces, 1, &removeMask);
+    //     BITBOARD_BitwiseAND(&board->boardCopy.black_pawns, 1, &removeMask);
+    //     BITBOARD_BitwiseAND(&board->boardCopy.black_knights, 1, &removeMask);
+    //     BITBOARD_BitwiseAND(&board->boardCopy.black_bishops, 1, &removeMask);
+    //     BITBOARD_BitwiseAND(&board->boardCopy.black_rooks, 1, &removeMask);
+    //     BITBOARD_BitwiseAND(&board->boardCopy.black_queens, 1, &removeMask);
+    //     BITBOARD_BitwiseAND(&board->boardCopy.black_king, 1, &removeMask);
+    //   }
+    //   BITBOARD_BitwiseAND(&board->boardCopy.all_pieces, 1, &removeMask);
+    //   can = !BOARD_IsCheck(&board->boardCopy, isWhite); 
+    // }
+
     BOARD_InitBoardStateCopy(board);
     BOARD_MakeMove(&board->boardCopy, &board->pseudoMoves.list[i], isWhite);
 
-    // z nejakeho dovodu to nefunguje ako ma xd
-    /* - viem preco -> tu jest priklad:
-     *
-     *  - r - - - - - k 
-     *  - - - - - - - - 
-     *  - - - - - - - - 
-     *  - - - - - - - - 
-     *  - - - - - - - - 
-     *  K Q - - - - - q 
-     *  - - - - - - - - 
-     *  - - - - - - - -
-     *
-     * - ked Q zoberie q tak v boardState copy nevymazem tu ciernu queenu cize isCheck si mysli ze
-     *   tam stale je a preto to povazuje za ilegalny tah
-     *
-     * */
-
-    BITBOARD_Print(&board->boardCopy.all_pieces);
     if(BOARD_IsCheck(&board->boardCopy, isWhite)==0){
       BOARD_AddMove(&board->legalMoves, board->pseudoMoves.list[i].from, board->pseudoMoves.list[i].to, board->pseudoMoves.list[i].promotion);
-      // printf("addujem\n");
-      // BITBOARD_Print(&board->boardCopy.all_pieces);
     }
   }
 }
