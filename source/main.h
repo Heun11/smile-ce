@@ -10,6 +10,8 @@
 #define TILE_REAL_W 32
 #define TILE_REAL_H 42
 
+#define FANCY_BOARD 1
+
 extern int SCREEN_WIDTH;
 extern int SCREEN_HEIGHT;
 extern int TS;

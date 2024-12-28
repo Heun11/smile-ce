@@ -95,6 +95,12 @@ void BOARD_PrintBitmaps(BOARD_Board* board)
 BOARD_Board BOARD_SetupBoard(char* fen)
 {
   BOARD_Board board;
+
+  board.pointingX = -1;
+  board.pointingY = -1;
+  board.selectedX = -1;
+  board.selectedY = -1;
+
   board.bools = 1<<4;
   
   board.board.white_pawns=(BITBOARD_Bitboard){{0,0}}, board.board.white_rooks=(BITBOARD_Bitboard){{0,0}}, 
@@ -194,92 +200,149 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
     for(col=0;col<8;col++){
 
       if((row+col)%2==0){
-        // DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){ 247, 243, 220, 255 });
+        #if FANCY_BOARD
         DrawTexturePro(tileset, (Rectangle){6*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
           (Rectangle){offx+TS*col, offy+TS*row, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
+        #else
+        DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){ 247, 243, 220, 255 });
+        #endif
       }
       else{
-        // DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){ 51, 107, 163, 255 });
+        #if FANCY_BOARD
         DrawTexturePro(tileset, (Rectangle){6*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
           (Rectangle){offx+TS*col, offy+TS*row, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
+        #else
+        DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){ 51, 107, 163, 255 });
+        #endif
       }
       
       pos = row*8+col;
+      #if FANCY_BOARD
       DrawText(TextFormat("%d", pos), offx+TS*col, offy+TS*row, TS*0.2, WHITE);
+      #else 
+      DrawText(TextFormat("%d", pos), offx+TS*col+TS*0.05, offy+TS*row+TS*0.05, TS*0.2, BLACK);
+      #endif
 
+      for(uint8_t i=0;i<board->legalMoves.count;i++){
+       if(board->legalMoves.list[i].from==board->selectedY*8+board->selectedX && board->legalMoves.list[i].to==pos){
+          #if FANCY_BOARD
+          DrawTexturePro(tileset, (Rectangle){7*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){255, 0, 0, 100});
+          #endif
+        }
+      }
+      
       if(BITBOARD_GetBit(&board->board.all_pieces, pos)){
         if(BITBOARD_GetBit(&board->board.white_pawns, pos)){
+          #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){0*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
-          // DrawTexturePro(tileset, (Rectangle){0*TILE_REAL, 0*TILE_REAL, TILE_REAL, TILE_REAL}, 
-          //   (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawTexturePro(tileset, (Rectangle){0*TILE_REAL, 0*TILE_REAL, TILE_REAL, TILE_REAL}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #endif
         }
         if(BITBOARD_GetBit(&board->board.white_rooks, pos)){
+          #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){1*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
-          // DrawTexturePro(tileset, (Rectangle){1*TILE_REAL, 0*TILE_REAL, TILE_REAL, TILE_REAL}, 
-          //   (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawTexturePro(tileset, (Rectangle){1*TILE_REAL, 0*TILE_REAL, TILE_REAL, TILE_REAL}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #endif
         }
         if(BITBOARD_GetBit(&board->board.white_knights, pos)){
+          #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){2*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
-          // DrawTexturePro(tileset, (Rectangle){2*TILE_REAL, 0*TILE_REAL, TILE_REAL, TILE_REAL}, 
-          //   (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawTexturePro(tileset, (Rectangle){2*TILE_REAL, 0*TILE_REAL, TILE_REAL, TILE_REAL}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #endif
         }
         if(BITBOARD_GetBit(&board->board.white_bishops, pos)){
+          #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){3*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
-          // DrawTexturePro(tileset, (Rectangle){3*TILE_REAL, 0*TILE_REAL, TILE_REAL, TILE_REAL}, 
-          //   (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawTexturePro(tileset, (Rectangle){3*TILE_REAL, 0*TILE_REAL, TILE_REAL, TILE_REAL}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #endif
         }
         if(BITBOARD_GetBit(&board->board.white_queens, pos)){
+          #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){4*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
-          // DrawTexturePro(tileset, (Rectangle){4*TILE_REAL, 0*TILE_REAL, TILE_REAL, TILE_REAL}, 
-          //   (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawTexturePro(tileset, (Rectangle){4*TILE_REAL, 0*TILE_REAL, TILE_REAL, TILE_REAL}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #endif
         }
         if(BITBOARD_GetBit(&board->board.white_king, pos)){
+          #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){5*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
-          // DrawTexturePro(tileset, (Rectangle){5*TILE_REAL, 0*TILE_REAL, TILE_REAL, TILE_REAL}, 
-          //   (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawTexturePro(tileset, (Rectangle){5*TILE_REAL, 0*TILE_REAL, TILE_REAL, TILE_REAL}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #endif
         }
         
         if(BITBOARD_GetBit(&board->board.black_pawns, pos)){
+          #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){0*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
-          // DrawTexturePro(tileset, (Rectangle){0*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
-          //   (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawTexturePro(tileset, (Rectangle){0*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #endif
         }
         if(BITBOARD_GetBit(&board->board.black_rooks, pos)){
+          #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){1*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
-          // DrawTexturePro(tileset, (Rectangle){1*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
-          //   (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawTexturePro(tileset, (Rectangle){1*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #endif
         }
         if(BITBOARD_GetBit(&board->board.black_knights, pos)){
+          #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){2*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
-          // DrawTexturePro(tileset, (Rectangle){2*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
-          //   (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawTexturePro(tileset, (Rectangle){2*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #endif
         }
         if(BITBOARD_GetBit(&board->board.black_bishops, pos)){
+          #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){3*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
-          // DrawTexturePro(tileset, (Rectangle){3*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
-          //   (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawTexturePro(tileset, (Rectangle){3*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #endif
         }
         if(BITBOARD_GetBit(&board->board.black_queens, pos)){
+          #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){4*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
-          // DrawTexturePro(tileset, (Rectangle){4*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
-          //   (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawTexturePro(tileset, (Rectangle){4*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #endif
         }
         if(BITBOARD_GetBit(&board->board.black_king, pos)){
+          #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){5*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
-          // DrawTexturePro(tileset, (Rectangle){5*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
-          //   (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #else
+          DrawTexturePro(tileset, (Rectangle){5*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
+            (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
+          #endif
         }
       }
     }
@@ -782,3 +845,49 @@ void BOARD_FilterLegalMoves(BOARD_Board* board)
   }
 }
 
+
+// ======================================= GAME FUNCTIONS ========================================
+
+
+void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy)
+{
+  uint8_t isWhite = UTIL_GetBoolFromBools(board->bools, INDEX_ON_TURN);
+  
+  int mx = GetMouseX();
+  int my = GetMouseY();
+
+  int px = (mx-offx)/TS;
+  int py = (my-offy)/TS;
+  int pos = -1;
+
+  if(px>=0 && px<8 && py>=0 && py<8 && (mx-offx)>=0 && (my-offy)>=0){
+    pos = py*8+px;
+  }
+
+  if(IsMouseButtonPressed(0)){
+    if(pos>0){
+        
+      if(isWhite && BITBOARD_GetBit(&board->board.white_pieces, pos)){
+          board->selectedX = px;
+          board->selectedY = py;
+      }
+      else if(!isWhite && BITBOARD_GetBit(&board->board.black_pieces, pos)){
+          board->selectedX = px;
+          board->selectedY = py;
+      }
+      else{
+        if(board->selectedX<0 || board->selectedY<0){
+          board->selectedX = board->selectedY = -1;
+        }
+        else{
+          // move a capture (alebo ak kliknes na prazdne policko tak zrus selection)
+        }
+      }
+    }
+    else{
+      board->selectedX = board->selectedY = -1;
+    }
+
+    
+  }
+}

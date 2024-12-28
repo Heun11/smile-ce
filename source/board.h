@@ -53,6 +53,9 @@ typedef struct{
 
   BOARD_BoardState boardCopy;
   BOARD_BoardState board;
+
+  // toto je len pre estetickost tejto verzie
+  int selectedX, selectedY, pointingX, pointingY;
 }BOARD_Board;
 
 #include "raylib.h"
@@ -76,5 +79,7 @@ void BOARD_GeneratePseudoMoves_Queen(BOARD_Board* board, uint8_t isWhite);
 void BOARD_GeneratePseudoMoves_King(BOARD_Board* board, uint8_t isWhite);
 void BOARD_GeneratePseudoMoves(BOARD_Board* board);
 void BOARD_FilterLegalMoves(BOARD_Board* board);
+
+void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy);
 
 #endif
