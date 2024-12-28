@@ -298,6 +298,7 @@ uint8_t BOARD_IsCheck(BOARD_BoardState* board, uint8_t isWhite)
   if(isWhite){
     // white is on turn
     kingSquare = BITBOARD_CountTrailingZeros(&board->white_king);
+    if(kingSquare==-1) return 1;
 
     // pawn 
     BITBOARD_SetBitboardToBitboard(&temp, &BITBOARD_AttackMasks_pawn[1][kingSquare]);
@@ -335,6 +336,7 @@ uint8_t BOARD_IsCheck(BOARD_BoardState* board, uint8_t isWhite)
   else{ 
     // black is on turn
     kingSquare = BITBOARD_CountTrailingZeros(&board->black_king);
+    if(kingSquare==-1) return 1;
     
     // pawn 
     BITBOARD_SetBitboardToBitboard(&temp, &BITBOARD_AttackMasks_pawn[1][kingSquare]);
@@ -737,45 +739,39 @@ void BOARD_FilterLegalMoves(BOARD_Board* board)
   uint8_t isWhite = UTIL_GetBoolFromBools(board->bools, INDEX_ON_TURN);
 
   for(uint8_t i=0;i<board->pseudoMoves.count;i++){
+    if(can && square==board->pseudoMoves.list[i].from){
+      BOARD_AddMove(&board->legalMoves, board->pseudoMoves.list[i].from, board->pseudoMoves.list[i].to, board->pseudoMoves.list[i].promotion);
+      continue;
+    }
+    else if(square!=board->pseudoMoves.list[i].from){
+      BOARD_InitBoardStateCopy(board);
+      square = board->pseudoMoves.list[i].from;
+      
+      BITBOARD_Bitboard pieceMask=(BITBOARD_Bitboard){{0,0}}, removeMask;
+      BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, square);
+      BITBOARD_Subtract(&removeMask, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &pieceMask);
 
-    /* 
-      * TODO -> tuto proste spravit ze ked ten piece vymazem tak automaticky to mozu byt vsetky tahy z toho policka
-    */
-
-
-    // if(can && square==board->pseudoMoves.list[i].from){
-    //   BOARD_AddMove(&board->legalMoves, board->pseudoMoves.list[i].from, board->pseudoMoves.list[i].to, board->pseudoMoves.list[i].promotion);
-    //   continue;
-    // }
-    // else if(square!=board->pseudoMoves.list[i].from){
-    //   BOARD_InitBoardStateCopy(board);
-    //   square = board->pseudoMoves.list[i].from;
-    //   
-    //   BITBOARD_Bitboard pieceMask=(BITBOARD_Bitboard){{0,0}}, removeMask;
-    //   BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, square);
-    //   BITBOARD_Subtract(&removeMask, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &pieceMask);
-    //
-    //   if(isWhite){
-    //     BITBOARD_BitwiseAND(&board->boardCopy.white_pieces, 1, &removeMask);
-    //     BITBOARD_BitwiseAND(&board->boardCopy.white_pawns, 1, &removeMask);
-    //     BITBOARD_BitwiseAND(&board->boardCopy.white_knights, 1, &removeMask);
-    //     BITBOARD_BitwiseAND(&board->boardCopy.white_bishops, 1, &removeMask);
-    //     BITBOARD_BitwiseAND(&board->boardCopy.white_rooks, 1, &removeMask);
-    //     BITBOARD_BitwiseAND(&board->boardCopy.white_queens, 1, &removeMask);
-    //     BITBOARD_BitwiseAND(&board->boardCopy.white_king, 1, &removeMask);
-    //   }
-    //   else{
-    //     BITBOARD_BitwiseAND(&board->boardCopy.black_pieces, 1, &removeMask);
-    //     BITBOARD_BitwiseAND(&board->boardCopy.black_pawns, 1, &removeMask);
-    //     BITBOARD_BitwiseAND(&board->boardCopy.black_knights, 1, &removeMask);
-    //     BITBOARD_BitwiseAND(&board->boardCopy.black_bishops, 1, &removeMask);
-    //     BITBOARD_BitwiseAND(&board->boardCopy.black_rooks, 1, &removeMask);
-    //     BITBOARD_BitwiseAND(&board->boardCopy.black_queens, 1, &removeMask);
-    //     BITBOARD_BitwiseAND(&board->boardCopy.black_king, 1, &removeMask);
-    //   }
-    //   BITBOARD_BitwiseAND(&board->boardCopy.all_pieces, 1, &removeMask);
-    //   can = !BOARD_IsCheck(&board->boardCopy, isWhite); 
-    // }
+      if(isWhite){
+        BITBOARD_BitwiseAND(&board->boardCopy.white_pieces, 1, &removeMask);
+        BITBOARD_BitwiseAND(&board->boardCopy.white_pawns, 1, &removeMask);
+        BITBOARD_BitwiseAND(&board->boardCopy.white_knights, 1, &removeMask);
+        BITBOARD_BitwiseAND(&board->boardCopy.white_bishops, 1, &removeMask);
+        BITBOARD_BitwiseAND(&board->boardCopy.white_rooks, 1, &removeMask);
+        BITBOARD_BitwiseAND(&board->boardCopy.white_queens, 1, &removeMask);
+        BITBOARD_BitwiseAND(&board->boardCopy.white_king, 1, &removeMask);
+      }
+      else{
+        BITBOARD_BitwiseAND(&board->boardCopy.black_pieces, 1, &removeMask);
+        BITBOARD_BitwiseAND(&board->boardCopy.black_pawns, 1, &removeMask);
+        BITBOARD_BitwiseAND(&board->boardCopy.black_knights, 1, &removeMask);
+        BITBOARD_BitwiseAND(&board->boardCopy.black_bishops, 1, &removeMask);
+        BITBOARD_BitwiseAND(&board->boardCopy.black_rooks, 1, &removeMask);
+        BITBOARD_BitwiseAND(&board->boardCopy.black_queens, 1, &removeMask);
+        BITBOARD_BitwiseAND(&board->boardCopy.black_king, 1, &removeMask);
+      }
+      BITBOARD_BitwiseAND(&board->boardCopy.all_pieces, 1, &removeMask);
+      can = !BOARD_IsCheck(&board->boardCopy, isWhite); 
+    }
 
     BOARD_InitBoardStateCopy(board);
     BOARD_MakeMove(&board->boardCopy, &board->pseudoMoves.list[i], isWhite);

@@ -13,7 +13,8 @@
         [] basic moving pieces
             [x] isCheck
             [x] generate pseudo legal moves
-            [] filter legal moves
+            [x] filter legal moves
+            [] actually move those pieces
         [] capturing pieces
         [] fancy moves 
             [] promotion
