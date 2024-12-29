@@ -188,6 +188,9 @@ BOARD_Board BOARD_SetupBoard(char* fen)
   printf("Show Boards:\n\n");
   BOARD_PrintBitmaps(&board);
 
+  BOARD_GeneratePseudoMoves(&board);
+  BOARD_FilterLegalMoves(&board);
+  
   return board;
 }
 
@@ -195,6 +198,9 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
 {
   uint8_t row, col;
   uint8_t pos;
+  #if FANCY_BOARD
+  uint8_t isWhite = UTIL_GetBoolFromBools(board->bools, INDEX_ON_TURN);
+  #endif
 
   for(row=0;row<8;row++){
     for(col=0;col<8;col++){
@@ -226,8 +232,14 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
       for(uint8_t i=0;i<board->legalMoves.count;i++){
        if(board->legalMoves.list[i].from==board->selectedY*8+board->selectedX && board->legalMoves.list[i].to==pos){
           #if FANCY_BOARD
-          DrawTexturePro(tileset, (Rectangle){7*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
-            (Rectangle){offx+TS*col, offy+TS*row, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
+          if(isWhite){
+            DrawTexturePro(tileset, (Rectangle){7*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+              (Rectangle){offx+TS*col, offy+TS*row, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
+          }
+          else{
+            DrawTexturePro(tileset, (Rectangle){7*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
+              (Rectangle){offx+TS*col, offy+TS*row, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
+          }
           #else
           DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){255, 0, 0, 100});
           #endif
@@ -649,7 +661,7 @@ void BOARD_GeneratePseudoMoves_Knight(BOARD_Board* board, uint8_t isWhite)
     BITBOARD_BitwiseAND(&knights, 1, &temp);
 
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0,0}});
-    BITBOARD_BitwiseOR(&temp, 2, &emptySquares, isWhite?(&board->board.black_knights):(&board->board.white_knights));
+    BITBOARD_BitwiseOR(&temp, 2, &emptySquares, isWhite?(&board->board.black_pieces):(&board->board.white_pieces));
     BITBOARD_SetBitboardToBitboard(&movesMask, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
     BITBOARD_BitwiseAND(&movesMask, 2, &temp, &BITBOARD_Masks_knight[square]);
     while(BITBOARD_IsBitboardTrue(&movesMask)){
@@ -876,18 +888,25 @@ void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy)
           board->selectedY = py;
       }
       else{
-        if(board->selectedX<0 || board->selectedY<0){
-          board->selectedX = board->selectedY = -1;
-        }
-        else{
+        if(board->selectedX>=0 && board->selectedY>=0){
           // move a capture (alebo ak kliknes na prazdne policko tak zrus selection)
+
+          for(uint8_t i=0;i<board->legalMoves.count;i++){
+            if(board->legalMoves.list[i].from==(board->selectedY*8+board->selectedX) && board->legalMoves.list[i].to==pos){
+              BOARD_MakeMove(&board->board, &board->legalMoves.list[i], isWhite);
+              UTIL_SetBoolInBools(&board->bools, INDEX_ON_TURN, !isWhite);
+              board->selectedX = board->selectedY = -1;
+              BOARD_PrintBitmaps(board);
+              printf("%s isCheck = %s\n", isWhite?"black":"white", BOARD_IsCheck(&board->board, isWhite)?"true":"false");
+              BOARD_GeneratePseudoMoves(board);
+              BOARD_FilterLegalMoves(board);
+            }
+          }
         }
       }
     }
     else{
       board->selectedX = board->selectedY = -1;
     }
-
-    
   }
 }

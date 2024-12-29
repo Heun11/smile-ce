@@ -38,11 +38,11 @@ int main(void)
   uint8_t result = 0;
 
   // debugging
-  printf("isCheck = %d\n", BOARD_IsCheck(&board.board, 1));
-  BOARD_GeneratePseudoMoves(&board);
+  // printf("isCheck = %d\n", BOARD_IsCheck(&board.board, 1));
+  // BOARD_GeneratePseudoMoves(&board);
   // printf("pseudo legal moves:\n");
   // BOARD_PrintMoves(&board.pseudoMoves);
-  BOARD_FilterLegalMoves(&board);
+  // BOARD_FilterLegalMoves(&board);
   // printf("legal moves:\n");
   // BOARD_PrintMoves(&board.legalMoves);
   

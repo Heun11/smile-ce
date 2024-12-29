@@ -10,12 +10,12 @@
         [x] render board
         [x] render pieces
     [] create game of chess
-        [] basic moving pieces
+        [x] basic moving pieces
             [x] isCheck
             [x] generate pseudo legal moves
             [x] filter legal moves
-            [] actually move those pieces
-        [] capturing pieces
+            [x] actually move those pieces
+            [x] capturing pieces
         [] fancy moves 
             [] promotion
             [] en passant 
