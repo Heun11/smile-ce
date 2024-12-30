@@ -101,6 +101,7 @@ BOARD_Board BOARD_SetupBoard(char* fen)
   board.selectedX = -1;
   board.selectedY = -1;
 
+  board.enPassant = -1;
   board.bools = 1<<4;
   
   board.board.white_pawns=(BITBOARD_Bitboard){{0,0}}, board.board.white_rooks=(BITBOARD_Bitboard){{0,0}}, 
@@ -454,7 +455,7 @@ void BOARD_AddMove(BOARD_MoveList* moves, int8_t from, int8_t to, int8_t promoti
   moves->count++;
 }
 
-void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
+void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite, int8_t enPassant)
 {
   BITBOARD_Bitboard temp, removeMask, pieceMask=(BITBOARD_Bitboard){{0,0}}, moveMask=(BITBOARD_Bitboard){{0,0}};
   BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, move->from);
@@ -466,7 +467,15 @@ void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
     BITBOARD_BitwiseAND(&temp, 2, &pieceMask, &board->white_pawns);
     if(BITBOARD_IsBitboardTrue(&temp)){
       BITBOARD_BitwiseAND(&board->white_pawns, 1, &removeMask);
-      BITBOARD_BitwiseOR(&board->white_pawns, 1, &moveMask); 
+      BITBOARD_BitwiseOR(&board->white_pawns, 1, &moveMask);
+
+      if(move->to==enPassant){
+        BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, enPassant+8);
+        BITBOARD_Subtract(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &pieceMask);
+        BITBOARD_BitwiseAND(&board->all_pieces, 1, &temp);
+        BITBOARD_BitwiseAND(&board->black_pieces, 1, &temp);
+        BITBOARD_BitwiseAND(&board->black_pawns, 1, &temp);
+      }
     }
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
     BITBOARD_BitwiseAND(&temp, 2, &pieceMask, &board->white_knights);
@@ -516,6 +525,14 @@ void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
     if(BITBOARD_IsBitboardTrue(&temp)){
       BITBOARD_BitwiseAND(&board->black_pawns, 1, &removeMask);
       BITBOARD_BitwiseOR(&board->black_pawns, 1, &moveMask);
+
+      if(move->to==enPassant){
+        BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, enPassant-8);
+        BITBOARD_Subtract(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &pieceMask);
+        BITBOARD_BitwiseAND(&board->all_pieces, 1, &temp);
+        BITBOARD_BitwiseAND(&board->white_pieces, 1, &temp);
+        BITBOARD_BitwiseAND(&board->white_pawns, 1, &temp);
+      }
     }
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
     BITBOARD_BitwiseAND(&temp, 2, &pieceMask, &board->black_knights);
@@ -643,6 +660,14 @@ void BOARD_GeneratePseudoMoves_Pawn(BOARD_Board* board, uint8_t isWhite)
       BITBOARD_BitwiseAND(&push, 1, &temp);
 
       BOARD_AddMove(&board->pseudoMoves, square, attackSquare, 0);
+    }
+
+    if(board->enPassant>=0){
+      BITBOARD_LeftShift(&temp, &(BITBOARD_Bitboard){{1,0}}, board->enPassant);
+      BITBOARD_BitwiseAND(&temp, 1, &BITBOARD_AttackMasks_pawn[isWhite?1:0][square]);
+      if(BITBOARD_IsBitboardTrue(&temp)){
+        BOARD_AddMove(&board->pseudoMoves, square, board->enPassant, 0);
+      }
     }
   }
 }
@@ -849,7 +874,7 @@ void BOARD_FilterLegalMoves(BOARD_Board* board)
     }
 
     BOARD_InitBoardStateCopy(board);
-    BOARD_MakeMove(&board->boardCopy, &board->pseudoMoves.list[i], isWhite);
+    BOARD_MakeMove(&board->boardCopy, &board->pseudoMoves.list[i], isWhite, board->enPassant);
 
     if(BOARD_IsCheck(&board->boardCopy, isWhite)==0){
       BOARD_AddMove(&board->legalMoves, board->pseudoMoves.list[i].from, board->pseudoMoves.list[i].to, board->pseudoMoves.list[i].promotion);
@@ -890,11 +915,23 @@ void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy)
       else{
         if(board->selectedX>=0 && board->selectedY>=0){
           // move a capture (alebo ak kliknes na prazdne policko tak zrus selection)
+          BOARD_InitBoardStateCopy(board);
 
-          for(uint8_t i=0;i<board->legalMoves.count;i++){
+          for(uint8_t i=0;i<board->legalMoves.count;i++){ 
             if(board->legalMoves.list[i].from==(board->selectedY*8+board->selectedX) && board->legalMoves.list[i].to==pos){
-              BOARD_MakeMove(&board->board, &board->legalMoves.list[i], isWhite);
+              
+              BOARD_MakeMove(&board->board, &board->legalMoves.list[i], isWhite, board->enPassant);
               UTIL_SetBoolInBools(&board->bools, INDEX_ON_TURN, !isWhite);
+              
+              if(((isWhite && BITBOARD_GetBit(&board->boardCopy.white_pawns, board->legalMoves.list[i].from)==1) || 
+              (!isWhite && BITBOARD_GetBit(&board->boardCopy.black_pawns, board->legalMoves.list[i].from)==1)) &&
+              (abs(board->legalMoves.list[i].to-board->legalMoves.list[i].from)==16)){
+                board->enPassant = (board->legalMoves.list[i].to+board->legalMoves.list[i].from)/2;
+              }
+              else{
+                board->enPassant = -1;
+              }
+
               board->selectedX = board->selectedY = -1;
               BOARD_PrintBitmaps(board);
               printf("%s isCheck = %s\n", isWhite?"black":"white", BOARD_IsCheck(&board->board, isWhite)?"true":"false");

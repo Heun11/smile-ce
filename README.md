@@ -17,9 +17,9 @@
             [x] actually move those pieces
             [x] capturing pieces
         [] fancy moves 
-            [] promotion
-            [] en passant 
+            [x] en passant 
             [] castle
+            [] promotion
         [] winning (checkmate & stalemate)
     [] create engine
         [] setup code (try with random moves)
