@@ -3,6 +3,7 @@
 
 #include "bitboard.h"
 #include <stdint.h>
+#include <stdio.h>
 
 uint8_t BITBOARD_IsBitboardTrue(BITBOARD_Bitboard* bitboard);
 void BITBOARD_Print(BITBOARD_Bitboard* bitboard);

@@ -25,6 +25,8 @@ typedef struct{
   BITBOARD_Bitboard white_pawns, white_rooks, white_knights, white_bishops, white_queens, white_king;
   BITBOARD_Bitboard black_pawns, black_rooks, black_knights, black_bishops, black_queens, black_king;
   BITBOARD_Bitboard white_pieces, black_pieces, all_pieces;
+
+  BITBOARD_Bitboard enemyAttack;
 }BOARD_BoardState;
 
 #define INDEX_ON_TURN 5
@@ -79,6 +81,8 @@ void BOARD_GeneratePseudoMoves_Bishop(BOARD_Board* board, uint8_t isWhite);
 void BOARD_GeneratePseudoMoves_Rook(BOARD_Board* board, uint8_t isWhite);
 void BOARD_GeneratePseudoMoves_Queen(BOARD_Board* board, uint8_t isWhite);
 void BOARD_GeneratePseudoMoves_King(BOARD_Board* board, uint8_t isWhite);
+void BOARD_GenerateCastlingMoves(BOARD_Board* board, uint8_t isWhite);
+void BOARD_UpdateCastlingRights(BOARD_Board* board, uint8_t isWhite);
 void BOARD_GeneratePseudoMoves(BOARD_Board* board);
 void BOARD_FilterLegalMoves(BOARD_Board* board);
 

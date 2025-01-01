@@ -153,7 +153,7 @@ void BITBOARD_GetAttackMask_bishop(BITBOARD_Bitboard* bitboard_dest, uint8_t squ
   BITBOARD_SetBitboardToBitboard(&temp1, bitboard_occupancy);
   BITBOARD_BitwiseAND(&temp1, 1, &BITBOARD_Masks_bishop[square]);
   BITBOARD_Multiply(&temp2, &temp1, &BITBOARD_Magics_bishop[square]);
-  BITBOARD_RightShift(&temp3, &temp2, BITBOARD_Shift_bishop[square]);
+  BITBOARD_RightShift(&temp3, &temp2, BITBOARD_Shift_bishop);
   BITBOARD_SetBitboardToBitboard(bitboard_dest, &BITBOARD_AttackTable_bishop[square][temp3.half[0]]);
   // printf("FINAL\n");
   // BITBOARD_Print(bitboard_dest);

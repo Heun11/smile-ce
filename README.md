@@ -4,6 +4,8 @@
 # IMPORTANT
     -> ak to bude niekedy randomne hadzat seg fault, moze to byt isCheck (mozno tym ze som tam nemal ziadnych kingov xd)
 
+    -> OKAMZITE TREBA FIXNUT CHYBNE MASKY A TAK :D
+
 ### overall todo 
     [x] create basics
         [x] project setup

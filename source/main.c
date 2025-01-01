@@ -34,7 +34,7 @@ int main(void)
   #endif
 
   BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-  // BOARD_Board board = BOARD_SetupBoard("1q5k/8/4N3/8/KQ5q/8/8/8 w");
+  // BOARD_Board board = BOARD_SetupBoard("5B2/8/8/8/8/8/k7/K7 w");
   uint8_t result = 0;
 
   // debugging
