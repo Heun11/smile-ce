@@ -1,4 +1,5 @@
 #include "main.h"
+#include "bitboard_func.h"
 #include "board.h"
 #include "util.h"
 #include <stdio.h>

@@ -118,6 +118,10 @@ void BITBOARD_SetBitboardToBitboard(BITBOARD_Bitboard* bitboard_dest, BITBOARD_B
 void BITBOARD_RightShift(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard, uint8_t shift)
 {
   *bitboard_dest = (BITBOARD_Bitboard){{0, 0}};
+  if(shift==0){
+    BITBOARD_SetBitboardToBitboard(bitboard_dest, bitboard);
+    return;
+  }
 
   if (shift >= 64) {
     bitboard_dest->half[0] = 0;
@@ -134,6 +138,10 @@ void BITBOARD_RightShift(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bi
 void BITBOARD_LeftShift(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard, uint8_t shift)
 {
   *bitboard_dest = (BITBOARD_Bitboard){{0, 0}};
+  if(shift==0){
+    BITBOARD_SetBitboardToBitboard(bitboard_dest, bitboard);
+    return;
+  }
 
   if (shift >= 64) {
     bitboard_dest->half[0] = 0;
@@ -142,8 +150,8 @@ void BITBOARD_LeftShift(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bit
     bitboard_dest->half[1] = bitboard->half[0] << (shift - 32);
     bitboard_dest->half[0] = 0;
   } else {
-      bitboard_dest->half[1] = (bitboard->half[1] << shift) | (bitboard->half[0] >> (32 - shift));
-      bitboard_dest->half[0] = bitboard->half[0] << shift;
+    bitboard_dest->half[1] = (bitboard->half[1] << shift) | (bitboard->half[0] >> (32 - shift));
+    bitboard_dest->half[0] = bitboard->half[0] << shift;
   }
 }
 

@@ -112,7 +112,7 @@ def validate_magics():
     for i in range(64):
         bishop_mask = generate_bishop_masks(i)  # Get bishop attack mask for the square
         blockers = generate_blocker_combinations(bishop_mask)  
-        print_bitboard(bishop_mask)
+        # print_bitboard(bishop_mask)
         
         # print(f"Validating magic for square {i}...")  # Debug line
         
@@ -126,6 +126,11 @@ def validate_magics():
             else:
                 indexes[i].append(index)  # Store the unique index for future checks
     
+    size = 0
+    for i in indexes:
+        size += len(i)
+    print(size)
+
     # Output squares that have non-unique magic numbers
     for i in range(len(unique)):
         # print(max(indexes[i]))
@@ -165,9 +170,11 @@ def generate_bishop_attack_masks():
 
 # Run the validation
 validate_magics()
-generate_bishop_attack_masks()
+# generate_bishop_attack_masks()
 # print_in_c_arr_format_64(bishop_magics)
-print_in_c_arr_format_64_512(attack_table)
+bishop_mask = [generate_bishop_masks(i) for i in range(64)]
+print_in_c_arr_format_64(bishop_mask)
+# print_in_c_arr_format_64_512(attack_table)
 
 def find_unique_magic_for_square(square, shift_value, trials=1_000_000):
     from random import randint

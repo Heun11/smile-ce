@@ -4,7 +4,7 @@
 # IMPORTANT
     -> ak to bude niekedy randomne hadzat seg fault, moze to byt isCheck (mozno tym ze som tam nemal ziadnych kingov xd)
 
-    -> OKAMZITE TREBA FIXNUT CHYBNE MASKY A TAK :D
+    -> spravit novu (peknu funkciu na printovanie boardy (s actual pieces))
 
 ### overall todo 
     [x] create basics
