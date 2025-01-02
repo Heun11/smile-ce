@@ -4,8 +4,6 @@
 # IMPORTANT
     -> ak to bude niekedy randomne hadzat seg fault, moze to byt isCheck (mozno tym ze som tam nemal ziadnych kingov xd)
 
-    -> spravit novu (peknu funkciu na printovanie boardy (s actual pieces))
-
 ### overall todo 
     [x] create basics
         [x] project setup
@@ -18,12 +16,16 @@
             [x] filter legal moves
             [x] actually move those pieces
             [x] capturing pieces
-        [] fancy moves 
+        [x] fancy moves 
             [x] en passant 
-            [] castle
-            [] promotion
-        [] winning (checkmate & stalemate)
+            [x] castle
+            [x] promotion (for queen only)
+        [] winning 
+            [] checkmate
+            [] stalemate
+            [] draw (only kings left ig)
     [] create engine
         [] setup code (try with random moves)
-        [] code basc minimax
-    [] polish
+        [] code basic minimax
+    [] optional
+        [] add suport for all promoting pieces

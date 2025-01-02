@@ -34,8 +34,8 @@ int main(void)
   tileset = LoadTexture("resources/chess.png");
   #endif
 
-  BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-  // BOARD_Board board = BOARD_SetupBoard("5B2/8/8/8/8/8/k7/K7 w");
+  // BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
+  BOARD_Board board = BOARD_SetupBoard("k7/4P3/8/8/8/8/4p3/K7 w");
   uint8_t result = 0;
 
   // debugging
