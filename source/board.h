@@ -27,6 +27,8 @@ typedef struct{
   BITBOARD_Bitboard white_pieces, black_pieces, all_pieces;
 }BOARD_BoardState;
 
+#define INDEX_WINNER 7
+#define INDEX_DRAW 6
 #define INDEX_ON_TURN 5
 #define INDEX_WIN 4
 #define INDEX_CCWK 3
@@ -39,8 +41,8 @@ typedef struct{
   // bools: kazdy bit je jeden bool (v takomto poradi, odhora dole) 
   // 0
   // b
-  // 0                7
-  // 0                6
+  // winner;          7
+  // draw;            6
   // onTurn;          5
   // win;             4
   // canCastleWK;     3

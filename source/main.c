@@ -36,7 +36,6 @@ int main(void)
 
   // BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
   BOARD_Board board = BOARD_SetupBoard("k7/4P3/8/8/8/8/4p3/K7 w");
-  uint8_t result = 0;
 
   // debugging
   // printf("isCheck = %d\n", BOARD_IsCheck(&board.board, 1));
@@ -51,22 +50,25 @@ int main(void)
     BeginDrawing();
     ClearBackground((Color){10,10,10,255});
 
-    // result = BOARD_IsGameEnd(&board, board.onTurn);
-    if(result==0){
+    printf("%d\n", board.bools);
+    if(UTIL_GetBoolFromBools(board.bools, INDEX_WIN)==0 && UTIL_GetBoolFromBools(board.bools, INDEX_DRAW)==0){
       BOARD_DrawBoard(&board, TS, TS);
       BOARD_PlayTurn(&board, TS, TS);
     }
     else{
-      if(result==1){
-        if(UTIL_GetBoolFromBools(board.bools, 5)){
-          DrawText("Black won by checkmate", TS, TS*2, TS/2, WHITE);
-        }
-        else{
+      if(UTIL_GetBoolFromBools(board.bools, INDEX_WIN)){
+        if(UTIL_GetBoolFromBools(board.bools, INDEX_WINNER)){
           DrawText("White won by checkmate", TS, TS*2, TS/2, WHITE);
         }
+        else{
+          DrawText("Black won by checkmate", TS, TS*2, TS/2, WHITE);
+        }
+      }
+      else if(UTIL_GetBoolFromBools(board.bools, INDEX_DRAW)){
+        DrawText("Game is Draw by stalemate", TS, TS*2, TS/2, WHITE);
       }
       else{
-        DrawText("Game is Draw by stalemate", TS, TS*2, TS/2, WHITE);
+        DrawText("wtf", TS, TS*2, TS/2, WHITE);
       }
     }
 

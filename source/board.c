@@ -125,7 +125,7 @@ BOARD_Board BOARD_SetupBoard(char* fen)
   board.selectedY = -1;
 
   board.enPassant = -1;
-  board.bools = 1<<4;
+  board.bools = 0;
   
   board.board.white_pawns=(BITBOARD_Bitboard){{0,0}}, board.board.white_rooks=(BITBOARD_Bitboard){{0,0}}, 
     board.board.white_knights=(BITBOARD_Bitboard){{0,0}}, board.board.white_bishops=(BITBOARD_Bitboard){{0,0}}, 
@@ -1078,16 +1078,36 @@ void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy)
               board->enPassant = -1;
             }
 
-            UTIL_SetBoolInBools(&board->bools, INDEX_ON_TURN, !isWhite);
+            isWhite = !isWhite;
+            UTIL_SetBoolInBools(&board->bools, INDEX_ON_TURN, isWhite);
             board->selectedX = board->selectedY = -1;
+
             BOARD_PrintPrettyBoard(&board->board);
-            printf("%s isCheck = %s\n", isWhite?"black":"white", BOARD_IsCheck(&board->board, isWhite
-              ?BITBOARD_CountTrailingZeros(&board->boardCopy.white_king)
-              :BITBOARD_CountTrailingZeros(&board->boardCopy.black_king), isWhite)?"true":"false");
+            printf("%s isCheck = %s\n", isWhite?"white":"black", BOARD_IsCheck(&board->board, isWhite
+              ?BITBOARD_CountTrailingZeros(&board->board.white_king)
+              :BITBOARD_CountTrailingZeros(&board->board.black_king), isWhite)?"true":"false");
             printf("%s Q%d K%d\n",isWhite?"white":"black", UTIL_GetBoolFromBools(board->bools, (isWhite)?INDEX_CCWQ:INDEX_CCBQ), 
               UTIL_GetBoolFromBools(board->bools, (isWhite)?INDEX_CCWK:INDEX_CCBK));
+
             BOARD_GeneratePseudoMoves(board);
             BOARD_FilterLegalMoves(board);
+
+            if(board->legalMoves.count==0){
+              if(BOARD_IsCheck(&board->board, isWhite?BITBOARD_CountTrailingZeros(&board->board.white_king)
+              :BITBOARD_CountTrailingZeros(&board->board.black_king), isWhite)){
+                // !isWhite vyhral checkmateom
+                printf("checkmate %d\n", isWhite);
+                UTIL_SetBoolInBools(&board->bools, INDEX_WIN, 1);
+                UTIL_SetBoolInBools(&board->bools, INDEX_WINNER, !isWhite);
+              }
+              else{
+                // stalemate
+                printf("stalemate\n");
+                UTIL_SetBoolInBools(&board->bools, INDEX_DRAW, 1);
+              }
+            }
+
+            
           }
         }
       }
