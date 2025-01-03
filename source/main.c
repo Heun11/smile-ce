@@ -50,26 +50,22 @@ int main(void)
     BeginDrawing();
     ClearBackground((Color){10,10,10,255});
 
-    printf("%d\n", board.bools);
-    if(UTIL_GetBoolFromBools(board.bools, INDEX_WIN)==0 && UTIL_GetBoolFromBools(board.bools, INDEX_DRAW)==0){
+    if(UTIL_GetBoolFromBools(board.bools, INDEX_GAME_END)==0){
       BOARD_DrawBoard(&board, TS, TS);
       BOARD_PlayTurn(&board, TS, TS);
     }
     else{
-      if(UTIL_GetBoolFromBools(board.bools, INDEX_WIN)){
-        if(UTIL_GetBoolFromBools(board.bools, INDEX_WINNER)){
+      if(UTIL_GetBoolFromBools(board.bools, INDEX_DRAW)){
+        DrawText("Game ended in Draw", TS, TS*2, TS/2, WHITE);
+      }
+      else{
+        if(UTIL_GetBoolFromBools(board.bools, INDEX_WIN)){
           DrawText("White won by checkmate", TS, TS*2, TS/2, WHITE);
         }
         else{
           DrawText("Black won by checkmate", TS, TS*2, TS/2, WHITE);
         }
-      }
-      else if(UTIL_GetBoolFromBools(board.bools, INDEX_DRAW)){
-        DrawText("Game is Draw by stalemate", TS, TS*2, TS/2, WHITE);
-      }
-      else{
-        DrawText("wtf", TS, TS*2, TS/2, WHITE);
-      }
+      } 
     }
 
     SetWindowTitle(TextFormat(":) - FPS:%d", GetFPS()));

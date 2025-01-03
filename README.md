@@ -9,7 +9,7 @@
         [x] project setup
         [x] render board
         [x] render pieces
-    [] create game of chess
+    [x] create game of chess
         [x] basic moving pieces
             [x] isCheck
             [x] generate pseudo legal moves
@@ -20,10 +20,10 @@
             [x] en passant 
             [x] castle
             [x] promotion (for queen only)
-        [] winning 
-            [] checkmate
-            [] stalemate
-            [] draw (only kings left ig)
+        [x] winning 
+            [x] checkmate
+            [x] stalemate
+            [x] draw (only kings left ig)
     [] create engine
         [] setup code (try with random moves)
         [] code basic minimax

@@ -1097,17 +1097,21 @@ void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy)
               :BITBOARD_CountTrailingZeros(&board->board.black_king), isWhite)){
                 // !isWhite vyhral checkmateom
                 printf("checkmate %d\n", isWhite);
-                UTIL_SetBoolInBools(&board->bools, INDEX_WIN, 1);
-                UTIL_SetBoolInBools(&board->bools, INDEX_WINNER, !isWhite);
+                UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
+                UTIL_SetBoolInBools(&board->bools, INDEX_WIN, !isWhite);
               }
               else{
                 // stalemate
                 printf("stalemate\n");
+                UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
                 UTIL_SetBoolInBools(&board->bools, INDEX_DRAW, 1);
               }
             }
-
-            
+            if(__builtin_popcount(board->board.all_pieces.half[0])+__builtin_popcount(board->board.all_pieces.half[1])==2){
+              // only kings left
+              UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
+              UTIL_SetBoolInBools(&board->bools, INDEX_DRAW, 1);
+            }
           }
         }
       }
