@@ -124,8 +124,8 @@ BOARD_Board BOARD_SetupBoard(char* fen)
   board.selectedX = -1;
   board.selectedY = -1;
 
-  board.enPassant = -1;
-  board.bools = 0;
+  board.board.enPassant = -1;
+  board.board.bools = 0;
   
   board.board.white_pawns=(BITBOARD_Bitboard){{0,0}}, board.board.white_rooks=(BITBOARD_Bitboard){{0,0}}, 
     board.board.white_knights=(BITBOARD_Bitboard){{0,0}}, board.board.white_bishops=(BITBOARD_Bitboard){{0,0}}, 
@@ -183,22 +183,22 @@ BOARD_Board BOARD_SetupBoard(char* fen)
   for(int i=setup_info;i<strlen(fen);i++){
     symbol = fen[i];
     if(symbol=='w'){
-      UTIL_SetBoolInBools(&board.bools, INDEX_ON_TURN, 1);
+      UTIL_SetBoolInBools(&board.board.bools, INDEX_ON_TURN, 1);
     }
     if(symbol=='b'){
-      UTIL_SetBoolInBools(&board.bools, INDEX_ON_TURN, 0);
+      UTIL_SetBoolInBools(&board.board.bools, INDEX_ON_TURN, 0);
     }
     if(symbol=='K'){
-      UTIL_SetBoolInBools(&board.bools, INDEX_CCWK, 1);
+      UTIL_SetBoolInBools(&board.board.bools, INDEX_CCWK, 1);
     }
     if(symbol=='Q'){
-      UTIL_SetBoolInBools(&board.bools, INDEX_CCWQ, 1);
+      UTIL_SetBoolInBools(&board.board.bools, INDEX_CCWQ, 1);
     }
     if(symbol=='k'){
-      UTIL_SetBoolInBools(&board.bools, INDEX_CCBK, 1);
+      UTIL_SetBoolInBools(&board.board.bools, INDEX_CCBK, 1);
     }
     if(symbol=='q'){
-      UTIL_SetBoolInBools(&board.bools, INDEX_CCBQ, 1);
+      UTIL_SetBoolInBools(&board.board.bools, INDEX_CCBQ, 1);
     }
   }
   
@@ -212,8 +212,8 @@ BOARD_Board BOARD_SetupBoard(char* fen)
   printf("Show Boards:\n\n");
   BOARD_PrintBitmaps(&board);
 
-  BOARD_GeneratePseudoMoves(&board);
-  BOARD_FilterLegalMoves(&board);
+  BOARD_GeneratePseudoMoves(&board.board);
+  BOARD_FilterLegalMoves(&board.board);
   
   return board;
 }
@@ -253,8 +253,8 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
       DrawText(TextFormat("%d", pos), offx+TS*col+TS*0.05, offy+TS*row+TS*0.05, TS*0.2, BLACK);
       #endif
 
-      for(uint8_t i=0;i<board->legalMoves.count;i++){
-       if(board->legalMoves.list[i].from==board->selectedY*8+board->selectedX && board->legalMoves.list[i].to==pos){
+      for(uint8_t i=0;i<board->board.legalMoves.count;i++){
+       if(board->board.legalMoves.list[i].from==board->selectedY*8+board->selectedX && board->board.legalMoves.list[i].to==pos){
           #if FANCY_BOARD
           if(isWhite){
             DrawTexturePro(tileset, (Rectangle){7*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
@@ -668,29 +668,29 @@ void BOARD_PrintMoves(BOARD_MoveList* moves)
   printf("\n");
 }
 
-void BOARD_InitBoardStateCopy(BOARD_Board* board)
+void BOARD_InitBoardStateCopy(BOARD_BoardState* board, BOARD_BoardState* boardCopy)
 {
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.all_pieces, &board->board.all_pieces);
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.white_pawns, &board->board.white_pawns);
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.white_knights, &board->board.white_knights);
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.white_bishops, &board->board.white_bishops);
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.white_rooks, &board->board.white_rooks);
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.white_queens, &board->board.white_queens);
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.white_king, &board->board.white_king);
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.black_pawns, &board->board.black_pawns);
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.black_knights, &board->board.black_knights);
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.black_bishops, &board->board.black_bishops);
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.black_rooks, &board->board.black_rooks);
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.black_queens, &board->board.black_queens);
-  BITBOARD_SetBitboardToBitboard(&board->boardCopy.black_king, &board->board.black_king);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->all_pieces, &board->all_pieces);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->white_pawns, &board->white_pawns);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->white_knights, &board->white_knights);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->white_bishops, &board->white_bishops);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->white_rooks, &board->white_rooks);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->white_queens, &board->white_queens);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->white_king, &board->white_king);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->black_pawns, &board->black_pawns);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->black_knights, &board->black_knights);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->black_bishops, &board->black_bishops);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->black_rooks, &board->black_rooks);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->black_queens, &board->black_queens);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->black_king, &board->black_king);
 }
 
-void BOARD_GeneratePseudoMoves_Pawn(BOARD_Board* board, uint8_t isWhite)
+void BOARD_GeneratePseudoMoves_Pawn(BOARD_BoardState* board, uint8_t isWhite)
 {
   uint8_t square, attackSquare;
   BITBOARD_Bitboard pawns, emptySquares, temp, push;
-  BITBOARD_SetBitboardToBitboard(&pawns, (isWhite)?(&board->board.white_pawns):(&board->board.black_pawns));
-  BITBOARD_BitwiseNOT(&emptySquares, &board->board.all_pieces);
+  BITBOARD_SetBitboardToBitboard(&pawns, (isWhite)?(&board->white_pawns):(&board->black_pawns));
+  BITBOARD_BitwiseNOT(&emptySquares, &board->all_pieces);
   
   while(BITBOARD_IsBitboardTrue(&pawns)){
     square = BITBOARD_CountTrailingZeros(&pawns);
@@ -726,7 +726,7 @@ void BOARD_GeneratePseudoMoves_Pawn(BOARD_Board* board, uint8_t isWhite)
 
     BITBOARD_SetBitboardToBitboard(&push, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
     BITBOARD_BitwiseAND(&push, 2, &BITBOARD_AttackMasks_pawn[isWhite?1:0][square], 
-      (isWhite)?(&board->board.black_pieces):(&board->board.white_pieces));
+      (isWhite)?(&board->black_pieces):(&board->white_pieces));
     while(BITBOARD_IsBitboardTrue(&push)){
       attackSquare = BITBOARD_CountTrailingZeros(&push);
       BITBOARD_SetBitboardToBitboard(&temp, &push);
@@ -746,12 +746,12 @@ void BOARD_GeneratePseudoMoves_Pawn(BOARD_Board* board, uint8_t isWhite)
   }
 }
 
-void BOARD_GeneratePseudoMoves_Knight(BOARD_Board* board, uint8_t isWhite)
+void BOARD_GeneratePseudoMoves_Knight(BOARD_BoardState* board, uint8_t isWhite)
 {
   uint8_t square, moveSquare;
   BITBOARD_Bitboard knights, emptySquares, temp, movesMask;
-  BITBOARD_SetBitboardToBitboard(&knights, isWhite?(&board->board.white_knights):(&board->board.black_knights));
-  BITBOARD_BitwiseNOT(&emptySquares, &board->board.all_pieces);
+  BITBOARD_SetBitboardToBitboard(&knights, isWhite?(&board->white_knights):(&board->black_knights));
+  BITBOARD_BitwiseNOT(&emptySquares, &board->all_pieces);
 
   while(BITBOARD_IsBitboardTrue(&knights)){
     square = BITBOARD_CountTrailingZeros(&knights);
@@ -760,7 +760,7 @@ void BOARD_GeneratePseudoMoves_Knight(BOARD_Board* board, uint8_t isWhite)
     BITBOARD_BitwiseAND(&knights, 1, &temp);
 
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0,0}});
-    BITBOARD_BitwiseOR(&temp, 2, &emptySquares, isWhite?(&board->board.black_pieces):(&board->board.white_pieces));
+    BITBOARD_BitwiseOR(&temp, 2, &emptySquares, isWhite?(&board->black_pieces):(&board->white_pieces));
     BITBOARD_SetBitboardToBitboard(&movesMask, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
     BITBOARD_BitwiseAND(&movesMask, 2, &temp, &BITBOARD_Masks_knight[square]);
     while(BITBOARD_IsBitboardTrue(&movesMask)){
@@ -774,12 +774,12 @@ void BOARD_GeneratePseudoMoves_Knight(BOARD_Board* board, uint8_t isWhite)
   }
 }
 
-void BOARD_GeneratePseudoMoves_Bishop(BOARD_Board* board, uint8_t isWhite)
+void BOARD_GeneratePseudoMoves_Bishop(BOARD_BoardState* board, uint8_t isWhite)
 {
   uint8_t square, moveSquare;
   BITBOARD_Bitboard bishops, emptySquares, temp, movesMask;
-  BITBOARD_SetBitboardToBitboard(&bishops, isWhite?(&board->board.white_bishops):(&board->board.black_bishops));
-  BITBOARD_BitwiseNOT(&emptySquares, &board->board.all_pieces);
+  BITBOARD_SetBitboardToBitboard(&bishops, isWhite?(&board->white_bishops):(&board->black_bishops));
+  BITBOARD_BitwiseNOT(&emptySquares, &board->all_pieces);
 
   while(BITBOARD_IsBitboardTrue(&bishops)){
     square = BITBOARD_CountTrailingZeros(&bishops);
@@ -787,9 +787,9 @@ void BOARD_GeneratePseudoMoves_Bishop(BOARD_Board* board, uint8_t isWhite)
     BITBOARD_Subtract(&temp, &temp, &(BITBOARD_Bitboard){{1,0}});
     BITBOARD_BitwiseAND(&bishops, 1, &temp);
 
-    BITBOARD_GetAttackMask_bishop(&temp, square, &board->board.all_pieces);
+    BITBOARD_GetAttackMask_bishop(&temp, square, &board->all_pieces);
     BITBOARD_SetBitboardToBitboard(&movesMask, &(BITBOARD_Bitboard){{0,0}});
-    BITBOARD_BitwiseOR(&movesMask, 2, &emptySquares, isWhite?(&board->board.black_pieces):(&board->board.white_pieces));
+    BITBOARD_BitwiseOR(&movesMask, 2, &emptySquares, isWhite?(&board->black_pieces):(&board->white_pieces));
     BITBOARD_BitwiseAND(&movesMask, 1, &temp);
     while(BITBOARD_IsBitboardTrue(&movesMask)){
       moveSquare = BITBOARD_CountTrailingZeros(&movesMask);
@@ -802,12 +802,12 @@ void BOARD_GeneratePseudoMoves_Bishop(BOARD_Board* board, uint8_t isWhite)
   }
 }
 
-void BOARD_GeneratePseudoMoves_Rook(BOARD_Board* board, uint8_t isWhite)
+void BOARD_GeneratePseudoMoves_Rook(BOARD_BoardState* board, uint8_t isWhite)
 {
   uint8_t square, moveSquare;
   BITBOARD_Bitboard rooks, emptySquares, temp, movesMask;
-  BITBOARD_SetBitboardToBitboard(&rooks, isWhite?(&board->board.white_rooks):(&board->board.black_rooks));
-  BITBOARD_BitwiseNOT(&emptySquares, &board->board.all_pieces);
+  BITBOARD_SetBitboardToBitboard(&rooks, isWhite?(&board->white_rooks):(&board->black_rooks));
+  BITBOARD_BitwiseNOT(&emptySquares, &board->all_pieces);
 
   while(BITBOARD_IsBitboardTrue(&rooks)){
     square = BITBOARD_CountTrailingZeros(&rooks);
@@ -815,9 +815,9 @@ void BOARD_GeneratePseudoMoves_Rook(BOARD_Board* board, uint8_t isWhite)
     BITBOARD_Subtract(&temp, &temp, &(BITBOARD_Bitboard){{1,0}});
     BITBOARD_BitwiseAND(&rooks, 1, &temp);
 
-    BITBOARD_GetAttackMask_rook(&temp, square, &board->board.all_pieces);
+    BITBOARD_GetAttackMask_rook(&temp, square, &board->all_pieces);
     BITBOARD_SetBitboardToBitboard(&movesMask, &(BITBOARD_Bitboard){{0,0}});
-    BITBOARD_BitwiseOR(&movesMask, 2, &emptySquares, isWhite?(&board->board.black_pieces):(&board->board.white_pieces));
+    BITBOARD_BitwiseOR(&movesMask, 2, &emptySquares, isWhite?(&board->black_pieces):(&board->white_pieces));
     BITBOARD_BitwiseAND(&movesMask, 1, &temp);
     while(BITBOARD_IsBitboardTrue(&movesMask)){
       moveSquare = BITBOARD_CountTrailingZeros(&movesMask);
@@ -830,12 +830,12 @@ void BOARD_GeneratePseudoMoves_Rook(BOARD_Board* board, uint8_t isWhite)
   }
 }
 
-void BOARD_GeneratePseudoMoves_Queen(BOARD_Board* board, uint8_t isWhite)
+void BOARD_GeneratePseudoMoves_Queen(BOARD_BoardState* board, uint8_t isWhite)
 {
   uint8_t square, moveSquare;
   BITBOARD_Bitboard queens, emptySquares, temp, movesMask;
-  BITBOARD_SetBitboardToBitboard(&queens, isWhite?(&board->board.white_queens):(&board->board.black_queens));
-  BITBOARD_BitwiseNOT(&emptySquares, &board->board.all_pieces);
+  BITBOARD_SetBitboardToBitboard(&queens, isWhite?(&board->white_queens):(&board->black_queens));
+  BITBOARD_BitwiseNOT(&emptySquares, &board->all_pieces);
 
   while(BITBOARD_IsBitboardTrue(&queens)){
     square = BITBOARD_CountTrailingZeros(&queens);
@@ -843,9 +843,9 @@ void BOARD_GeneratePseudoMoves_Queen(BOARD_Board* board, uint8_t isWhite)
     BITBOARD_Subtract(&temp, &temp, &(BITBOARD_Bitboard){{1,0}});
     BITBOARD_BitwiseAND(&queens, 1, &temp);
 
-    BITBOARD_GetAttackMask_rook(&temp, square, &board->board.all_pieces);
+    BITBOARD_GetAttackMask_rook(&temp, square, &board->all_pieces);
     BITBOARD_SetBitboardToBitboard(&movesMask, &(BITBOARD_Bitboard){{0,0}});
-    BITBOARD_BitwiseOR(&movesMask, 2, &emptySquares, isWhite?(&board->board.black_pieces):(&board->board.white_pieces));
+    BITBOARD_BitwiseOR(&movesMask, 2, &emptySquares, isWhite?(&board->black_pieces):(&board->white_pieces));
     BITBOARD_BitwiseAND(&movesMask, 1, &temp);
     while(BITBOARD_IsBitboardTrue(&movesMask)){
       moveSquare = BITBOARD_CountTrailingZeros(&movesMask);
@@ -856,9 +856,9 @@ void BOARD_GeneratePseudoMoves_Queen(BOARD_Board* board, uint8_t isWhite)
       BOARD_AddMove(&board->pseudoMoves, square, moveSquare, 0);
     }
 
-    BITBOARD_GetAttackMask_bishop(&temp, square, &board->board.all_pieces);
+    BITBOARD_GetAttackMask_bishop(&temp, square, &board->all_pieces);
     BITBOARD_SetBitboardToBitboard(&movesMask, &(BITBOARD_Bitboard){{0,0}});
-    BITBOARD_BitwiseOR(&movesMask, 2, &emptySquares, isWhite?(&board->board.black_pieces):(&board->board.white_pieces));
+    BITBOARD_BitwiseOR(&movesMask, 2, &emptySquares, isWhite?(&board->black_pieces):(&board->white_pieces));
     BITBOARD_BitwiseAND(&movesMask, 1, &temp);
     while(BITBOARD_IsBitboardTrue(&movesMask)){
       moveSquare = BITBOARD_CountTrailingZeros(&movesMask);
@@ -871,16 +871,16 @@ void BOARD_GeneratePseudoMoves_Queen(BOARD_Board* board, uint8_t isWhite)
   }
 }
 
-void BOARD_GeneratePseudoMoves_King(BOARD_Board* board, uint8_t isWhite)
+void BOARD_GeneratePseudoMoves_King(BOARD_BoardState* board, uint8_t isWhite)
 {
   uint8_t square, moveSquare;
   BITBOARD_Bitboard emptySquares, temp, movesMask;
-  BITBOARD_BitwiseNOT(&emptySquares, &board->board.all_pieces);
+  BITBOARD_BitwiseNOT(&emptySquares, &board->all_pieces);
 
   
-  square = BITBOARD_CountTrailingZeros(isWhite?(&board->board.white_king):(&board->board.black_king));
+  square = BITBOARD_CountTrailingZeros(isWhite?(&board->white_king):(&board->black_king));
   BITBOARD_SetBitboardToBitboard(&movesMask, &(BITBOARD_Bitboard){{0,0}});
-  BITBOARD_BitwiseOR(&movesMask, 2, &emptySquares, isWhite?(&board->board.black_pieces):(&board->board.white_pieces));
+  BITBOARD_BitwiseOR(&movesMask, 2, &emptySquares, isWhite?(&board->black_pieces):(&board->white_pieces));
   BITBOARD_BitwiseAND(&movesMask, 1, &BITBOARD_Masks_king[square]);
   while(BITBOARD_IsBitboardTrue(&movesMask)){
     moveSquare = BITBOARD_CountTrailingZeros(&movesMask);
@@ -892,83 +892,83 @@ void BOARD_GeneratePseudoMoves_King(BOARD_Board* board, uint8_t isWhite)
   }
 }
 
-void BOARD_GenerateCastlingMoves(BOARD_Board* board, uint8_t isWhite)
+void BOARD_GenerateCastlingMoves(BOARD_BoardState* board, uint8_t isWhite)
 {
   uint8_t kingsideRights = UTIL_GetBoolFromBools(board->bools, (isWhite)?INDEX_CCWK:INDEX_CCBK);
   uint8_t queensideRights = UTIL_GetBoolFromBools(board->bools, (isWhite)?INDEX_CCWQ:INDEX_CCBQ);
   uint8_t kingSquare;
 
   if(isWhite){
-    kingSquare = BITBOARD_CountTrailingZeros(&board->board.white_king);
+    kingSquare = BITBOARD_CountTrailingZeros(&board->white_king);
 
-    if(kingsideRights && !(BITBOARD_GetBit(&board->board.white_rooks, 63) && kingSquare==60)){
+    if(kingsideRights && !(BITBOARD_GetBit(&board->white_rooks, 63) && kingSquare==60)){
       UTIL_SetBoolInBools(&board->bools, INDEX_CCWK, 0);
       kingsideRights = 0;
     }
-    if(queensideRights && !(BITBOARD_GetBit(&board->board.white_rooks, 56) && kingSquare==60)){
+    if(queensideRights && !(BITBOARD_GetBit(&board->white_rooks, 56) && kingSquare==60)){
       UTIL_SetBoolInBools(&board->bools, INDEX_CCWQ, 0);
       queensideRights = 0;
     }
     
     if(kingsideRights){
-      if(!BITBOARD_GetBit(&board->board.all_pieces, kingSquare+1)
-      && !BITBOARD_GetBit(&board->board.all_pieces, kingSquare+2) 
-      && !BOARD_IsCheck(&board->board, kingSquare, isWhite) 
-      && !BOARD_IsCheck(&board->board, kingSquare+1, isWhite)
-      && !BOARD_IsCheck(&board->board, kingSquare+2, isWhite)){
+      if(!BITBOARD_GetBit(&board->all_pieces, kingSquare+1)
+      && !BITBOARD_GetBit(&board->all_pieces, kingSquare+2) 
+      && !BOARD_IsCheck(board, kingSquare, isWhite) 
+      && !BOARD_IsCheck(board, kingSquare+1, isWhite)
+      && !BOARD_IsCheck(board, kingSquare+2, isWhite)){
         BOARD_AddMove(&board->pseudoMoves, kingSquare, kingSquare+2, 0);
       }
     }
 
     if(queensideRights){
-      if(!BITBOARD_GetBit(&board->board.all_pieces, kingSquare-1)
-      && !BITBOARD_GetBit(&board->board.all_pieces, kingSquare-2) 
-      && !BITBOARD_GetBit(&board->board.all_pieces, kingSquare-3) 
-      && !BOARD_IsCheck(&board->board, kingSquare, isWhite) 
-      && !BOARD_IsCheck(&board->board, kingSquare-1, isWhite)
-      && !BOARD_IsCheck(&board->board, kingSquare-2, isWhite)
-      && !BOARD_IsCheck(&board->board, kingSquare-3, isWhite)){
+      if(!BITBOARD_GetBit(&board->all_pieces, kingSquare-1)
+      && !BITBOARD_GetBit(&board->all_pieces, kingSquare-2) 
+      && !BITBOARD_GetBit(&board->all_pieces, kingSquare-3) 
+      && !BOARD_IsCheck(board, kingSquare, isWhite) 
+      && !BOARD_IsCheck(board, kingSquare-1, isWhite)
+      && !BOARD_IsCheck(board, kingSquare-2, isWhite)
+      && !BOARD_IsCheck(board, kingSquare-3, isWhite)){
         BOARD_AddMove(&board->pseudoMoves, kingSquare, kingSquare-2, 0);
       }
     }
   }
   else{
-    kingSquare = BITBOARD_CountTrailingZeros(&board->board.black_king);
+    kingSquare = BITBOARD_CountTrailingZeros(&board->black_king);
 
-    if(kingsideRights && !(BITBOARD_GetBit(&board->board.black_rooks, 7) && kingSquare==4)){
+    if(kingsideRights && !(BITBOARD_GetBit(&board->black_rooks, 7) && kingSquare==4)){
       UTIL_SetBoolInBools(&board->bools, INDEX_CCBK, 0);
       kingsideRights = 0;
     }
-    if(queensideRights && !(BITBOARD_GetBit(&board->board.black_rooks, 0) && kingSquare==4)){
+    if(queensideRights && !(BITBOARD_GetBit(&board->black_rooks, 0) && kingSquare==4)){
       UTIL_SetBoolInBools(&board->bools, INDEX_CCBQ, 0);
       queensideRights = 0;
     }
 
     if(kingsideRights){
-      if(!BITBOARD_GetBit(&board->board.all_pieces, kingSquare+1)
-      && !BITBOARD_GetBit(&board->board.all_pieces, kingSquare+2) 
-      && !BOARD_IsCheck(&board->board, kingSquare, isWhite) 
-      && !BOARD_IsCheck(&board->board, kingSquare+1, isWhite)
-      && !BOARD_IsCheck(&board->board, kingSquare+2, isWhite)){
+      if(!BITBOARD_GetBit(&board->all_pieces, kingSquare+1)
+      && !BITBOARD_GetBit(&board->all_pieces, kingSquare+2) 
+      && !BOARD_IsCheck(board, kingSquare, isWhite) 
+      && !BOARD_IsCheck(board, kingSquare+1, isWhite)
+      && !BOARD_IsCheck(board, kingSquare+2, isWhite)){
         BOARD_AddMove(&board->pseudoMoves, kingSquare, kingSquare+2, 0);
       }
     }
 
     if(queensideRights){
-      if(!BITBOARD_GetBit(&board->board.all_pieces, kingSquare-1)
-      && !BITBOARD_GetBit(&board->board.all_pieces, kingSquare-2) 
-      && !BITBOARD_GetBit(&board->board.all_pieces, kingSquare-3) 
-      && !BOARD_IsCheck(&board->board, kingSquare, isWhite) 
-      && !BOARD_IsCheck(&board->board, kingSquare-1, isWhite)
-      && !BOARD_IsCheck(&board->board, kingSquare-2, isWhite)
-      && !BOARD_IsCheck(&board->board, kingSquare-3, isWhite)){
+      if(!BITBOARD_GetBit(&board->all_pieces, kingSquare-1)
+      && !BITBOARD_GetBit(&board->all_pieces, kingSquare-2) 
+      && !BITBOARD_GetBit(&board->all_pieces, kingSquare-3) 
+      && !BOARD_IsCheck(board, kingSquare, isWhite) 
+      && !BOARD_IsCheck(board, kingSquare-1, isWhite)
+      && !BOARD_IsCheck(board, kingSquare-2, isWhite)
+      && !BOARD_IsCheck(board, kingSquare-3, isWhite)){
         BOARD_AddMove(&board->pseudoMoves, kingSquare, kingSquare-2, 0);
       }
     }
   }
 }
 
-void BOARD_GeneratePseudoMoves(BOARD_Board* board)
+void BOARD_GeneratePseudoMoves(BOARD_BoardState* board)
 {
   uint8_t isWhite = UTIL_GetBoolFromBools(board->bools, INDEX_ON_TURN);
   board->pseudoMoves.count = 0;
@@ -983,12 +983,13 @@ void BOARD_GeneratePseudoMoves(BOARD_Board* board)
   BOARD_GenerateCastlingMoves(board, isWhite);
 }
 
-void BOARD_FilterLegalMoves(BOARD_Board* board)
+void BOARD_FilterLegalMoves(BOARD_BoardState* board)
 {
   board->legalMoves.count = 0;
   int8_t can=0, square=-1;
   uint8_t isWhite = UTIL_GetBoolFromBools(board->bools, INDEX_ON_TURN);
   int8_t kingSquare;
+  BOARD_BoardState boardCopy;
 
   for(uint8_t i=0;i<board->pseudoMoves.count;i++){
     if(can && square==board->pseudoMoves.list[i].from){
@@ -996,7 +997,7 @@ void BOARD_FilterLegalMoves(BOARD_Board* board)
       continue;
     }
     else if(square!=board->pseudoMoves.list[i].from){
-      BOARD_InitBoardStateCopy(board);
+      BOARD_InitBoardStateCopy(board, &boardCopy);
       square = board->pseudoMoves.list[i].from;
       
       BITBOARD_Bitboard pieceMask=(BITBOARD_Bitboard){{0,0}}, removeMask;
@@ -1004,34 +1005,34 @@ void BOARD_FilterLegalMoves(BOARD_Board* board)
       BITBOARD_Subtract(&removeMask, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &pieceMask);
 
       if(isWhite){
-        BITBOARD_BitwiseAND(&board->boardCopy.white_pieces, 1, &removeMask);
-        BITBOARD_BitwiseAND(&board->boardCopy.white_pawns, 1, &removeMask);
-        BITBOARD_BitwiseAND(&board->boardCopy.white_knights, 1, &removeMask);
-        BITBOARD_BitwiseAND(&board->boardCopy.white_bishops, 1, &removeMask);
-        BITBOARD_BitwiseAND(&board->boardCopy.white_rooks, 1, &removeMask);
-        BITBOARD_BitwiseAND(&board->boardCopy.white_queens, 1, &removeMask);
-        BITBOARD_BitwiseAND(&board->boardCopy.white_king, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.white_pieces, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.white_pawns, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.white_knights, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.white_bishops, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.white_rooks, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.white_queens, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.white_king, 1, &removeMask);
       }
       else{
-        BITBOARD_BitwiseAND(&board->boardCopy.black_pieces, 1, &removeMask);
-        BITBOARD_BitwiseAND(&board->boardCopy.black_pawns, 1, &removeMask);
-        BITBOARD_BitwiseAND(&board->boardCopy.black_knights, 1, &removeMask);
-        BITBOARD_BitwiseAND(&board->boardCopy.black_bishops, 1, &removeMask);
-        BITBOARD_BitwiseAND(&board->boardCopy.black_rooks, 1, &removeMask);
-        BITBOARD_BitwiseAND(&board->boardCopy.black_queens, 1, &removeMask);
-        BITBOARD_BitwiseAND(&board->boardCopy.black_king, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.black_pieces, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.black_pawns, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.black_knights, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.black_bishops, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.black_rooks, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.black_queens, 1, &removeMask);
+        BITBOARD_BitwiseAND(&boardCopy.black_king, 1, &removeMask);
       }
-      BITBOARD_BitwiseAND(&board->boardCopy.all_pieces, 1, &removeMask);
+      BITBOARD_BitwiseAND(&boardCopy.all_pieces, 1, &removeMask);
       
-      kingSquare = isWhite?BITBOARD_CountTrailingZeros(&board->boardCopy.white_king):BITBOARD_CountTrailingZeros(&board->boardCopy.black_king);
-      can = !BOARD_IsCheck(&board->boardCopy, kingSquare, isWhite); 
+      kingSquare = isWhite?BITBOARD_CountTrailingZeros(&boardCopy.white_king):BITBOARD_CountTrailingZeros(&boardCopy.black_king);
+      can = !BOARD_IsCheck(&boardCopy, kingSquare, isWhite); 
     }
 
-    BOARD_InitBoardStateCopy(board);
-    BOARD_MakeMove(&board->boardCopy, &board->pseudoMoves.list[i], isWhite, board->enPassant);
+    BOARD_InitBoardStateCopy(board, &boardCopy);
+    BOARD_MakeMove(&boardCopy, &board->pseudoMoves.list[i], isWhite, board->enPassant);
 
-    kingSquare = isWhite?BITBOARD_CountTrailingZeros(&board->boardCopy.white_king):BITBOARD_CountTrailingZeros(&board->boardCopy.black_king);
-    if(BOARD_IsCheck(&board->boardCopy, kingSquare, isWhite)==0){
+    kingSquare = isWhite?BITBOARD_CountTrailingZeros(&boardCopy.white_king):BITBOARD_CountTrailingZeros(&boardCopy.black_king);
+    if(BOARD_IsCheck(&boardCopy, kingSquare, isWhite)==0){
       BOARD_AddMove(&board->legalMoves, board->pseudoMoves.list[i].from, board->pseudoMoves.list[i].to, board->pseudoMoves.list[i].promotion);
     }
   }
@@ -1043,7 +1044,7 @@ void BOARD_FilterLegalMoves(BOARD_Board* board)
 
 void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy)
 {
-  uint8_t isWhite = UTIL_GetBoolFromBools(board->bools, INDEX_ON_TURN);
+  uint8_t isWhite = UTIL_GetBoolFromBools(board->board.bools, INDEX_ON_TURN);
   
   int mx = GetMouseX();
   int my = GetMouseY();
@@ -1056,61 +1057,62 @@ void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy)
     pos = py*8+px;
   }
 
+  BOARD_BoardState boardCopy;
 
   if(IsMouseButtonPressed(0)){
     // printf("x%d y%d\n", px, py);
     
     if(pos>=0){
       if(board->selectedX>=0 && board->selectedY>=0){
-        BOARD_InitBoardStateCopy(board);
+        BOARD_InitBoardStateCopy(&board->board, &boardCopy);
 
-        for(uint8_t i=0;i<board->legalMoves.count;i++){ 
-          if(board->legalMoves.list[i].from==(board->selectedY*8+board->selectedX) && board->legalMoves.list[i].to==pos){
+        for(uint8_t i=0;i<board->board.legalMoves.count;i++){ 
+          if(board->board.legalMoves.list[i].from==(board->selectedY*8+board->selectedX) && board->board.legalMoves.list[i].to==pos){
            
-            BOARD_MakeMove(&board->board, &board->legalMoves.list[i], isWhite, board->enPassant);
+            BOARD_MakeMove(&board->board, &board->board.legalMoves.list[i], isWhite, board->board.enPassant);
             
-            if(((isWhite && BITBOARD_GetBit(&board->boardCopy.white_pawns, board->legalMoves.list[i].from)==1) || 
-            (!isWhite && BITBOARD_GetBit(&board->boardCopy.black_pawns, board->legalMoves.list[i].from)==1)) &&
-            (abs(board->legalMoves.list[i].to-board->legalMoves.list[i].from)==16)){
-              board->enPassant = (board->legalMoves.list[i].to+board->legalMoves.list[i].from)/2;
+            if(((isWhite && BITBOARD_GetBit(&boardCopy.white_pawns, board->board.legalMoves.list[i].from)==1) || 
+            (!isWhite && BITBOARD_GetBit(&boardCopy.black_pawns, board->board.legalMoves.list[i].from)==1)) &&
+            (abs(board->board.legalMoves.list[i].to-board->board.legalMoves.list[i].from)==16)){
+              board->board.enPassant = (board->board.legalMoves.list[i].to+board->board.legalMoves.list[i].from)/2;
             }
             else{
-              board->enPassant = -1;
+              board->board.enPassant = -1;
             }
 
             isWhite = !isWhite;
-            UTIL_SetBoolInBools(&board->bools, INDEX_ON_TURN, isWhite);
+            UTIL_SetBoolInBools(&board->board.bools, INDEX_ON_TURN, isWhite);
             board->selectedX = board->selectedY = -1;
 
             BOARD_PrintPrettyBoard(&board->board);
             printf("%s isCheck = %s\n", isWhite?"white":"black", BOARD_IsCheck(&board->board, isWhite
               ?BITBOARD_CountTrailingZeros(&board->board.white_king)
               :BITBOARD_CountTrailingZeros(&board->board.black_king), isWhite)?"true":"false");
-            printf("%s Q%d K%d\n",isWhite?"white":"black", UTIL_GetBoolFromBools(board->bools, (isWhite)?INDEX_CCWQ:INDEX_CCBQ), 
-              UTIL_GetBoolFromBools(board->bools, (isWhite)?INDEX_CCWK:INDEX_CCBK));
+            printf("%s Q%d K%d\n",isWhite?"white":"black", UTIL_GetBoolFromBools(board->board.bools, (isWhite)?INDEX_CCWQ:INDEX_CCBQ), 
+              UTIL_GetBoolFromBools(board->board.bools, (isWhite)?INDEX_CCWK:INDEX_CCBK));
 
-            BOARD_GeneratePseudoMoves(board);
-            BOARD_FilterLegalMoves(board);
+            BOARD_GeneratePseudoMoves(&board->board);
+            BOARD_FilterLegalMoves(&board->board);
 
-            if(board->legalMoves.count==0){
+            if(board->board.legalMoves.count==0){
               if(BOARD_IsCheck(&board->board, isWhite?BITBOARD_CountTrailingZeros(&board->board.white_king)
               :BITBOARD_CountTrailingZeros(&board->board.black_king), isWhite)){
                 // !isWhite vyhral checkmateom
                 printf("checkmate %d\n", isWhite);
-                UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
-                UTIL_SetBoolInBools(&board->bools, INDEX_WIN, !isWhite);
+                UTIL_SetBoolInBools(&board->board.bools, INDEX_GAME_END, 1);
+                UTIL_SetBoolInBools(&board->board.bools, INDEX_WIN, !isWhite);
               }
               else{
                 // stalemate
                 printf("stalemate\n");
-                UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
-                UTIL_SetBoolInBools(&board->bools, INDEX_DRAW, 1);
+                UTIL_SetBoolInBools(&board->board.bools, INDEX_GAME_END, 1);
+                UTIL_SetBoolInBools(&board->board.bools, INDEX_DRAW, 1);
               }
             }
-            if(__builtin_popcount(board->board.all_pieces.half[0])+__builtin_popcount(board->board.all_pieces.half[1])==2){
+            else if(__builtin_popcount(board->board.all_pieces.half[0])+__builtin_popcount(board->board.all_pieces.half[1])==2){
               // only kings left
-              UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
-              UTIL_SetBoolInBools(&board->bools, INDEX_DRAW, 1);
+              UTIL_SetBoolInBools(&board->board.bools, INDEX_GAME_END, 1);
+              UTIL_SetBoolInBools(&board->board.bools, INDEX_DRAW, 1);
             }
           }
         }
