@@ -23,8 +23,14 @@ uint8_t ENGINE_EvaluatePosition(BOARD_BoardState* board)
   return white_count-black_count; 
 }
 
-uint8_t ENGINE_Minimax(BOARD_BoardState* board, uint8_t depth, uint8_t isWhite, uint8_t legalMovesCount)
+uint8_t ENGINE_Minimax(BOARD_BoardState* board, uint8_t depth, uint8_t isWhite)
 {
+  BOARD_BoardState boardCopy;
+  BOARD_InitBoardStateCopy(board, &boardCopy);
+
+  BOARD_GeneratePseudoMoves(&boardCopy);
+  BOARD_FilterLegalMoves(&boardCopy);
+
   return 0;
 }
 
@@ -33,6 +39,8 @@ uint8_t ENGINE_FindBestMove(BOARD_Board* board, uint8_t depth, uint8_t isWhite)
   uint8_t bestMove;
   int16_t bestScore = (isWhite)?-10000:10000; 
 
+  ENGINE_Minimax(&board->board, depth, isWhite);
+  
   return 0;
 }
 
@@ -44,7 +52,7 @@ void ENGINE_PlayTurn(BOARD_Board* board, uint8_t depth)
   BOARD_InitBoardStateCopy(&board->board, &boardCopy);
   
   uint8_t i = ENGINE_FindBestMove(board, depth, isWhite);
-  BOARD_MakeMove(&board->board, &board->board.legalMoves.list[i], isWhite, board->board.enPassant);
+  BOARD_MakeMove(&board->board, &board->board.legalMoves.list[i], isWhite);
   
   if(((isWhite && BITBOARD_GetBit(&boardCopy.white_pawns, board->board.legalMoves.list[i].from)==1) || 
   (!isWhite && BITBOARD_GetBit(&boardCopy.black_pawns, board->board.legalMoves.list[i].from)==1)) &&

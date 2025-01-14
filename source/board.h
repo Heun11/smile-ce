@@ -74,7 +74,8 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy);
 uint8_t BOARD_IsCheck(BOARD_BoardState* board, int8_t square, uint8_t isWhite);
 
 void BOARD_AddMove(BOARD_MoveList* moves, int8_t from, int8_t to, int8_t promotion);
-void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite, int8_t enPassant);
+void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite);
+void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite);
 void BOARD_PrintMoves(BOARD_MoveList* moves);
 void BOARD_InitBoardStateCopy(BOARD_BoardState* board, BOARD_BoardState* boardCopy);
 

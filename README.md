@@ -25,7 +25,10 @@
             [x] stalemate
             [x] draw (only kings left ig)
     [] create engine
-        [] setup code (try with random moves)
-        [] code basic minimax
+        [x] setup code (try with random moves)
+        [] code minimax
+            [] make undoMove function
+            [] implement basic minimax
+            [] implement alpha beta pruning
     [] optional
         [] add suport for all promoting pieces
