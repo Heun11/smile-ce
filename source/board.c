@@ -218,12 +218,12 @@ BOARD_Board BOARD_SetupBoard(char* fen)
   return board;
 }
 
-void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy)
+void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
 {
   uint8_t row, col;
   uint8_t pos;
   #if FANCY_BOARD
-  uint8_t isWhite = UTIL_GetBoolFromBools(board->bools, INDEX_ON_TURN);
+  uint8_t isWhite = UTIL_GetBoolFromBools(*bools, INDEX_ON_TURN);
   #endif
 
   for(row=0;row<8;row++){
@@ -705,7 +705,6 @@ void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
       BITBOARD_BitwiseOR(&board->white_queens, 1, &moveMask);
 
       if(move->to<=7){
-        printf("undo toto dofaka\n");
         BITBOARD_BitwiseAND(&board->white_queens, 1, &removeFrom);
         BITBOARD_BitwiseOR(&board->white_pawns, 1, &moveMask);
       }
@@ -718,21 +717,21 @@ void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
 
       if(move->from==60 && move->to==62){
         // kingside
-        BITBOARD_BitwiseAND(&board->white_rooks, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0x7FFFFFFF}});
-        BITBOARD_BitwiseAND(&board->white_pieces, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0x7FFFFFFF}});
-        BITBOARD_BitwiseAND(&board->all_pieces, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0x7FFFFFFF}});
-        BITBOARD_BitwiseOR(&board->white_rooks, 1, &(BITBOARD_Bitboard){{0,0x20000000}});
-        BITBOARD_BitwiseOR(&board->white_pieces, 1, &(BITBOARD_Bitboard){{0,0x20000000}});
-        BITBOARD_BitwiseOR(&board->all_pieces, 1, &(BITBOARD_Bitboard){{0,0x20000000}});
+        BITBOARD_BitwiseAND(&board->white_rooks, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xDFFFFFFF}});
+        BITBOARD_BitwiseAND(&board->white_pieces, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xDFFFFFFF}});
+        BITBOARD_BitwiseAND(&board->all_pieces, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xDFFFFFFF}});
+        BITBOARD_BitwiseOR(&board->white_rooks, 1, &(BITBOARD_Bitboard){{0,0x80000000}});
+        BITBOARD_BitwiseOR(&board->white_pieces, 1, &(BITBOARD_Bitboard){{0,0x80000000}});
+        BITBOARD_BitwiseOR(&board->all_pieces, 1, &(BITBOARD_Bitboard){{0,0x80000000}});
       }
       if(move->from==60 && move->to==58){
         // queenside 
-        BITBOARD_BitwiseAND(&board->white_rooks, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFEFFFFFF}});
-        BITBOARD_BitwiseAND(&board->white_pieces, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFEFFFFFF}});
-        BITBOARD_BitwiseAND(&board->all_pieces, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFEFFFFFF}});
-        BITBOARD_BitwiseOR(&board->white_rooks, 1, &(BITBOARD_Bitboard){{0,0x08000000}});
-        BITBOARD_BitwiseOR(&board->white_pieces, 1, &(BITBOARD_Bitboard){{0,0x08000000}});
-        BITBOARD_BitwiseOR(&board->all_pieces, 1, &(BITBOARD_Bitboard){{0,0x08000000}});
+        BITBOARD_BitwiseAND(&board->white_rooks, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xF7FFFFFF}});
+        BITBOARD_BitwiseAND(&board->white_pieces, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xF7FFFFFF}});
+        BITBOARD_BitwiseAND(&board->all_pieces, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xF7FFFFFF}});
+        BITBOARD_BitwiseOR(&board->white_rooks, 1, &(BITBOARD_Bitboard){{0,0x01000000}});
+        BITBOARD_BitwiseOR(&board->white_pieces, 1, &(BITBOARD_Bitboard){{0,0x01000000}});
+        BITBOARD_BitwiseOR(&board->all_pieces, 1, &(BITBOARD_Bitboard){{0,0x01000000}});
       }
     }
     BITBOARD_BitwiseAND(&board->white_pieces, 1, &removeMask);

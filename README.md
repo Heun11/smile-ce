@@ -27,7 +27,12 @@
     [] create engine
         [x] setup code (try with random moves)
         [] code minimax
-            [] make undoMove function
+            [] make undoMove function (needed for a minimax [probably])
+                [x] basic moves
+                [x] promotions
+                [x] castle
+                [] capture
+                [] everything for black as well
             [] implement basic minimax
             [] implement alpha beta pruning
     [] optional

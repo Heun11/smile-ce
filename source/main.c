@@ -37,7 +37,7 @@ int main(void)
   #endif
 
   // BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-  BOARD_Board board = BOARD_SetupBoard("8/4P3/8/8/k7/8/6P1/4K2R w K");
+  BOARD_Board board = BOARD_SetupBoard("8/4P3/8/1k6/4B3/6N1/4p3/R3K2R w KQ");
 
   uint8_t playerColor = 1;
 
@@ -46,7 +46,7 @@ int main(void)
     ClearBackground((Color){10,10,10,255});
 
     if(UTIL_GetBoolFromBools(board.board.bools, INDEX_GAME_END)==0){
-      BOARD_DrawBoard(&board, TS, TS);
+      BOARD_DrawBoard(&board, TS, TS, &board.board.bools);
       if(UTIL_GetBoolFromBools(board.board.bools, INDEX_ON_TURN)==playerColor){
         BOARD_PlayTurn(&board, TS, TS);
       }

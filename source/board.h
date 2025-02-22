@@ -69,7 +69,7 @@ void BOARD_PrintPrettyBoard(BOARD_BoardState* board);
 void BOARD_PrintBitmaps(BOARD_Board* board);
 
 BOARD_Board BOARD_SetupBoard(char* fen);
-void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy);
+void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools);
 
 uint8_t BOARD_IsCheck(BOARD_BoardState* board, int8_t square, uint8_t isWhite);
 
