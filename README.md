@@ -32,10 +32,13 @@
                 [x] promotions
                 [x] castle
                 [x] capture
+                [] capture en passanta skusit 
+                [x] niekedy sa stane ze sa zmena neprejavi v all_pieces 
+                    (ked capturnes tak z all_pieces sa vymaze to co si capturol)
                 [] everything for black as well
                     [] basic moves
-                    [] promotions
-                    [] castle
+                    [x] promotions
+                    [x] castle
                     [x] capture
             [] implement basic minimax
             [] implement alpha beta pruning
