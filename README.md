@@ -31,8 +31,12 @@
                 [x] basic moves
                 [x] promotions
                 [x] castle
-                [] capture
+                [x] capture
                 [] everything for black as well
+                    [] basic moves
+                    [] promotions
+                    [] castle
+                    [x] capture
             [] implement basic minimax
             [] implement alpha beta pruning
     [] optional

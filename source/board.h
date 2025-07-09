@@ -53,6 +53,8 @@ typedef struct{
   BITBOARD_Bitboard white_pawns, white_rooks, white_knights, white_bishops, white_queens, white_king;
   BITBOARD_Bitboard black_pawns, black_rooks, black_knights, black_bishops, black_queens, black_king;
   BITBOARD_Bitboard white_pieces, black_pieces, all_pieces;
+
+  BITBOARD_Bitboard* capturedPiece;
 }BOARD_BoardState;
 
 typedef struct{

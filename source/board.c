@@ -208,6 +208,8 @@ BOARD_Board BOARD_SetupBoard(char* fen)
     &board.board.black_knights, &board.board.black_bishops, &board.board.black_queens, &board.board.black_king);
   BITBOARD_BitwiseOR(&board.board.all_pieces, 2, &board.board.white_pieces, &board.board.black_pieces);
 
+  board.board.capturedPiece = NULL;
+
   // printing board
   printf("Show Boards:\n\n");
   BOARD_PrintBitmaps(&board);
@@ -559,13 +561,38 @@ void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
     BITBOARD_BitwiseOR(&board->white_pieces, 1, &moveMask);
 
     BITBOARD_Subtract(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &moveMask);
-    BITBOARD_BitwiseAND(&board->black_pieces, 1, &temp);
-    BITBOARD_BitwiseAND(&board->black_pawns, 1, &temp);
-    BITBOARD_BitwiseAND(&board->black_knights, 1, &temp);
-    BITBOARD_BitwiseAND(&board->black_bishops, 1, &temp);
-    BITBOARD_BitwiseAND(&board->black_rooks, 1, &temp);
-    BITBOARD_BitwiseAND(&board->black_queens, 1, &temp);
-    BITBOARD_BitwiseAND(&board->black_king, 1, &temp);
+
+    if(BITBOARD_GetBit(&board->black_pieces, move->to)){
+      BITBOARD_BitwiseAND(&board->black_pieces, 1, &temp);
+
+      if(BITBOARD_GetBit(&board->black_pawns, move->to)){
+        BITBOARD_BitwiseAND(&board->black_pawns, 1, &temp);
+        board->capturedPiece = &board->black_pawns;
+      }
+      else if(BITBOARD_GetBit(&board->black_knights, move->to)){
+        BITBOARD_BitwiseAND(&board->black_knights, 1, &temp);
+        board->capturedPiece = &board->black_knights;
+      }
+      else if(BITBOARD_GetBit(&board->black_bishops, move->to)){
+        BITBOARD_BitwiseAND(&board->black_bishops, 1, &temp);
+        board->capturedPiece = &board->black_bishops;
+      }
+      else if(BITBOARD_GetBit(&board->black_rooks, move->to)){
+        BITBOARD_BitwiseAND(&board->black_rooks, 1, &temp);
+        board->capturedPiece = &board->black_rooks;
+      }
+      else if(BITBOARD_GetBit(&board->black_queens, move->to)){
+        BITBOARD_BitwiseAND(&board->black_queens, 1, &temp);
+        board->capturedPiece = &board->black_queens;
+      }
+      else{
+        BITBOARD_BitwiseAND(&board->black_king, 1, &temp);
+        board->capturedPiece = &board->black_king;
+      }
+    } 
+    else{
+      board->capturedPiece = NULL;
+    }
   } 
   else{
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
@@ -642,13 +669,38 @@ void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
     BITBOARD_BitwiseOR(&board->black_pieces, 1, &moveMask);
     
     BITBOARD_Subtract(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &moveMask);
-    BITBOARD_BitwiseAND(&board->white_pieces, 1, &temp);
-    BITBOARD_BitwiseAND(&board->white_pawns, 1, &temp);
-    BITBOARD_BitwiseAND(&board->white_knights, 1, &temp);
-    BITBOARD_BitwiseAND(&board->white_bishops, 1, &temp);
-    BITBOARD_BitwiseAND(&board->white_rooks, 1, &temp);
-    BITBOARD_BitwiseAND(&board->white_queens, 1, &temp);
-    BITBOARD_BitwiseAND(&board->white_king, 1, &temp);
+
+    if(BITBOARD_GetBit(&board->white_pieces, move->to)){
+      BITBOARD_BitwiseAND(&board->white_pieces, 1, &temp);
+
+      if(BITBOARD_GetBit(&board->white_pawns, move->to)){
+        BITBOARD_BitwiseAND(&board->white_pawns, 1, &temp);
+        board->capturedPiece = &board->white_pawns;
+      }
+      else if(BITBOARD_GetBit(&board->white_knights, move->to)){
+        BITBOARD_BitwiseAND(&board->white_knights, 1, &temp);
+        board->capturedPiece = &board->white_knights;
+      }
+      else if(BITBOARD_GetBit(&board->white_bishops, move->to)){
+        BITBOARD_BitwiseAND(&board->white_bishops, 1, &temp);
+        board->capturedPiece = &board->white_bishops;
+      }
+      else if(BITBOARD_GetBit(&board->white_rooks, move->to)){
+        BITBOARD_BitwiseAND(&board->white_rooks, 1, &temp);
+        board->capturedPiece = &board->white_rooks;
+      }
+      else if(BITBOARD_GetBit(&board->white_queens, move->to)){
+        BITBOARD_BitwiseAND(&board->white_queens, 1, &temp);
+        board->capturedPiece = &board->white_queens;
+      }
+      else{
+        BITBOARD_BitwiseAND(&board->white_king, 1, &temp);
+        board->capturedPiece = &board->white_king;
+      }
+    } 
+    else{
+      board->capturedPiece = NULL;
+    }
   }
   BITBOARD_BitwiseAND(&board->all_pieces, 1, &removeMask);
   BITBOARD_BitwiseOR(&board->all_pieces, 1, &moveMask);
@@ -737,14 +789,12 @@ void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
     BITBOARD_BitwiseAND(&board->white_pieces, 1, &removeMask);
     BITBOARD_BitwiseOR(&board->white_pieces, 1, &moveMask);
 
-    BITBOARD_Subtract(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &moveMask);
-    BITBOARD_BitwiseAND(&board->black_pieces, 1, &temp);
-    BITBOARD_BitwiseAND(&board->black_pawns, 1, &temp);
-    BITBOARD_BitwiseAND(&board->black_knights, 1, &temp);
-    BITBOARD_BitwiseAND(&board->black_bishops, 1, &temp);
-    BITBOARD_BitwiseAND(&board->black_rooks, 1, &temp);
-    BITBOARD_BitwiseAND(&board->black_queens, 1, &temp);
-    BITBOARD_BitwiseAND(&board->black_king, 1, &temp);
+    if(board->capturedPiece!=NULL){
+      temp=(BITBOARD_Bitboard){{1,0}};
+      BITBOARD_LeftShift(&temp, &(BITBOARD_Bitboard){{0x1,0x0}}, move->to);
+      BITBOARD_BitwiseOR(&board->black_pieces, 1, &temp);
+      BITBOARD_BitwiseOR(board->capturedPiece, 1, &temp);
+    }
   } 
   else{
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
@@ -798,14 +848,16 @@ void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
       BITBOARD_BitwiseAND(&board->black_king, 1, &removeMask);
       BITBOARD_BitwiseOR(&board->black_king, 1, &moveMask);
 
+      // SNAZIM SA REVERTNUT CASTLE ALE FAKT NEVIEM AKO 😭
+
       if(move->from==4 && move->to==6){
         // kingside
-        BITBOARD_BitwiseAND(&board->black_rooks, 1, &(BITBOARD_Bitboard){{0xFFFFFF7F,0xFFFFFFFF}});
-        BITBOARD_BitwiseAND(&board->black_pieces, 1, &(BITBOARD_Bitboard){{0xFFFFFF7F,0xFFFFFFFF}});
-        BITBOARD_BitwiseAND(&board->all_pieces, 1, &(BITBOARD_Bitboard){{0xFFFFFF7F,0xFFFFFFFF}});
-        BITBOARD_BitwiseOR(&board->black_rooks, 1, &(BITBOARD_Bitboard){{0x00000020,0}});
-        BITBOARD_BitwiseOR(&board->black_pieces, 1, &(BITBOARD_Bitboard){{0x00000020,0}});
-        BITBOARD_BitwiseOR(&board->all_pieces, 1, &(BITBOARD_Bitboard){{0x00000020,0}});
+        BITBOARD_BitwiseAND(&board->black_rooks, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFDF}});
+        BITBOARD_BitwiseAND(&board->black_pieces, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFDF}});
+        BITBOARD_BitwiseAND(&board->all_pieces, 1, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFDF}});
+        // BITBOARD_BitwiseOR(&board->black_rooks, 1, &(BITBOARD_Bitboard){{0x1,0}});
+        // BITBOARD_BitwiseOR(&board->black_pieces, 1, &(BITBOARD_Bitboard){{0x1,0}});
+        // BITBOARD_BitwiseOR(&board->all_pieces, 1, &(BITBOARD_Bitboard){{0x1,0}});
       }
       if(move->from==4 && move->to==2){
         // queenside 
@@ -820,16 +872,13 @@ void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
     BITBOARD_BitwiseAND(&board->black_pieces, 1, &removeMask);
     BITBOARD_BitwiseOR(&board->black_pieces, 1, &moveMask);
     
-    BITBOARD_Subtract(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &moveMask);
-    BITBOARD_BitwiseAND(&board->white_pieces, 1, &temp);
-    BITBOARD_BitwiseAND(&board->white_pawns, 1, &temp);
-    BITBOARD_BitwiseAND(&board->white_knights, 1, &temp);
-    BITBOARD_BitwiseAND(&board->white_bishops, 1, &temp);
-    BITBOARD_BitwiseAND(&board->white_rooks, 1, &temp);
-    BITBOARD_BitwiseAND(&board->white_queens, 1, &temp);
-    BITBOARD_BitwiseAND(&board->white_king, 1, &temp);
+    if(board->capturedPiece!=NULL){
+      temp=(BITBOARD_Bitboard){{1,0}};
+      BITBOARD_LeftShift(&temp, &(BITBOARD_Bitboard){{0x1,0x0}}, move->to);
+      BITBOARD_BitwiseOR(&board->white_pieces, 1, &temp);
+      BITBOARD_BitwiseOR(board->capturedPiece, 1, &temp);
+    }
   }
-  BITBOARD_BitwiseAND(&board->all_pieces, 1, &removeMask);
   BITBOARD_BitwiseOR(&board->all_pieces, 1, &moveMask);
 }
 
@@ -1249,6 +1298,7 @@ void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy)
           if(board->board.legalMoves.list[i].from==(board->selectedY*8+board->selectedX) && board->board.legalMoves.list[i].to==pos){
            
             BOARD_MakeMove(&board->board, &board->board.legalMoves.list[i], isWhite);
+            printf("sasovsky capture %d\n", board->board.capturedPiece==NULL);
             BOARD_UndoMove(&board->board, &board->board.legalMoves.list[i], isWhite);
 
             if(((isWhite && BITBOARD_GetBit(&boardCopy.white_pawns, board->board.legalMoves.list[i].from)==1) || 
