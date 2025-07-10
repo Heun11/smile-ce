@@ -124,7 +124,8 @@ BOARD_Board BOARD_SetupBoard(char* fen)
   board.selectedX = -1;
   board.selectedY = -1;
 
-  board.board.enPassant = -1;
+  board.board.enPassant[0] = -1;
+  board.board.enPassant[1] = -1;
   board.board.bools = 0;
   
   board.board.white_pawns=(BITBOARD_Bitboard){{0,0}}, board.board.white_rooks=(BITBOARD_Bitboard){{0,0}}, 
@@ -499,8 +500,8 @@ void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
         BITBOARD_BitwiseOR(&board->white_pawns, 1, &moveMask);
       }
 
-      if(move->to==board->enPassant){
-        BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, board->enPassant+8);
+      if(move->to==board->enPassant[isWhite]){
+        BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, board->enPassant[isWhite]+8);
         BITBOARD_Subtract(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &pieceMask);
         BITBOARD_BitwiseAND(&board->all_pieces, 1, &temp);
         BITBOARD_BitwiseAND(&board->black_pieces, 1, &temp);
@@ -606,8 +607,8 @@ void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
         BITBOARD_BitwiseOR(&board->black_pawns, 1, &moveMask);
       }
 
-      if(move->to==board->enPassant){
-        BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, board->enPassant-8);
+      if(move->to==board->enPassant[isWhite]){
+        BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, board->enPassant[isWhite]-8);
         BITBOARD_Subtract(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &pieceMask);
         BITBOARD_BitwiseAND(&board->all_pieces, 1, &temp);
         BITBOARD_BitwiseAND(&board->white_pieces, 1, &temp);
@@ -722,12 +723,11 @@ void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
       BITBOARD_BitwiseAND(&board->white_pawns, 1, &removeMask);
       BITBOARD_BitwiseOR(&board->white_pawns, 1, &moveMask);
 
-      if(move->to==board->enPassant){
-        BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, board->enPassant+8);
-        BITBOARD_Subtract(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &pieceMask);
-        BITBOARD_BitwiseAND(&board->all_pieces, 1, &temp);
-        BITBOARD_BitwiseAND(&board->black_pieces, 1, &temp);
-        BITBOARD_BitwiseAND(&board->black_pawns, 1, &temp);
+      if(move->to==board->enPassant[isWhite]){
+        BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, board->enPassant[isWhite]+8);
+        BITBOARD_BitwiseOR(&board->all_pieces, 1, &pieceMask);
+        BITBOARD_BitwiseOR(&board->black_pieces, 1, &pieceMask);
+        BITBOARD_BitwiseOR(&board->black_pawns, 1, &pieceMask);
       }
     }
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
@@ -801,12 +801,11 @@ void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
       BITBOARD_BitwiseAND(&board->black_pawns, 1, &removeMask);
       BITBOARD_BitwiseOR(&board->black_pawns, 1, &moveMask);
 
-      if(move->to==board->enPassant){
-        BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, board->enPassant-8);
-        BITBOARD_Subtract(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}}, &pieceMask);
-        BITBOARD_BitwiseAND(&board->all_pieces, 1, &temp);
-        BITBOARD_BitwiseAND(&board->white_pieces, 1, &temp);
-        BITBOARD_BitwiseAND(&board->white_pawns, 1, &temp);
+      if(move->to==board->enPassant[isWhite]){
+        BITBOARD_LeftShift(&pieceMask, &(BITBOARD_Bitboard){{1,0}}, board->enPassant[isWhite]-8);
+        BITBOARD_BitwiseOR(&board->all_pieces, 1, &pieceMask);
+        BITBOARD_BitwiseOR(&board->white_pieces, 1, &pieceMask);
+        BITBOARD_BitwiseOR(&board->white_pawns, 1, &pieceMask);
       }
     }
     
@@ -963,11 +962,11 @@ void BOARD_GeneratePseudoMoves_Pawn(BOARD_BoardState* board, uint8_t isWhite)
       BOARD_AddMove(&board->pseudoMoves, square, attackSquare, 0);
     }
 
-    if(board->enPassant>=0){
-      BITBOARD_LeftShift(&temp, &(BITBOARD_Bitboard){{1,0}}, board->enPassant);
+    if(board->enPassant[isWhite]>=0){
+      BITBOARD_LeftShift(&temp, &(BITBOARD_Bitboard){{1,0}}, board->enPassant[isWhite]);
       BITBOARD_BitwiseAND(&temp, 1, &BITBOARD_AttackMasks_pawn[isWhite?1:0][square]);
       if(BITBOARD_IsBitboardTrue(&temp)){
-        BOARD_AddMove(&board->pseudoMoves, square, board->enPassant, 0);
+        BOARD_AddMove(&board->pseudoMoves, square, board->enPassant[isWhite], 0);
       }
     }
   }
@@ -1297,16 +1296,23 @@ void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy)
           if(board->board.legalMoves.list[i].from==(board->selectedY*8+board->selectedX) && board->board.legalMoves.list[i].to==pos){
            
             BOARD_MakeMove(&board->board, &board->board.legalMoves.list[i], isWhite);
-            BOARD_UndoMove(&board->board, &board->board.legalMoves.list[i], isWhite);
-            BOARD_PrintBitmaps(board);
+            // BOARD_UndoMove(&board->board, &board->board.legalMoves.list[i], isWhite);
+            // BOARD_PrintBitmaps(board);
+            // if(isWhite){
+            //   BOARD_UndoMove(&board->board, &board->board.legalMoves.list[i], isWhite);
+            //   BOARD_PrintBitmaps(board);
+            //   isWhite = !isWhite;
+            // }
 
             if(((isWhite && BITBOARD_GetBit(&boardCopy.white_pawns, board->board.legalMoves.list[i].from)==1) || 
             (!isWhite && BITBOARD_GetBit(&boardCopy.black_pawns, board->board.legalMoves.list[i].from)==1)) &&
             (abs(board->board.legalMoves.list[i].to-board->board.legalMoves.list[i].from)==16)){
-              board->board.enPassant = (board->board.legalMoves.list[i].to+board->board.legalMoves.list[i].from)/2;
+              board->board.enPassant[!isWhite] = (board->board.legalMoves.list[i].to+board->board.legalMoves.list[i].from)/2;
+              printf("teraz to nastavujem pre %s\n", !isWhite?"white":"black");
             }
             else{
-              board->board.enPassant = -1;
+              board->board.enPassant[isWhite] = -1;
+              printf("teraz to vygumujem pre %s\n", isWhite?"white":"black");
             }
 
             isWhite = !isWhite;

@@ -57,10 +57,10 @@ void ENGINE_PlayTurn(BOARD_Board* board, uint8_t depth)
   if(((isWhite && BITBOARD_GetBit(&boardCopy.white_pawns, board->board.legalMoves.list[i].from)==1) || 
   (!isWhite && BITBOARD_GetBit(&boardCopy.black_pawns, board->board.legalMoves.list[i].from)==1)) &&
   (abs(board->board.legalMoves.list[i].to-board->board.legalMoves.list[i].from)==16)){
-    board->board.enPassant = (board->board.legalMoves.list[i].to+board->board.legalMoves.list[i].from)/2;
+    board->board.enPassant[!isWhite] = (board->board.legalMoves.list[i].to+board->board.legalMoves.list[i].from)/2;
   }
   else{
-    board->board.enPassant = -1;
+    board->board.enPassant[isWhite] = -1;
   }
 
   isWhite = !isWhite;

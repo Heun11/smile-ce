@@ -39,9 +39,9 @@ int main(void)
   // BOARD_Board board = BOARD_SetupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
   // BOARD_Board board = BOARD_SetupBoard("8/4P3/8/1k6/4B3/6N1/4n3/R3K2R w KQ");
   // BOARD_Board board = BOARD_SetupBoard("r3k2r/r3P3/6n1/4b3/1K6/8/4p3/8 b kq");
-  BOARD_Board board = BOARD_SetupBoard("r3k2r/r7/6n1/4b3/1K6/8/4p3/P7 b kq");
+  BOARD_Board board = BOARD_SetupBoard("7k/8/8/8/1p6/8/P7/7K b");
 
-  uint8_t playerColor = 0;
+  uint8_t playerColor = 1;
 
   while (!WindowShouldClose()){
     BeginDrawing();
@@ -53,7 +53,8 @@ int main(void)
         BOARD_PlayTurn(&board, TS, TS);
       }
       else{
-        ENGINE_PlayTurn(&board, 4);
+        // ENGINE_PlayTurn(&board, 4);
+        BOARD_PlayTurn(&board, TS, TS);
       }
     }
     else{

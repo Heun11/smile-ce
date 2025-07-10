@@ -46,15 +46,14 @@ typedef struct{
   BOARD_MoveList pseudoMoves;
   BOARD_MoveList legalMoves;
 
-  int8_t enPassant;
+  int8_t enPassant[2];
+  BITBOARD_Bitboard* capturedPiece;
   
   // (info)                        (high) 1 | 0 (low)
   // 0b 11111111 11111111 00000000 00000000 | 00000000 00000000 11111111 11111111
   BITBOARD_Bitboard white_pawns, white_rooks, white_knights, white_bishops, white_queens, white_king;
   BITBOARD_Bitboard black_pawns, black_rooks, black_knights, black_bishops, black_queens, black_king;
   BITBOARD_Bitboard white_pieces, black_pieces, all_pieces;
-
-  BITBOARD_Bitboard* capturedPiece;
 }BOARD_BoardState;
 
 typedef struct{

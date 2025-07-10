@@ -27,19 +27,20 @@
     [] create engine
         [x] setup code (try with random moves)
         [] code minimax
-            [] make undoMove function (needed for a minimax [probably])
+            [x] make undoMove function (needed for a minimax [probably]) - should be working :D
                 [x] basic moves
                 [x] promotions
                 [x] castle
                 [x] capture
-                [] capture en passanta skusit 
                 [x] niekedy sa stane ze sa zmena neprejavi v all_pieces 
                     (ked capturnes tak z all_pieces sa vymaze to co si capturol)
-                [] everything for black as well
-                    [] basic moves
+                [x] everything for black as well
+                    [x] basic moves
                     [x] promotions
                     [x] castle
                     [x] capture
+                [x] capture en passant
+                    [x] vpodstate ked odvratis en passanta tak uz sa neda spravit :D
             [] implement basic minimax
             [] implement alpha beta pruning
     [] optional
