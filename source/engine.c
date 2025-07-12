@@ -4,7 +4,7 @@
 #include "util.h"
 #include <stdint.h>
 
-uint8_t ENGINE_EvaluatePosition(BOARD_BoardState* board)
+int8_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
 {
   int8_t black_count = 0, white_count = 0;
 
@@ -23,35 +23,72 @@ uint8_t ENGINE_EvaluatePosition(BOARD_BoardState* board)
   return white_count-black_count; 
 }
 
-uint8_t ENGINE_Minimax(BOARD_BoardState* board, uint8_t depth, uint8_t isWhite)
+uint8_t ENGINE_Minimax(BOARD_BoardState *board,  uint8_t depth, uint8_t isWhite, uint8_t *bestMove)
 {
-  BOARD_BoardState boardCopy;
-  BOARD_InitBoardStateCopy(board, &boardCopy);
+  if(depth==ENGINE_DEPTH || BOARD_IsGameEnded(board, isWhite)){
+    return ENGINE_EvaluatePosition(board);
+  }
 
-  BOARD_GeneratePseudoMoves(&boardCopy);
-  BOARD_FilterLegalMoves(&boardCopy);
-
-  return 0;
-}
-
-uint8_t ENGINE_FindBestMove(BOARD_Board* board, uint8_t depth, uint8_t isWhite)
-{
-  uint8_t bestMove;
-  int16_t bestScore = (isWhite)?-10000:10000; 
-
-  ENGINE_Minimax(&board->board, depth, isWhite);
+  BOARD_MoveList pseudoMoves, legalMoves;
+  BOARD_GeneratePseudoMoves(board, &pseudoMoves);
+  BOARD_FilterLegalMoves(board, &pseudoMoves, &legalMoves);
   
-  return 0;
+  if(isWhite){ // maximizing player
+    int16_t maxEval, eval;
+    maxEval = -0x8000; 
+    for(uint8_t i=0;i<legalMoves.count;i++){
+      BOARD_MakeMove(board, &legalMoves.list[i], isWhite);
+      eval = ENGINE_Minimax(board, depth+1, false, bestMove);
+      BOARD_UndoMove(board, &legalMoves.list[i], isWhite);
+      // maxEval = UTIL_Max_int16(maxEval, eval);
+      if(eval>maxEval){
+        maxEval = eval;
+        if(depth==0){
+          *bestMove = i;
+        }
+      }
+    }
+    return maxEval;
+  }
+  else{ // minimizing player
+    int16_t minEval, eval;
+    minEval = 0x8000; 
+    for(uint8_t i=0;i<legalMoves.count;i++){
+      BOARD_MakeMove(board, &legalMoves.list[i], isWhite);
+      eval = ENGINE_Minimax(board, depth+1, true, bestMove);
+      BOARD_UndoMove(board, &legalMoves.list[i], isWhite);
+      // minEval = UTIL_Min_int16(minEval, eval);
+      if(eval<minEval){
+        minEval = eval;
+        if(depth==0){
+          *bestMove = i;
+        }
+      }
+    }
+    return minEval;
+  }
 }
 
-void ENGINE_PlayTurn(BOARD_Board* board, uint8_t depth)
+uint8_t ENGINE_FindBestMove(BOARD_Board *board, uint8_t isWhite)
+{
+  uint8_t bestMove = 0;
+  
+  BOARD_BoardState boardCopy;
+  BOARD_InitBoardStateCopy(&board->board, &boardCopy);
+
+  ENGINE_Minimax(&board->board, 0, isWhite, &bestMove);
+  
+  return bestMove;
+}
+
+void ENGINE_PlayTurn(BOARD_Board *board)
 {
   uint8_t isWhite = UTIL_GetBoolFromBools(board->board.bools, INDEX_ON_TURN);
   
   BOARD_BoardState boardCopy; 
   BOARD_InitBoardStateCopy(&board->board, &boardCopy);
   
-  uint8_t i = ENGINE_FindBestMove(board, depth, isWhite);
+  uint8_t i = ENGINE_FindBestMove(board, isWhite);
   BOARD_MakeMove(&board->board, &board->board.legalMoves.list[i], isWhite);
   
   if(((isWhite && BITBOARD_GetBit(&boardCopy.white_pawns, board->board.legalMoves.list[i].from)==1) || 
@@ -74,29 +111,10 @@ void ENGINE_PlayTurn(BOARD_Board* board, uint8_t depth)
   printf("%s Q%d K%d\n",isWhite?"white":"black", UTIL_GetBoolFromBools(board->board.bools, (isWhite)?INDEX_CCWQ:INDEX_CCBQ), 
     UTIL_GetBoolFromBools(board->board.bools, (isWhite)?INDEX_CCWK:INDEX_CCBK));
 
-  BOARD_GeneratePseudoMoves(&board->board);
-  BOARD_FilterLegalMoves(&board->board);
+  BOARD_GeneratePseudoMoves(&board->board, &board->board.pseudoMoves);
+  BOARD_FilterLegalMoves(&board->board, &board->board.pseudoMoves, &board->board.legalMoves);
 
-  if(board->board.legalMoves.count==0){
-    if(BOARD_IsCheck(&board->board, isWhite?BITBOARD_CountTrailingZeros(&board->board.white_king)
-    :BITBOARD_CountTrailingZeros(&board->board.black_king), isWhite)){
-      // !isWhite vyhral checkmateom
-      printf("checkmate %d\n", isWhite);
-      UTIL_SetBoolInBools(&board->board.bools, INDEX_GAME_END, 1);
-      UTIL_SetBoolInBools(&board->board.bools, INDEX_WIN, !isWhite);
-    }
-    else{
-      // stalemate
-      printf("stalemate\n");
-      UTIL_SetBoolInBools(&board->board.bools, INDEX_GAME_END, 1);
-      UTIL_SetBoolInBools(&board->board.bools, INDEX_DRAW, 1);
-    }
-  }
-  else if(__builtin_popcount(board->board.all_pieces.half[0])+__builtin_popcount(board->board.all_pieces.half[1])==2){
-    // only kings left
-    UTIL_SetBoolInBools(&board->board.bools, INDEX_GAME_END, 1);
-    UTIL_SetBoolInBools(&board->board.bools, INDEX_DRAW, 1);
-  }
+  BOARD_IsGameEnded(&board->board, isWhite);
 }
 
 

@@ -80,15 +80,16 @@ void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite);
 void BOARD_PrintMoves(BOARD_MoveList* moves);
 void BOARD_InitBoardStateCopy(BOARD_BoardState* board, BOARD_BoardState* boardCopy);
 
-void BOARD_GeneratePseudoMoves_Pawn(BOARD_BoardState* board, uint8_t isWhite);
-void BOARD_GeneratePseudoMoves_Knight(BOARD_BoardState* board, uint8_t isWhite);
-void BOARD_GeneratePseudoMoves_Bishop(BOARD_BoardState* board, uint8_t isWhite);
-void BOARD_GeneratePseudoMoves_Rook(BOARD_BoardState* board, uint8_t isWhite);
-void BOARD_GeneratePseudoMoves_Queen(BOARD_BoardState* board, uint8_t isWhite);
-void BOARD_GeneratePseudoMoves_King(BOARD_BoardState* board, uint8_t isWhite);
-void BOARD_GenerateCastlingMoves(BOARD_BoardState* board, uint8_t isWhite);
-void BOARD_GeneratePseudoMoves(BOARD_BoardState* board);
-void BOARD_FilterLegalMoves(BOARD_BoardState* board);
+void BOARD_GeneratePseudoMoves_Pawn(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* pseudoMoves);
+void BOARD_GeneratePseudoMoves_Knight(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* pseudoMoves);
+void BOARD_GeneratePseudoMoves_Bishop(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* pseudoMoves);
+void BOARD_GeneratePseudoMoves_Rook(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* pseudoMoves);
+void BOARD_GeneratePseudoMoves_Queen(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* pseudoMoves);
+void BOARD_GeneratePseudoMoves_King(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* pseudoMoves);
+void BOARD_GenerateCastlingPseudoMoves(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* pseudoMoves);
+void BOARD_GeneratePseudoMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves);
+void BOARD_FilterLegalMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves, BOARD_MoveList* legalMoves);
+uint8_t BOARD_IsGameEnded(BOARD_BoardState* board, uint8_t isWhite);
 
 void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy);
 

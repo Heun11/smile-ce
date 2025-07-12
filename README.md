@@ -45,3 +45,10 @@
             [] implement alpha beta pruning
     [] optional
         [] add suport for all promoting pieces
+
+### ideas for optimalization for future
+    [] make BOARD_Move smaller by storing it all in uint16_t and then use masking and bitshifts to use 
+        6bits for "from", 6bits for "to" and remaining 4 to store the "promotion"
+    [] maybe even replace BOARD_Move with like whole bitmap which would represent all possible moves for given piece  
+    
+

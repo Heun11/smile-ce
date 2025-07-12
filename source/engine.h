@@ -6,11 +6,13 @@
 // rook 5
 // queen 9
 
+#define ENGINE_DEPTH 4
+
 #include "board.h"
 #include <stdint.h>
 
-uint8_t ENGINE_EvaluatePosition(BOARD_BoardState* board);
+int8_t ENGINE_EvaluatePosition(BOARD_BoardState *board);
 
-void ENGINE_PlayTurn(BOARD_Board* board, uint8_t depth);
+void ENGINE_PlayTurn(BOARD_Board *board);
 
 #endif
