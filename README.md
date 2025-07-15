@@ -4,6 +4,9 @@
 # IMPORTANT
     -> ak to bude niekedy randomne hadzat seg fault, moze to byt isCheck (mozno tym ze som tam nemal ziadnych kingov xd)
 
+    -> zatial to vyzera ze chyba je sice ze make move a undo move ale deje sa preto lebo dostane tah ktory je nelegalny z nejakeho dovodu
+    -> do buducna board->bools moze robit castling problemy v minimaxe
+
 ### overall todo 
     [x] create basics
         [x] project setup
@@ -42,6 +45,8 @@
                 [x] capture en passant
                     [x] vpodstate ked odvratis en passanta tak uz sa neda spravit :D
             [] implement basic minimax
+                [] opravit co sa posiera v undoMove :D
+                    [] capture
             [] implement alpha beta pruning
     [] optional
         [] add suport for all promoting pieces

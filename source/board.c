@@ -33,7 +33,7 @@ void BOARD_PrintPrettyBoard(BOARD_BoardState* board)
   printf("\n");
 }
 
-void BOARD_PrintBitmaps(BOARD_Board* board)
+void BOARD_PrintBitmaps(BOARD_BoardState* board)
 {
   // P R N
   // B Q K
@@ -43,13 +43,13 @@ void BOARD_PrintBitmaps(BOARD_Board* board)
   printf("PAWNS:                  ROOKS:                  KNIGHTS:        \n");
   for(int8_t i=0;i<8;i++){
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.white_pawns, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->white_pawns, i*8+j)?'1':'-');
     }printf("\t");
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.white_rooks, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->white_rooks, i*8+j)?'1':'-');
     }printf("\t");
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.white_knights, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->white_knights, i*8+j)?'1':'-');
     }
     printf("\n");
   }
@@ -57,13 +57,13 @@ void BOARD_PrintBitmaps(BOARD_Board* board)
   printf("BISHOPS:                QUEENS:                 KING:         \n");
   for(int8_t i=0;i<8;i++){
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.white_bishops, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->white_bishops, i*8+j)?'1':'-');
     }printf("\t");
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.white_queens, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->white_queens, i*8+j)?'1':'-');
     }printf("\t");
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.white_king, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->white_king, i*8+j)?'1':'-');
     }
     printf("\n");
   }
@@ -73,13 +73,13 @@ void BOARD_PrintBitmaps(BOARD_Board* board)
   printf("PAWNS:                  ROOKS:                  KNIGHTS:        \n");
   for(int8_t i=0;i<8;i++){
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.black_pawns, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->black_pawns, i*8+j)?'1':'-');
     }printf("\t");
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.black_rooks, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->black_rooks, i*8+j)?'1':'-');
     }printf("\t");
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.black_knights, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->black_knights, i*8+j)?'1':'-');
     }
     printf("\n");
   }
@@ -87,13 +87,13 @@ void BOARD_PrintBitmaps(BOARD_Board* board)
   printf("BISHOPS:                QUEENS:                 KING:         \n");
   for(int8_t i=0;i<8;i++){
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.black_bishops, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->black_bishops, i*8+j)?'1':'-');
     }printf("\t");
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.black_queens, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->black_queens, i*8+j)?'1':'-');
     }printf("\t");
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.black_king, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->black_king, i*8+j)?'1':'-');
     }
     printf("\n");
   }
@@ -103,13 +103,13 @@ void BOARD_PrintBitmaps(BOARD_Board* board)
   printf("WHITE:                  BLACK:                  ALL:        \n");
   for(int8_t i=0;i<8;i++){
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.white_pieces, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->white_pieces, i*8+j)?'1':'-');
     }printf("\t");
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.black_pieces, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->black_pieces, i*8+j)?'1':'-');
     }printf("\t");
     for(uint8_t j=0;j<8;j++){
-      printf("%c ", BITBOARD_GetBit(&board->board.all_pieces, i*8+j)?'1':'-');
+      printf("%c ", BITBOARD_GetBit(&board->all_pieces, i*8+j)?'1':'-');
     }
     printf("\n");
   }
@@ -213,10 +213,10 @@ BOARD_Board BOARD_SetupBoard(char* fen)
 
   // printing board
   printf("Show Boards:\n\n");
-  BOARD_PrintBitmaps(&board);
+  BOARD_PrintBitmaps(&board.board);
 
-  BOARD_GeneratePseudoMoves(&board.board, &board.board.pseudoMoves);
-  BOARD_FilterLegalMoves(&board.board, &board.board.pseudoMoves, &board.board.legalMoves);
+  BOARD_GeneratePseudoMoves(&board.board, &board.board.pseudoMoves, UTIL_GetBoolFromBools(board.board.bools, INDEX_ON_TURN));
+  BOARD_FilterLegalMoves(&board.board, &board.board.pseudoMoves, &board.board.legalMoves, UTIL_GetBoolFromBools(board.board.bools, INDEX_ON_TURN));
   
   return board;
 }
@@ -226,7 +226,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
   uint8_t row, col;
   uint8_t pos;
   #if FANCY_BOARD
-  uint8_t isWhite = UTIL_GetBoolFromBools(*bools, INDEX_ON_TURN);
+  // uint8_t isWhite = UTIL_GetBoolFromBools(*bools, INDEX_ON_TURN);
   #endif
 
   for(row=0;row<8;row++){
@@ -274,7 +274,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
       }
 
       if(pos==board->selectedY*8+board->selectedX){
-        DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){100, 0, 0, 100});
+        DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){100, 100, 0, 100});
       }
       
       if(BITBOARD_GetBit(&board->board.all_pieces, pos)){
@@ -287,7 +287,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
             (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
           #endif
         }
-        if(BITBOARD_GetBit(&board->board.white_rooks, pos)){
+        else if(BITBOARD_GetBit(&board->board.white_rooks, pos)){
           #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){1*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
@@ -296,7 +296,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
             (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
           #endif
         }
-        if(BITBOARD_GetBit(&board->board.white_knights, pos)){
+        else if(BITBOARD_GetBit(&board->board.white_knights, pos)){
           #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){2*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
@@ -305,7 +305,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
             (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
           #endif
         }
-        if(BITBOARD_GetBit(&board->board.white_bishops, pos)){
+        else if(BITBOARD_GetBit(&board->board.white_bishops, pos)){
           #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){3*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
@@ -314,7 +314,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
             (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
           #endif
         }
-        if(BITBOARD_GetBit(&board->board.white_queens, pos)){
+        else if(BITBOARD_GetBit(&board->board.white_queens, pos)){
           #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){4*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
@@ -323,7 +323,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
             (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
           #endif
         }
-        if(BITBOARD_GetBit(&board->board.white_king, pos)){
+        else if(BITBOARD_GetBit(&board->board.white_king, pos)){
           #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){5*TILE_REAL_W, 0*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
@@ -333,7 +333,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
           #endif
         }
         
-        if(BITBOARD_GetBit(&board->board.black_pawns, pos)){
+        else if(BITBOARD_GetBit(&board->board.black_pawns, pos)){
           #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){0*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
@@ -342,7 +342,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
             (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
           #endif
         }
-        if(BITBOARD_GetBit(&board->board.black_rooks, pos)){
+        else if(BITBOARD_GetBit(&board->board.black_rooks, pos)){
           #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){1*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
@@ -351,7 +351,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
             (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
           #endif
         }
-        if(BITBOARD_GetBit(&board->board.black_knights, pos)){
+        else if(BITBOARD_GetBit(&board->board.black_knights, pos)){
           #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){2*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
@@ -360,7 +360,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
             (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
           #endif
         }
-        if(BITBOARD_GetBit(&board->board.black_bishops, pos)){
+        else if(BITBOARD_GetBit(&board->board.black_bishops, pos)){
           #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){3*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
@@ -369,7 +369,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
             (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
           #endif
         }
-        if(BITBOARD_GetBit(&board->board.black_queens, pos)){
+        else if(BITBOARD_GetBit(&board->board.black_queens, pos)){
           #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){4*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
@@ -378,7 +378,7 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
             (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
           #endif
         }
-        if(BITBOARD_GetBit(&board->board.black_king, pos)){
+        else if(BITBOARD_GetBit(&board->board.black_king, pos)){
           #if FANCY_BOARD
           DrawTexturePro(tileset, (Rectangle){5*TILE_REAL_W, 1*TILE_REAL_H, TILE_REAL_W, TILE_REAL_H}, 
             (Rectangle){offx+TS*col, offy+TS*row-TS*0.623, TS, TS*1.3125}, (Vector2){0,0}, 0, RAYWHITE);
@@ -386,6 +386,9 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
           DrawTexturePro(tileset, (Rectangle){5*TILE_REAL, 1*TILE_REAL, TILE_REAL, TILE_REAL}, 
             (Rectangle){offx+TS*col, offy+TS*row, TS, TS}, (Vector2){0,0}, 0, RAYWHITE);
           #endif
+        }
+        else{
+          DrawCircle(offx+TS*col+TS*0.5, offy+TS*row+TS*0.5, TS*0.5, YELLOW);
         }
       }
     }
@@ -487,7 +490,7 @@ void BOARD_MakeMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
   BITBOARD_LeftShift(&pieceMask, &temp, move->from);
   BITBOARD_LeftShift(&moveMask, &temp, move->to);
   BITBOARD_BitwiseNOT(&removeMask, &pieceMask);
- 
+
   if(isWhite){
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
     BITBOARD_BitwiseAND(&temp, 2, &pieceMask, &board->white_pawns);
@@ -715,7 +718,11 @@ void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
   BITBOARD_LeftShift(&moveMask, &temp, move->from);
   BITBOARD_BitwiseNOT(&removeMask, &pieceMask);
   BITBOARD_BitwiseNOT(&removeFrom, &moveMask);
- 
+
+  // printf("undo from %d to %d | capturedPiece=%p | isWhite=%d\n", move->from, move->to, board->capturedPiece, isWhite);
+  // BITBOARD_Print(&removeMask);
+  // BITBOARD_Print(&board->black_pieces);
+
   if(isWhite){
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
     BITBOARD_BitwiseAND(&temp, 2, &pieceMask, &board->white_pawns);
@@ -757,6 +764,7 @@ void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
       if(move->to<=7){
         BITBOARD_BitwiseAND(&board->white_queens, 1, &removeFrom);
         BITBOARD_BitwiseOR(&board->white_pawns, 1, &moveMask);
+        // printf("ano marek mas pravdu\n");
       }
     }
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
@@ -837,6 +845,7 @@ void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
       if(move->to>=56){
         BITBOARD_BitwiseAND(&board->black_queens, 1, &removeFrom);
         BITBOARD_BitwiseOR(&board->black_pawns, 1, &moveMask);
+        // printf("ano marek mas pravdu\n");
       }
     }
     BITBOARD_SetBitboardToBitboard(&temp, &(BITBOARD_Bitboard){{0xFFFFFFFF,0xFFFFFFFF}});
@@ -878,6 +887,8 @@ void BOARD_UndoMove(BOARD_BoardState* board, BOARD_Move* move, uint8_t isWhite)
     BITBOARD_BitwiseAND(&board->all_pieces, 1, &removeMask);
   }
   BITBOARD_BitwiseOR(&board->all_pieces, 1, &moveMask);
+  
+  // BITBOARD_Print(&board->black_pieces);
 }
 
 void BOARD_PrintMoves(BOARD_MoveList* moves)
@@ -920,6 +931,7 @@ void BOARD_InitBoardStateCopy(BOARD_BoardState* board, BOARD_BoardState* boardCo
   boardCopy->enPassant[0] = board->enPassant[0];
   boardCopy->enPassant[1] = board->enPassant[1];
   // BITBOARD_Bitboard* capturedPiece; // -> na toto zatial kakam - dufam ze to nebude treba xd
+  boardCopy->capturedPiece = board->capturedPiece;
 }
 
 void BOARD_GeneratePseudoMoves_Pawn(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* pseudoMoves)
@@ -1205,10 +1217,9 @@ void BOARD_GenerateCastlingPseudoMoves(BOARD_BoardState* board, uint8_t isWhite,
   }
 }
 
-void BOARD_GeneratePseudoMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves)
+void BOARD_GeneratePseudoMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves, uint8_t isWhite)
 {
-  uint8_t isWhite = UTIL_GetBoolFromBools(board->bools, INDEX_ON_TURN);
-  board->pseudoMoves.count = 0;
+  pseudoMoves->count = 0;
 
   // generate moves for all all_pieces
   BOARD_GeneratePseudoMoves_Pawn(board, isWhite, pseudoMoves);
@@ -1220,17 +1231,23 @@ void BOARD_GeneratePseudoMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMo
   BOARD_GenerateCastlingPseudoMoves(board, isWhite, pseudoMoves);
 }
 
-void BOARD_FilterLegalMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves, BOARD_MoveList* legalMoves)
+void BOARD_FilterLegalMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves, BOARD_MoveList* legalMoves, uint8_t isWhite)
 {
   legalMoves->count = 0;
   int8_t can=0, square=-1;
-  uint8_t isWhite = UTIL_GetBoolFromBools(board->bools, INDEX_ON_TURN);
   int8_t kingSquare;
   BOARD_BoardState boardCopy;
 
+  // printf("FILTER LEGAL MOVES\n\n");
+
   for(uint8_t i=0;i<pseudoMoves->count;i++){
+    if(pseudoMoves->list[i].from==pseudoMoves->list[i].to){
+      continue;
+    }
     if(can && square==pseudoMoves->list[i].from){
       BOARD_AddMove(legalMoves, pseudoMoves->list[i].from, pseudoMoves->list[i].to, pseudoMoves->list[i].promotion);
+      // printf("prva: move added to legal moves: from %d to %d isWhite=%d\n", pseudoMoves->list[i].from, pseudoMoves->list[i].to, isWhite);
+      // BOARD_PrintBitmaps(board);
       continue;
     }
     else if(square!=pseudoMoves->list[i].from){
@@ -1268,35 +1285,50 @@ void BOARD_FilterLegalMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves
     BOARD_InitBoardStateCopy(board, &boardCopy);
     BOARD_MakeMove(&boardCopy, &pseudoMoves->list[i], isWhite);
 
+    // hlbsia diagnostika ukazala error presne tu :D
     kingSquare = isWhite?BITBOARD_CountTrailingZeros(&boardCopy.white_king):BITBOARD_CountTrailingZeros(&boardCopy.black_king);
     if(BOARD_IsCheck(&boardCopy, kingSquare, isWhite)==0){
       BOARD_AddMove(legalMoves, pseudoMoves->list[i].from, pseudoMoves->list[i].to, pseudoMoves->list[i].promotion);
+      // printf("druha: move added to legal moves: from %d to %d isWhite=%d\n", pseudoMoves->list[i].from, pseudoMoves->list[i].to, isWhite);
+      // BOARD_PrintBitmaps(board);
     }
   }
+
+  // ked to raz bude fungovat tak toto skusim :D
+  // UTIL_ShuffleMoves(legalMoves);
 }
 
-uint8_t BOARD_IsGameEnded(BOARD_BoardState* board, uint8_t isWhite)
+uint8_t BOARD_IsGameEnded(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* legalMoves, uint8_t isEngine)
 {
-  if(board->legalMoves.count==0){
+  if(legalMoves->count==0){
     if(BOARD_IsCheck(board, isWhite?BITBOARD_CountTrailingZeros(&board->white_king)
     :BITBOARD_CountTrailingZeros(&board->black_king), isWhite)){
       // !isWhite vyhral checkmateom
       printf("checkmate %d\n", isWhite);
-      UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
-      UTIL_SetBoolInBools(&board->bools, INDEX_WIN, !isWhite);
+      BOARD_PrintPrettyBoard(board);
+
+      if(!isEngine){
+        UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
+        UTIL_SetBoolInBools(&board->bools, INDEX_WIN, !isWhite);
+      }
     }
     else{
       // stalemate
       printf("stalemate\n");
-      UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
-      UTIL_SetBoolInBools(&board->bools, INDEX_DRAW, 1);
+      if(!isEngine){
+        UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
+        UTIL_SetBoolInBools(&board->bools, INDEX_DRAW, 1);
+      }
     }
     return 1;
   }
   else if(__builtin_popcount(board->all_pieces.half[0])+__builtin_popcount(board->all_pieces.half[1])==2){
     // only kings left
-    UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
-    UTIL_SetBoolInBools(&board->bools, INDEX_DRAW, 1);
+    printf("draw\n");
+      if(!isEngine){
+      UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
+      UTIL_SetBoolInBools(&board->bools, INDEX_DRAW, 1);
+    }
     return 1;
   }
   return 0;
@@ -1335,7 +1367,7 @@ void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy)
            
             BOARD_MakeMove(&board->board, &board->board.legalMoves.list[i], isWhite);
             // BOARD_UndoMove(&board->board, &board->board.legalMoves.list[i], isWhite);
-            // BOARD_PrintBitmaps(board);
+            BOARD_PrintBitmaps(&board->board);
             // if(isWhite){
             //   BOARD_UndoMove(&board->board, &board->board.legalMoves.list[i], isWhite);
             //   BOARD_PrintBitmaps(board);
@@ -1346,28 +1378,28 @@ void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy)
             (!isWhite && BITBOARD_GetBit(&boardCopy.black_pawns, board->board.legalMoves.list[i].from)==1)) &&
             (abs(board->board.legalMoves.list[i].to-board->board.legalMoves.list[i].from)==16)){
               board->board.enPassant[!isWhite] = (board->board.legalMoves.list[i].to+board->board.legalMoves.list[i].from)/2;
-              printf("teraz to nastavujem pre %s\n", !isWhite?"white":"black");
+              // printf("teraz to nastavujem pre %s\n", !isWhite?"white":"black");
             }
             else{
               board->board.enPassant[isWhite] = -1;
-              printf("teraz to vygumujem pre %s\n", isWhite?"white":"black");
+              // printf("teraz to vygumujem pre %s\n", isWhite?"white":"black");
             }
 
             isWhite = !isWhite;
             UTIL_SetBoolInBools(&board->board.bools, INDEX_ON_TURN, isWhite);
             board->selectedX = board->selectedY = -1;
 
-            BOARD_PrintPrettyBoard(&board->board);
+            // BOARD_PrintPrettyBoard(&board->board);
             printf("%s isCheck = %s\n", isWhite?"white":"black", BOARD_IsCheck(&board->board, isWhite
               ?BITBOARD_CountTrailingZeros(&board->board.white_king)
               :BITBOARD_CountTrailingZeros(&board->board.black_king), isWhite)?"true":"false");
             printf("%s Q%d K%d\n",isWhite?"white":"black", UTIL_GetBoolFromBools(board->board.bools, (isWhite)?INDEX_CCWQ:INDEX_CCBQ), 
               UTIL_GetBoolFromBools(board->board.bools, (isWhite)?INDEX_CCWK:INDEX_CCBK));
 
-            BOARD_GeneratePseudoMoves(&board->board, &board->board.pseudoMoves);
-            BOARD_FilterLegalMoves(&board->board, &board->board.pseudoMoves, &board->board.legalMoves);
+            BOARD_GeneratePseudoMoves(&board->board, &board->board.pseudoMoves, isWhite);
+            BOARD_FilterLegalMoves(&board->board, &board->board.pseudoMoves, &board->board.legalMoves, isWhite);
 
-            BOARD_IsGameEnded(&board->board, isWhite);
+            BOARD_IsGameEnded(&board->board, isWhite, &board->board.legalMoves, 0);
           }
         }
       }

@@ -67,7 +67,7 @@ typedef struct{
 #include "bitboard.h"
 
 void BOARD_PrintPrettyBoard(BOARD_BoardState* board);
-void BOARD_PrintBitmaps(BOARD_Board* board);
+void BOARD_PrintBitmaps(BOARD_BoardState* board);
 
 BOARD_Board BOARD_SetupBoard(char* fen);
 void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools);
@@ -87,9 +87,9 @@ void BOARD_GeneratePseudoMoves_Rook(BOARD_BoardState* board, uint8_t isWhite, BO
 void BOARD_GeneratePseudoMoves_Queen(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* pseudoMoves);
 void BOARD_GeneratePseudoMoves_King(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* pseudoMoves);
 void BOARD_GenerateCastlingPseudoMoves(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* pseudoMoves);
-void BOARD_GeneratePseudoMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves);
-void BOARD_FilterLegalMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves, BOARD_MoveList* legalMoves);
-uint8_t BOARD_IsGameEnded(BOARD_BoardState* board, uint8_t isWhite);
+void BOARD_GeneratePseudoMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves, uint8_t isWhite);
+void BOARD_FilterLegalMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves, BOARD_MoveList* legalMoves, uint8_t isWhite);
+uint8_t BOARD_IsGameEnded(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* legalMoves, uint8_t isEngine);
 
 void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy);
 

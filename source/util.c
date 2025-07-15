@@ -25,3 +25,13 @@ uint8_t UTIL_GetBitFrom32(uint32_t bitmap, uint8_t bit_index)
   return bitmap>>bit_index&1;
 }
 
+void UTIL_ShuffleMoves(BOARD_MoveList* moves) 
+{
+  for (int i = moves->count - 1; i > 0; i--) {
+    int j = rand() % (i + 1);
+    // Swap list[i] and list[j]
+    BOARD_Move temp = moves->list[i];
+    moves->list[i] = moves->list[j];
+    moves->list[j] = temp;
+  }
+}
