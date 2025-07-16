@@ -907,13 +907,19 @@ void BOARD_PrintMoves(BOARD_MoveList* moves)
 
 void BOARD_InitBoardStateCopy(BOARD_BoardState* board, BOARD_BoardState* boardCopy)
 {
+  // printf("\nINIT BOARD COPY\n");
+  
+  // BOARD_PrintBitmaps(board);
+
   BITBOARD_SetBitboardToBitboard(&boardCopy->all_pieces, &board->all_pieces);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->white_pieces, &board->white_pieces);
   BITBOARD_SetBitboardToBitboard(&boardCopy->white_pawns, &board->white_pawns);
   BITBOARD_SetBitboardToBitboard(&boardCopy->white_knights, &board->white_knights);
   BITBOARD_SetBitboardToBitboard(&boardCopy->white_bishops, &board->white_bishops);
   BITBOARD_SetBitboardToBitboard(&boardCopy->white_rooks, &board->white_rooks);
   BITBOARD_SetBitboardToBitboard(&boardCopy->white_queens, &board->white_queens);
   BITBOARD_SetBitboardToBitboard(&boardCopy->white_king, &board->white_king);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->black_pieces, &board->black_pieces);
   BITBOARD_SetBitboardToBitboard(&boardCopy->black_pawns, &board->black_pawns);
   BITBOARD_SetBitboardToBitboard(&boardCopy->black_knights, &board->black_knights);
   BITBOARD_SetBitboardToBitboard(&boardCopy->black_bishops, &board->black_bishops);
@@ -932,6 +938,8 @@ void BOARD_InitBoardStateCopy(BOARD_BoardState* board, BOARD_BoardState* boardCo
   boardCopy->enPassant[1] = board->enPassant[1];
   // BITBOARD_Bitboard* capturedPiece; // -> na toto zatial kakam - dufam ze to nebude treba xd
   boardCopy->capturedPiece = board->capturedPiece;
+  
+  // BOARD_PrintBitmaps(boardCopy);
 }
 
 void BOARD_GeneratePseudoMoves_Pawn(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* pseudoMoves)
@@ -1238,7 +1246,9 @@ void BOARD_FilterLegalMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves
   int8_t kingSquare;
   BOARD_BoardState boardCopy;
 
-  // printf("FILTER LEGAL MOVES\n\n");
+  // printf("\nFILTER LEGAL MOVES\n");
+  
+  // BOARD_PrintBitmaps(board);
 
   for(uint8_t i=0;i<pseudoMoves->count;i++){
     if(pseudoMoves->list[i].from==pseudoMoves->list[i].to){
@@ -1247,7 +1257,6 @@ void BOARD_FilterLegalMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves
     if(can && square==pseudoMoves->list[i].from){
       BOARD_AddMove(legalMoves, pseudoMoves->list[i].from, pseudoMoves->list[i].to, pseudoMoves->list[i].promotion);
       // printf("prva: move added to legal moves: from %d to %d isWhite=%d\n", pseudoMoves->list[i].from, pseudoMoves->list[i].to, isWhite);
-      // BOARD_PrintBitmaps(board);
       continue;
     }
     else if(square!=pseudoMoves->list[i].from){
@@ -1295,7 +1304,7 @@ void BOARD_FilterLegalMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves
   }
 
   // ked to raz bude fungovat tak toto skusim :D
-  // UTIL_ShuffleMoves(legalMoves);
+  UTIL_ShuffleMoves(legalMoves);
 }
 
 uint8_t BOARD_IsGameEnded(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* legalMoves, uint8_t isEngine)
@@ -1305,7 +1314,6 @@ uint8_t BOARD_IsGameEnded(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveLi
     :BITBOARD_CountTrailingZeros(&board->black_king), isWhite)){
       // !isWhite vyhral checkmateom
       printf("checkmate %d\n", isWhite);
-      BOARD_PrintPrettyBoard(board);
 
       if(!isEngine){
         UTIL_SetBoolInBools(&board->bools, INDEX_GAME_END, 1);
