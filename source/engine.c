@@ -101,76 +101,15 @@ int8_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, uint8_t isWhite, u
   }
 }
 
-uint8_t ENGINE_MinimaxBoardCopyTry(BOARD_BoardState *board, uint8_t depth, uint8_t isWhite, uint8_t *bestMove)
-{
-  
-  BOARD_BoardState boardCopy;
-  BOARD_InitBoardStateCopy(board, &boardCopy);
-
-  BOARD_GeneratePseudoMoves(&boardCopy, &boardCopy.pseudoMoves, isWhite);
-  BOARD_FilterLegalMoves(&boardCopy, &boardCopy.pseudoMoves, &boardCopy.legalMoves, isWhite);
- 
-  if(depth==ENGINE_DEPTH || BOARD_IsGameEnded(&boardCopy, isWhite, &boardCopy.legalMoves, 1)){
-    return ENGINE_EvaluatePosition(&boardCopy);
-  }
-
-  // getchar();
-  
-  if(isWhite){ // maximizing player
-    int16_t maxEval, eval;
-    maxEval = 0x8000; 
-    for(uint8_t i=0;i<boardCopy.legalMoves.count;i++){
-      
-      BOARD_BoardState boardCopyCopy;
-      BOARD_InitBoardStateCopy(&boardCopy, &boardCopyCopy);
-     
-      printf("move from %d to %d | capturedPiece=%p | isWhite=%d\n", boardCopy.legalMoves.list[i].from, boardCopy.legalMoves.list[i].to, boardCopyCopy.capturedPiece, isWhite);
-
-      BOARD_MakeMove(&boardCopyCopy, &boardCopy.legalMoves.list[i], isWhite);
-      eval = ENGINE_MinimaxBoardCopyTry(&boardCopyCopy, depth+1, false, bestMove);
-      
-      if(eval>maxEval){
-        maxEval = eval;
-        if(depth==0){
-          *bestMove = i;
-        }
-      }
-    }
-    return maxEval;
-  }
-  else{ // minimizing player
-    int16_t minEval, eval;
-    minEval = 0x7FFF; 
-    for(uint8_t i=0;i<boardCopy.legalMoves.count;i++){
-
-      BOARD_BoardState boardCopyCopy;
-      BOARD_InitBoardStateCopy(&boardCopy, &boardCopyCopy);
-      
-      printf("move from %d to %d | capturedPiece=%p | isWhite=%d\n", boardCopy.legalMoves.list[i].from, boardCopy.legalMoves.list[i].to, boardCopyCopy.capturedPiece, isWhite);
-
-      BOARD_MakeMove(&boardCopyCopy, &boardCopy.legalMoves.list[i], isWhite);
-      eval = ENGINE_MinimaxBoardCopyTry(&boardCopyCopy, depth+1, true, bestMove);
-
-      if(eval<minEval){
-        minEval = eval;
-        if(depth==0){
-          *bestMove = i;
-        }
-      }
-    }
-    return minEval;
-  }
-}
-
 uint8_t ENGINE_FindBestMove(BOARD_Board *board, uint8_t isWhite)
 {
   uint8_t bestMove = 0;
   
-  BOARD_BoardState boardCopy;
-  BOARD_InitBoardStateCopy(&board->board, &boardCopy);
-
-  ENGINE_Minimax(&boardCopy, 0, isWhite, &bestMove);
-  // ENGINE_Minimax(&board->board, 0, isWhite, &bestMove);
+  // BOARD_BoardState boardCopy;
+  // BOARD_InitBoardStateCopy(&board->board, &boardCopy);
+  // ENGINE_Minimax(&boardCopy, 0, isWhite, &bestMove);
+  
+  ENGINE_Minimax(&board->board, 0, isWhite, &bestMove);
   // ENGINE_MinimaxBoardCopyTry(&board->board, 0, isWhite, &bestMove);
   BOARD_PrintBitmaps(&board->board);
   

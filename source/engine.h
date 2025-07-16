@@ -6,7 +6,7 @@
 // rook 5
 // queen 9
 
-#define ENGINE_DEPTH 4
+#define ENGINE_DEPTH 2
 
 #include "board.h"
 #include <stdint.h>

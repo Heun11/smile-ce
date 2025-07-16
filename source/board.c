@@ -911,7 +911,6 @@ void BOARD_InitBoardStateCopy(BOARD_BoardState* board, BOARD_BoardState* boardCo
   
   // BOARD_PrintBitmaps(board);
 
-  BITBOARD_SetBitboardToBitboard(&boardCopy->all_pieces, &board->all_pieces);
   BITBOARD_SetBitboardToBitboard(&boardCopy->white_pieces, &board->white_pieces);
   BITBOARD_SetBitboardToBitboard(&boardCopy->white_pawns, &board->white_pawns);
   BITBOARD_SetBitboardToBitboard(&boardCopy->white_knights, &board->white_knights);
@@ -926,6 +925,7 @@ void BOARD_InitBoardStateCopy(BOARD_BoardState* board, BOARD_BoardState* boardCo
   BITBOARD_SetBitboardToBitboard(&boardCopy->black_rooks, &board->black_rooks);
   BITBOARD_SetBitboardToBitboard(&boardCopy->black_queens, &board->black_queens);
   BITBOARD_SetBitboardToBitboard(&boardCopy->black_king, &board->black_king);
+  BITBOARD_SetBitboardToBitboard(&boardCopy->all_pieces, &board->all_pieces);
 
   boardCopy->bools = board->bools;
   
@@ -1304,7 +1304,7 @@ void BOARD_FilterLegalMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves
   }
 
   // ked to raz bude fungovat tak toto skusim :D
-  UTIL_ShuffleMoves(legalMoves);
+  // UTIL_ShuffleMoves(legalMoves);
 }
 
 uint8_t BOARD_IsGameEnded(BOARD_BoardState* board, uint8_t isWhite, BOARD_MoveList* legalMoves, uint8_t isEngine)
