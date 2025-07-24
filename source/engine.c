@@ -41,28 +41,15 @@ int8_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, uint8_t isWhite, u
     int16_t maxEval, eval;
     maxEval = 0x8000; 
     for(uint8_t i=0;i<legalMoves.count;i++){
-      // BOARD_PrintPrettyBoard(board);
-      // BOARD_PrintBitmaps(board);
-      // printf("move from %d to %d | capturedPiece=%p | isWhite=%d\n", legalMoves.list[i].from, legalMoves.list[i].to, board->capturedPiece, isWhite);
-      // BITBOARD_Print(&board->black_pieces);
-      // BOARD_PrintBitmaps(board);
       BOARD_MakeMove(board, &legalMoves.list[i], isWhite);
-      // BOARD_PrintBitmaps(board);
-      // BITBOARD_Print(&board->black_pieces);
       capturedPiece = board->capturedPiece;
       enPassant[0] = board->enPassant[0];
       enPassant[1] = board->enPassant[1];
-      // printf("po tahu AI %p\n", capturedPiece);
-      // BOARD_PrintPrettyBoard(board);
       eval = ENGINE_Minimax(board, depth+1, false, bestMove);
       board->capturedPiece = capturedPiece;
       board->enPassant[0] = enPassant[0];
       board->enPassant[1] = enPassant[1];
       BOARD_UndoMove(board, &legalMoves.list[i], isWhite);
-      // printf("po undo tahu AI\n");
-      // BOARD_PrintBitmaps(board);
-      // BOARD_PrintPrettyBoard(board);
-      // maxEval = UTIL_Max_int16(maxEval, eval);
       if(eval>maxEval){
         maxEval = eval;
         if(depth==0){
@@ -76,10 +63,7 @@ int8_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, uint8_t isWhite, u
     int16_t minEval, eval;
     minEval = 0x7FFF; 
     for(uint8_t i=0;i<legalMoves.count;i++){
-      // printf("move from %d to %d | capturedPiece=%p | isWhite=%d\n", legalMoves.list[i].from, legalMoves.list[i].to, board->capturedPiece, isWhite);
-      // BOARD_PrintBitmaps(board);
       BOARD_MakeMove(board, &legalMoves.list[i], isWhite);
-      // BOARD_PrintBitmaps(board);
       capturedPiece = board->capturedPiece;
       enPassant[0] = board->enPassant[0];
       enPassant[1] = board->enPassant[1];
@@ -88,14 +72,12 @@ int8_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, uint8_t isWhite, u
       board->enPassant[0] = enPassant[0];
       board->enPassant[1] = enPassant[1];
       BOARD_UndoMove(board, &legalMoves.list[i], isWhite);
-      // minEval = UTIL_Min_int16(minEval, eval);
       if(eval<minEval){
         minEval = eval;
         if(depth==0){
           *bestMove = i;
         }
       }
-      // printf("%d %d\n", eval, minEval);
     }
     return minEval;
   }
@@ -105,13 +87,8 @@ uint8_t ENGINE_FindBestMove(BOARD_Board *board, uint8_t isWhite)
 {
   uint8_t bestMove = 0;
   
-  // BOARD_BoardState boardCopy;
-  // BOARD_InitBoardStateCopy(&board->board, &boardCopy);
-  // ENGINE_Minimax(&boardCopy, 0, isWhite, &bestMove);
-  
   ENGINE_Minimax(&board->board, 0, isWhite, &bestMove);
-  // ENGINE_MinimaxBoardCopyTry(&board->board, 0, isWhite, &bestMove);
-  BOARD_PrintBitmaps(&board->board);
+  // BOARD_PrintBitmaps(&board->board);
   
   return bestMove;
 }

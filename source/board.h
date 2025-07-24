@@ -20,7 +20,7 @@
 typedef struct{
   int8_t from;
   int8_t to;
-  int8_t promotion; // pre pesiakov
+  int8_t promotion; // pre pesiakov 0 -> nic 1 -> queen 2 -> rook 3 -> knight 4 -> bishop
 }BOARD_Move;
 
 typedef struct{
