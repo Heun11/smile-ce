@@ -23,7 +23,7 @@ int8_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
   return white_count-black_count; 
 }
 
-int8_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, uint8_t isWhite, uint8_t *bestMove)
+int8_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, int16_t alpha, int16_t beta, uint8_t isWhite, uint8_t *bestMove)
 {
   int8_t enPassant[2];
   BITBOARD_Bitboard* capturedPiece;
@@ -45,7 +45,7 @@ int8_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, uint8_t isWhite, u
       capturedPiece = board->capturedPiece;
       enPassant[0] = board->enPassant[0];
       enPassant[1] = board->enPassant[1];
-      eval = ENGINE_Minimax(board, depth+1, false, bestMove);
+      eval = ENGINE_Minimax(board, depth+1, alpha, beta, false, bestMove);
       board->capturedPiece = capturedPiece;
       board->enPassant[0] = enPassant[0];
       board->enPassant[1] = enPassant[1];
@@ -55,6 +55,11 @@ int8_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, uint8_t isWhite, u
         if(depth==0){
           *bestMove = i;
         }
+      }
+      alpha = (alpha>eval)?alpha:eval;
+      if(beta<=alpha){
+        // printf("pruned\n");
+        break;
       }
     }
     return maxEval;
@@ -67,7 +72,7 @@ int8_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, uint8_t isWhite, u
       capturedPiece = board->capturedPiece;
       enPassant[0] = board->enPassant[0];
       enPassant[1] = board->enPassant[1];
-      eval = ENGINE_Minimax(board, depth+1, true, bestMove);
+      eval = ENGINE_Minimax(board, depth+1, alpha, beta, true, bestMove);
       board->capturedPiece = capturedPiece;
       board->enPassant[0] = enPassant[0];
       board->enPassant[1] = enPassant[1];
@@ -78,6 +83,11 @@ int8_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, uint8_t isWhite, u
           *bestMove = i;
         }
       }
+      beta = (beta<eval)?beta:eval;
+      if(beta<=alpha){
+        // printf("pruned\n");
+        break;
+      }
     }
     return minEval;
   }
@@ -87,7 +97,7 @@ uint8_t ENGINE_FindBestMove(BOARD_Board *board, uint8_t isWhite)
 {
   uint8_t bestMove = 0;
   
-  ENGINE_Minimax(&board->board, 0, isWhite, &bestMove);
+  ENGINE_Minimax(&board->board, 0, 0x8000, 0x7FFF, isWhite, &bestMove);
   // BOARD_PrintBitmaps(&board->board);
   
   return bestMove;
@@ -102,6 +112,7 @@ void ENGINE_PlayTurn(BOARD_Board *board)
   
   uint8_t i = ENGINE_FindBestMove(board, isWhite);
   BOARD_MakeMove(&board->board, &board->board.legalMoves.list[i], isWhite);
+  memcpy(&board->lastMove, &board->board.legalMoves.list[i], sizeof(BOARD_Move));
   
   if(((isWhite && BITBOARD_GetBit(&boardCopy.white_pawns, board->board.legalMoves.list[i].from)==1) || 
   (!isWhite && BITBOARD_GetBit(&boardCopy.black_pawns, board->board.legalMoves.list[i].from)==1)) &&

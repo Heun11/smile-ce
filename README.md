@@ -1,10 +1,15 @@
 # Smile Chess engine :)
-- using raylib and C
+- Raylib & C
 
 # IMPORTANT
     -> ak to bude niekedy randomne hadzat seg fault, moze to byt isCheck (mozno tym ze som tam nemal ziadnych kingov xd)
 
     -> do buducna board->bools moze robit castling problemy v minimaxe
+        - asi nerobi xd
+
+    -> stane sa niekedy ze opakuje tie iste tahy aj ked ma na vyber (ak opakujes aj ty samozrejme)
+
+    -> niekedy sa stale (neviem preco a kedy) z kralovny spravi pesiak :D
 
 ### overall todo 
     [x] create basics
@@ -44,7 +49,7 @@
                 [x] capture en passant
                     [x] vpodstate ked odvratis en passanta tak uz sa neda spravit :D
             [x] implement basic minimax
-            [] implement alpha beta pruning
+            [x] implement alpha beta pruning
             [] make better evaluation function
             [] speed things up a bit
     [] optional
@@ -53,6 +58,6 @@
 ### ideas for optimalization for future
     [] make BOARD_Move smaller by storing it all in uint16_t and then use masking and bitshifts to use 
         6bits for "from", 6bits for "to" and remaining 4 to store the "promotion"
-    [] maybe even replace BOARD_Move with like whole bitmap which would represent all possible moves for given piece  
+    [] maybe even replace BOARD_MoveList with like whole bitmap which would represent all possible moves for given piece  
     
 

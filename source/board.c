@@ -123,6 +123,7 @@ BOARD_Board BOARD_SetupBoard(char* fen)
   board.pointingY = -1;
   board.selectedX = -1;
   board.selectedY = -1;
+  board.lastMove = (BOARD_Move){-1, -1, -1};
 
   board.board.enPassant[0] = -1;
   board.board.enPassant[1] = -1;
@@ -247,6 +248,13 @@ void BOARD_DrawBoard(BOARD_Board* board, int offx, int offy, uint8_t* bools)
 
       if(pos==board->selectedY*8+board->selectedX){
         DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){100, 100, 0, 100});
+      }
+
+      if(pos==board->lastMove.from){
+        DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){10, 100, 10, 120});
+      }
+      if(pos==board->lastMove.to){
+        DrawRectangle(offx+col*TS, offy+row*TS, TS, TS, (Color){10, 100, 10, 120});
       }
       
       if(BITBOARD_GetBit(&board->board.all_pieces, pos)){
@@ -1206,6 +1214,7 @@ void BOARD_FilterLegalMoves(BOARD_BoardState* board, BOARD_MoveList* pseudoMoves
     }
   }
 
+  // aby nehral stale to iste dokola
   // UTIL_ShuffleMoves(legalMoves);
 }
 
@@ -1276,8 +1285,9 @@ void BOARD_PlayTurn(BOARD_Board* board, int offx, int offy)
           if(board->board.legalMoves.list[i].from==(board->selectedY*8+board->selectedX) && board->board.legalMoves.list[i].to==pos){
            
             BOARD_MakeMove(&board->board, &board->board.legalMoves.list[i], isWhite);
+            memcpy(&board->lastMove, &board->board.legalMoves.list[i], sizeof(BOARD_Move));
             // BOARD_UndoMove(&board->board, &board->board.legalMoves.list[i], isWhite);
-            // BOARD_PrintBitmaps(&board->board);
+            BOARD_PrintBitmaps(&board->board);
 
             if(((isWhite && BITBOARD_GetBit(&boardCopy.white_pawns, board->board.legalMoves.list[i].from)==1) || 
             (!isWhite && BITBOARD_GetBit(&boardCopy.black_pawns, board->board.legalMoves.list[i].from)==1)) &&

@@ -60,6 +60,7 @@ typedef struct{
   BOARD_BoardState board;
   // toto je len pre estetickost tejto verzie
   int selectedX, selectedY, pointingX, pointingY;
+  BOARD_Move lastMove;
 }BOARD_Board;
 
 #include "raylib.h"
