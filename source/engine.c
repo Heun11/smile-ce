@@ -8,6 +8,9 @@ int8_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
 {
   int8_t black_count = 0, white_count = 0;
 
+  // TODO -> pravdepodobne budem musiet pouzit int16_t aby som mohol mat vacsi rozdiel medzi tymi TH (chapes)
+
+  // material counting
   black_count += __builtin_popcount(board->black_pawns.half[0])*1+__builtin_popcount(board->black_pawns.half[1])*1; 
   black_count += __builtin_popcount(board->black_knights.half[0])*3+__builtin_popcount(board->black_knights.half[1])*3; 
   black_count += __builtin_popcount(board->black_bishops.half[0])*3+__builtin_popcount(board->black_bishops.half[1])*3; 
@@ -19,6 +22,11 @@ int8_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
   white_count += __builtin_popcount(board->white_bishops.half[0])*3+__builtin_popcount(board->white_bishops.half[1])*3; 
   white_count += __builtin_popcount(board->white_rooks.half[0])*5+__builtin_popcount(board->white_rooks.half[1])*5; 
   white_count += __builtin_popcount(board->white_queens.half[0])*9+__builtin_popcount(board->white_queens.half[1])*9;
+
+  // check for CHECKMATE, STALEMATE or DRAW
+
+  // Piece Square Table
+
 
   return white_count-black_count; 
 }
