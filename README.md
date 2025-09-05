@@ -1,5 +1,5 @@
 # Smile Chess engine :)
-- Raylib & C
+- Raylib & C -> implement with though of running it on 32bit RP2350A (hence the 32bit numbers instead of 64bit)
 
 # IMPORTANT
     -> ak to bude niekedy randomne hadzat seg fault, moze to byt isCheck (mozno tym ze som tam nemal ziadnych kingov xd)
@@ -39,20 +39,18 @@
                 [x] promotions
                 [x] castle
                 [x] capture
-                [x] niekedy sa stane ze sa zmena neprejavi v all_pieces 
-                    (ked capturnes tak z all_pieces sa vymaze to co si capturol)
                 [x] everything for black as well
                     [x] basic moves
                     [x] promotions
                     [x] castle
                     [x] capture
                 [x] capture en passant
-                    [x] vpodstate ked odvratis en passanta tak uz sa neda spravit :D
             [x] implement basic minimax
             [x] implement alpha beta pruning
             [] make better evaluation function
                 [] piece square table
                 [] checkmate & stalemate checking
+                [] tweak all multipliers to be good :D
             [] speed things up a bit
     [] optional
         [] add suport for all promoting pieces

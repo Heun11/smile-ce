@@ -4,11 +4,10 @@
 #include "util.h"
 #include <stdint.h>
 
-int8_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
-{
-  int8_t black_count = 0, white_count = 0;
 
-  // TODO -> pravdepodobne budem musiet pouzit int16_t aby som mohol mat vacsi rozdiel medzi tymi TH (chapes)
+int16_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
+{
+  int16_t black_count = 0, white_count = 0;
 
   // material counting
   black_count += __builtin_popcount(board->black_pawns.half[0])*1+__builtin_popcount(board->black_pawns.half[1])*1; 
@@ -25,13 +24,34 @@ int8_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
 
   // check for CHECKMATE, STALEMATE or DRAW
 
+  // lebo pouzivam 32bitove cisla
+  // for(uint8_t i=0;i<32;i++){
+  //
+  //   white_count += ((board->white_pawns.half[0]>>i)&1)*BITBOARD_PST_Pawn[i];
+  //   white_count += ((board->white_pawns.half[1]>>i)&1)*BITBOARD_PST_Pawn[32+i];
+  // }
+
+  // taketo nieco treba spravit 
+  // BITBOARD_Bitboard saso = {.half={
+  //   0x00001881, 0x8117ffff
+  // }};
+  //
+  // uint8_t indexes[64];
+  // uint8_t count = BITBOARD_FindSetBits(&saso, indexes);
+  //
+  // printf("indexes ");
+  // for(;count>0;count--){
+  //   printf("%d ", indexes[count]);
+  // }
+  // printf("\n");
+
   // Piece Square Table
 
 
   return white_count-black_count; 
 }
 
-int8_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, int16_t alpha, int16_t beta, uint8_t isWhite, uint8_t *bestMove)
+int16_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, int16_t alpha, int16_t beta, uint8_t isWhite, uint8_t *bestMove)
 {
   int8_t enPassant[2];
   BITBOARD_Bitboard* capturedPiece;

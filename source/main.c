@@ -1,4 +1,5 @@
 #include "main.h"
+#include "bitboard.h"
 #include "bitboard_func.h"
 #include "board.h"
 #include "engine.h"
@@ -39,7 +40,7 @@ int main(void)
   // BOARD_Board board = BOARD_SetupBoard("7R/k7/8/8/8/8/K7/8 w ");
 
   uint8_t playerColor = 1;
-
+    
   while (!WindowShouldClose()){
     BeginDrawing();
     ClearBackground((Color){10,10,10,255});

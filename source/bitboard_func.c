@@ -97,22 +97,48 @@ void BITBOARD_Subtract(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitb
   bitboard_dest->half[1] = bitboard_a->half[1] - bitboard_b->half[1];
 }
 
-int8_t BITBOARD_CountTrailingZeros(BITBOARD_Bitboard* bitboard)
-{
-  if(bitboard->half[0]==0 && bitboard->half[1]==0){
-    return -1;
+int8_t BITBOARD_CountTrailingZeros(BITBOARD_Bitboard* bitboard) {
+  if (bitboard->half[0] != 0) {
+      return __builtin_ctz(bitboard->half[0]);
   }
-  uint8_t tz = __builtin_ctz(bitboard->half[0]);
-  if(tz==32){
-    tz += __builtin_ctz(bitboard->half[1]);
+  if (bitboard->half[1] != 0) {
+      return 32 + __builtin_ctz(bitboard->half[1]);
   }
-  return tz;
+  return -1;
 }
 
 void BITBOARD_SetBitboardToBitboard(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard)
 {
   bitboard_dest->half[0] = bitboard->half[0];
   bitboard_dest->half[1] = bitboard->half[1];
+}
+
+// int find_set_bits(unsigned int x, int indexes[]) {
+//     int count = 0;
+//
+//     while (x) {
+//         int bitIndex = __builtin_ctz(x);   // position of lowest set bit
+//         indexes[count++] = bitIndex;
+//         x &= (x - 1); // clear the lowest set bit
+//     }
+//
+//     return count;
+// }
+
+uint8_t BITBOARD_FindSetBits(BITBOARD_Bitboard* bitboard, uint8_t* indexes)
+{
+  uint32_t lower = bitboard->half[0];
+  uint32_t higher = bitboard->half[1];
+  uint8_t count = 0;
+  for(;lower;){
+    indexes[count++] = __builtin_ctz(lower);
+    lower &= (lower-1);
+  }
+  for(;higher;){
+    indexes[count++] = 32+__builtin_ctz(higher);
+    higher &= (higher-1);
+  }
+  return count;
 }
 
 void BITBOARD_RightShift(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard, uint8_t shift)

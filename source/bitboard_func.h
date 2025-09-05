@@ -21,6 +21,8 @@ void BITBOARD_Subtract(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitb
 int8_t BITBOARD_CountTrailingZeros(BITBOARD_Bitboard* bitboard);
 void BITBOARD_SetBitboardToBitboard(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard);
 
+uint8_t BITBOARD_FindSetBits(BITBOARD_Bitboard* bitboard, uint8_t* indexes);
+
 void BITBOARD_RightShift(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard, uint8_t shift);
 void BITBOARD_LeftShift(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitboard, uint8_t shift);
 
