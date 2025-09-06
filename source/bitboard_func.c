@@ -113,18 +113,6 @@ void BITBOARD_SetBitboardToBitboard(BITBOARD_Bitboard* bitboard_dest, BITBOARD_B
   bitboard_dest->half[1] = bitboard->half[1];
 }
 
-// int find_set_bits(unsigned int x, int indexes[]) {
-//     int count = 0;
-//
-//     while (x) {
-//         int bitIndex = __builtin_ctz(x);   // position of lowest set bit
-//         indexes[count++] = bitIndex;
-//         x &= (x - 1); // clear the lowest set bit
-//     }
-//
-//     return count;
-// }
-
 uint8_t BITBOARD_FindSetBits(BITBOARD_Bitboard* bitboard, uint8_t* indexes)
 {
   uint32_t lower = bitboard->half[0];

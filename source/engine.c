@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "bitboard.h"
 #include "bitboard_func.h"
 #include "board.h"
 #include "util.h"
@@ -10,43 +11,69 @@ int16_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
   int16_t black_count = 0, white_count = 0;
 
   // material counting
-  black_count += __builtin_popcount(board->black_pawns.half[0])*1+__builtin_popcount(board->black_pawns.half[1])*1; 
-  black_count += __builtin_popcount(board->black_knights.half[0])*3+__builtin_popcount(board->black_knights.half[1])*3; 
-  black_count += __builtin_popcount(board->black_bishops.half[0])*3+__builtin_popcount(board->black_bishops.half[1])*3; 
-  black_count += __builtin_popcount(board->black_rooks.half[0])*5+__builtin_popcount(board->black_rooks.half[1])*5; 
-  black_count += __builtin_popcount(board->black_queens.half[0])*9+__builtin_popcount(board->black_queens.half[1])*9;
+  black_count += (__builtin_popcount(board->black_pawns.half[0])+__builtin_popcount(board->black_pawns.half[1]))*100; 
+  black_count += (__builtin_popcount(board->black_knights.half[0])+__builtin_popcount(board->black_knights.half[1]))*300; 
+  black_count += (__builtin_popcount(board->black_bishops.half[0])+__builtin_popcount(board->black_bishops.half[1]))*330; 
+  black_count += (__builtin_popcount(board->black_rooks.half[0])+__builtin_popcount(board->black_rooks.half[1]))*500;
+  black_count += (__builtin_popcount(board->black_queens.half[0])+__builtin_popcount(board->black_queens.half[1]))*900;
 
-  white_count += __builtin_popcount(board->white_pawns.half[0])*1+__builtin_popcount(board->white_pawns.half[1])*1; 
-  white_count += __builtin_popcount(board->white_knights.half[0])*3+__builtin_popcount(board->white_knights.half[1])*3; 
-  white_count += __builtin_popcount(board->white_bishops.half[0])*3+__builtin_popcount(board->white_bishops.half[1])*3; 
-  white_count += __builtin_popcount(board->white_rooks.half[0])*5+__builtin_popcount(board->white_rooks.half[1])*5; 
-  white_count += __builtin_popcount(board->white_queens.half[0])*9+__builtin_popcount(board->white_queens.half[1])*9;
+  white_count += (__builtin_popcount(board->white_pawns.half[0])+__builtin_popcount(board->white_pawns.half[1]))*100; 
+  white_count += (__builtin_popcount(board->white_knights.half[0])+__builtin_popcount(board->white_knights.half[1]))*300; 
+  white_count += (__builtin_popcount(board->white_bishops.half[0])+__builtin_popcount(board->white_bishops.half[1]))*330; 
+  white_count += (__builtin_popcount(board->white_rooks.half[0])+__builtin_popcount(board->white_rooks.half[1]))*500; 
+  white_count += (__builtin_popcount(board->white_queens.half[0])+__builtin_popcount(board->white_queens.half[1]))*900;
 
-  // check for CHECKMATE, STALEMATE or DRAW
-
-  // lebo pouzivam 32bitove cisla
-  // for(uint8_t i=0;i<32;i++){
-  //
-  //   white_count += ((board->white_pawns.half[0]>>i)&1)*BITBOARD_PST_Pawn[i];
-  //   white_count += ((board->white_pawns.half[1]>>i)&1)*BITBOARD_PST_Pawn[32+i];
-  // }
-
-  // taketo nieco treba spravit 
-  // BITBOARD_Bitboard saso = {.half={
-  //   0x00001881, 0x8117ffff
-  // }};
-  //
-  // uint8_t indexes[64];
-  // uint8_t count = BITBOARD_FindSetBits(&saso, indexes);
-  //
-  // printf("indexes ");
-  // for(;count>0;count--){
-  //   printf("%d ", indexes[count]);
-  // }
-  // printf("\n");
 
   // Piece Square Table
+  uint8_t indexes[9], count;
 
+  count = BITBOARD_FindSetBits(&board->white_pawns, indexes);
+  for(;count>0;count--){
+    white_count += BITBOARD_PST_Pawn[indexes[count]^56];
+  }
+  count = BITBOARD_FindSetBits(&board->white_knights, indexes);
+  for(;count>0;count--){
+    white_count += BITBOARD_PST_Knight[indexes[count]];
+  }
+  count = BITBOARD_FindSetBits(&board->white_bishops, indexes);
+  for(;count>0;count--){
+    white_count += BITBOARD_PST_Bishop[indexes[count]];
+  }
+  count = BITBOARD_FindSetBits(&board->white_rooks, indexes);
+  for(;count>0;count--){
+    white_count += BITBOARD_PST_Rook[indexes[count]^56];
+  }
+  count = BITBOARD_FindSetBits(&board->white_queens, indexes);
+  for(;count>0;count--){
+    white_count += BITBOARD_PST_Queen[indexes[count]];
+  }
+
+  count = BITBOARD_FindSetBits(&board->black_pawns, indexes);
+  for(;count>0;count--){
+    black_count += BITBOARD_PST_Pawn[indexes[count]];
+  }
+  count = BITBOARD_FindSetBits(&board->black_knights, indexes);
+  for(;count>0;count--){
+    black_count += BITBOARD_PST_Knight[indexes[count]];
+  }
+  count = BITBOARD_FindSetBits(&board->black_bishops, indexes);
+  for(;count>0;count--){
+    black_count += BITBOARD_PST_Bishop[indexes[count]];
+  }
+  count = BITBOARD_FindSetBits(&board->black_rooks, indexes);
+  for(;count>0;count--){
+    black_count += BITBOARD_PST_Rook[indexes[count]];
+  }
+  count = BITBOARD_FindSetBits(&board->black_queens, indexes);
+  for(;count>0;count--){
+    black_count += BITBOARD_PST_Queen[indexes[count]];
+  }
+
+  // TODO -> pridat kinga
+  
+
+  // check for CHECKMATE, STALEMATE or DRAW
+  // (este neviem ci a hlavne ako to spravim)
 
   return white_count-black_count; 
 }
