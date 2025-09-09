@@ -99,10 +99,10 @@ void BITBOARD_Subtract(BITBOARD_Bitboard* bitboard_dest, BITBOARD_Bitboard* bitb
 
 int8_t BITBOARD_CountTrailingZeros(BITBOARD_Bitboard* bitboard) {
   if (bitboard->half[0] != 0) {
-      return __builtin_ctz(bitboard->half[0]);
+    return __builtin_ctz(bitboard->half[0]);
   }
   if (bitboard->half[1] != 0) {
-      return 32 + __builtin_ctz(bitboard->half[1]);
+    return 32 + __builtin_ctz(bitboard->half[1]);
   }
   return -1;
 }

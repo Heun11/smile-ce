@@ -26,11 +26,11 @@ extern BITBOARD_Bitboard BITBOARD_Magics_rook[64];
 extern BITBOARD_Bitboard BITBOARD_AttackTable_rook[64][4096]; 
 
 // niesu to bitboardy ale dam to sem xd (Piece Square Table) [pre ciernych index^56]
-extern uint8_t BITBOARD_PST_Pawn[64];
-extern uint8_t BITBOARD_PST_Knight[64];
-extern uint8_t BITBOARD_PST_Bishop[64];
-extern uint8_t BITBOARD_PST_Rook[64];
-extern uint8_t BITBOARD_PST_Queen[64];
-extern uint8_t BITBOARD_PST_King[2][64]; // midgame, endgame
+extern int8_t BITBOARD_PST_Pawn[64];
+extern int8_t BITBOARD_PST_Knight[64];
+extern int8_t BITBOARD_PST_Bishop[64];
+extern int8_t BITBOARD_PST_Rook[64];
+extern int8_t BITBOARD_PST_Queen[64];
+extern int8_t BITBOARD_PST_King[2][64]; // midgame, endgame
 
 #endif

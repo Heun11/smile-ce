@@ -4,7 +4,7 @@
 #include "board.h"
 #include "util.h"
 #include <stdint.h>
-
+#include <stdio.h>
 
 int16_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
 {
@@ -25,11 +25,11 @@ int16_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
 
 
   // Piece Square Table
-  uint8_t indexes[9], count;
+  uint8_t indexes[10], count;
 
   count = BITBOARD_FindSetBits(&board->white_pawns, indexes);
   for(;count>0;count--){
-    white_count += BITBOARD_PST_Pawn[indexes[count]^56];
+    white_count += BITBOARD_PST_Pawn[indexes[count]];
   }
   count = BITBOARD_FindSetBits(&board->white_knights, indexes);
   for(;count>0;count--){
@@ -41,7 +41,7 @@ int16_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
   }
   count = BITBOARD_FindSetBits(&board->white_rooks, indexes);
   for(;count>0;count--){
-    white_count += BITBOARD_PST_Rook[indexes[count]^56];
+    white_count += BITBOARD_PST_Rook[indexes[count]];
   }
   count = BITBOARD_FindSetBits(&board->white_queens, indexes);
   for(;count>0;count--){
@@ -50,23 +50,23 @@ int16_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
 
   count = BITBOARD_FindSetBits(&board->black_pawns, indexes);
   for(;count>0;count--){
-    black_count += BITBOARD_PST_Pawn[indexes[count]];
+    black_count += BITBOARD_PST_Pawn[indexes[count]^56];
   }
   count = BITBOARD_FindSetBits(&board->black_knights, indexes);
   for(;count>0;count--){
-    black_count += BITBOARD_PST_Knight[indexes[count]];
+    black_count += BITBOARD_PST_Knight[indexes[count]^56];
   }
   count = BITBOARD_FindSetBits(&board->black_bishops, indexes);
   for(;count>0;count--){
-    black_count += BITBOARD_PST_Bishop[indexes[count]];
+    black_count += BITBOARD_PST_Bishop[indexes[count]^56];
   }
   count = BITBOARD_FindSetBits(&board->black_rooks, indexes);
   for(;count>0;count--){
-    black_count += BITBOARD_PST_Rook[indexes[count]];
+    black_count += BITBOARD_PST_Rook[indexes[count]^56];
   }
   count = BITBOARD_FindSetBits(&board->black_queens, indexes);
   for(;count>0;count--){
-    black_count += BITBOARD_PST_Queen[indexes[count]];
+    black_count += BITBOARD_PST_Queen[indexes[count]^56];
   }
 
   // TODO -> pridat kinga
@@ -74,7 +74,8 @@ int16_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
 
   // check for CHECKMATE, STALEMATE or DRAW
   // (este neviem ci a hlavne ako to spravim)
-
+  
+  // printf("white = %d | black = %d\n", white_count, black_count);
   return white_count-black_count; 
 }
 
@@ -117,6 +118,7 @@ int16_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, int16_t alpha, in
         break;
       }
     }
+
     return maxEval;
   }
   else{ // minimizing player
@@ -128,6 +130,13 @@ int16_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, int16_t alpha, in
       enPassant[0] = board->enPassant[0];
       enPassant[1] = board->enPassant[1];
       eval = ENGINE_Minimax(board, depth+1, alpha, beta, true, bestMove);
+
+      // if(depth==0){
+      //   printf("BOARDSTATE depth=%d, eval=%d\n", depth, eval);
+      //   BOARD_PrintPrettyBoard(board);
+      //   printf("FROM %d TO %d\n\n", legalMoves.list[i].from, legalMoves.list[i].to);
+      // }
+
       board->capturedPiece = capturedPiece;
       board->enPassant[0] = enPassant[0];
       board->enPassant[1] = enPassant[1];
@@ -151,7 +160,8 @@ int16_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, int16_t alpha, in
 uint8_t ENGINE_FindBestMove(BOARD_Board *board, uint8_t isWhite)
 {
   uint8_t bestMove = 0;
-  
+    
+  printf("\n==============================================================\n");
   ENGINE_Minimax(&board->board, 0, 0x8000, 0x7FFF, isWhite, &bestMove);
   // BOARD_PrintBitmaps(&board->board);
   
