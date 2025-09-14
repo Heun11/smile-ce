@@ -44,7 +44,7 @@
             [x] draw (only kings left ig)
     [] create engine
         [x] setup code (try with random moves)
-        [] code minimax
+        [x] code minimax
             [x] make undoMove function (needed for a minimax [probably]) - should be working :D
                 [x] basic moves
                 [x] promotions
@@ -58,11 +58,11 @@
                 [x] capture en passant
             [x] implement basic minimax
             [x] implement alpha beta pruning
-            [] make better evaluation function
-                [] piece square table
-                [] checkmate & stalemate checking
-                [] tweak all multipliers to be good :D
-            [] speed things up a bit
+            [x] make better evaluation function
+                [x] piece square table
+                [x] tweak all multipliers to be good :D
+                [x] checkmate checking
+        [] massive optimalization
     [] optional
         [] add suport for all promoting pieces
 

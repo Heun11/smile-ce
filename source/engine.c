@@ -6,26 +6,58 @@
 #include <stdint.h>
 #include <stdio.h>
 
-int16_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
+int16_t ENGINE_EvaluatePosition(BOARD_BoardState *board, uint8_t depth)
 {
+  // check for checkmate
+  uint8_t white_king_square = BITBOARD_CountTrailingZeros(&board->white_king);
+  uint8_t black_king_square = BITBOARD_CountTrailingZeros(&board->black_king);
+
+  if(board->legalMoves.count==0){
+    if(BOARD_IsCheck(board, white_king_square, 1)){
+      return -32768+depth;
+    }
+    else if(BOARD_IsCheck(board, black_king_square, 0)){
+      return 32767-depth;
+    }
+    else{
+      return 0;
+    }
+  }
+
+
   int16_t black_count = 0, white_count = 0;
+  int16_t total_nonpawn = 0;
 
   // material counting
-  black_count += (__builtin_popcount(board->black_pawns.half[0])+__builtin_popcount(board->black_pawns.half[1]))*100; 
   black_count += (__builtin_popcount(board->black_knights.half[0])+__builtin_popcount(board->black_knights.half[1]))*300; 
   black_count += (__builtin_popcount(board->black_bishops.half[0])+__builtin_popcount(board->black_bishops.half[1]))*330; 
   black_count += (__builtin_popcount(board->black_rooks.half[0])+__builtin_popcount(board->black_rooks.half[1]))*500;
   black_count += (__builtin_popcount(board->black_queens.half[0])+__builtin_popcount(board->black_queens.half[1]))*900;
+  total_nonpawn += black_count;
+  black_count += (__builtin_popcount(board->black_pawns.half[0])+__builtin_popcount(board->black_pawns.half[1]))*100; 
+  
 
-  white_count += (__builtin_popcount(board->white_pawns.half[0])+__builtin_popcount(board->white_pawns.half[1]))*100; 
   white_count += (__builtin_popcount(board->white_knights.half[0])+__builtin_popcount(board->white_knights.half[1]))*300; 
   white_count += (__builtin_popcount(board->white_bishops.half[0])+__builtin_popcount(board->white_bishops.half[1]))*330; 
   white_count += (__builtin_popcount(board->white_rooks.half[0])+__builtin_popcount(board->white_rooks.half[1]))*500; 
   white_count += (__builtin_popcount(board->white_queens.half[0])+__builtin_popcount(board->white_queens.half[1]))*900;
+  total_nonpawn += white_count;
+  white_count += (__builtin_popcount(board->white_pawns.half[0])+__builtin_popcount(board->white_pawns.half[1]))*100; 
 
 
   // Piece Square Table
   uint8_t indexes[10], count;
+
+  if(total_nonpawn>2000){ 
+    // total_nonpawn > 2000 → Middlegame
+    white_count += BITBOARD_PST_King[0][white_king_square];
+    black_count += BITBOARD_PST_King[0][black_king_square];
+  }
+  else{ 
+    // total_nonpawn <= 2000 → Endgame
+    white_count += BITBOARD_PST_King[1][white_king_square];
+    black_count += BITBOARD_PST_King[1][black_king_square];
+  }
 
   count = BITBOARD_FindSetBits(&board->white_pawns, indexes);
   for(;count>0;count--){
@@ -68,13 +100,7 @@ int16_t ENGINE_EvaluatePosition(BOARD_BoardState *board)
   for(;count>0;count--){
     black_count += BITBOARD_PST_Queen[indexes[count]^56];
   }
-
-  // TODO -> pridat kinga
-  
-
-  // check for CHECKMATE, STALEMATE or DRAW
-  // (este neviem ci a hlavne ako to spravim)
-  
+   
   // printf("white = %d | black = %d\n", white_count, black_count);
   return white_count-black_count; 
 }
@@ -88,14 +114,14 @@ int16_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, int16_t alpha, in
   BOARD_FilterLegalMoves(board, &pseudoMoves, &legalMoves, isWhite);
  
   if(depth==ENGINE_DEPTH || BOARD_IsGameEnded(board, isWhite, &legalMoves, 1)){
-    return ENGINE_EvaluatePosition(board);
+    return ENGINE_EvaluatePosition(board, depth);
   }
 
   // getchar();
   
   if(isWhite){ // maximizing player
     int16_t maxEval, eval;
-    maxEval = 0x8000; 
+    maxEval = -32768; 
     for(uint8_t i=0;i<legalMoves.count;i++){
       BOARD_MakeMove(board, &legalMoves.list[i], isWhite);
       capturedPiece = board->capturedPiece;
@@ -123,7 +149,7 @@ int16_t ENGINE_Minimax(BOARD_BoardState *board, uint8_t depth, int16_t alpha, in
   }
   else{ // minimizing player
     int16_t minEval, eval;
-    minEval = 0x7FFF; 
+    minEval = 32767; 
     for(uint8_t i=0;i<legalMoves.count;i++){
       BOARD_MakeMove(board, &legalMoves.list[i], isWhite);
       capturedPiece = board->capturedPiece;

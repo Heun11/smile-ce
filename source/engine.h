@@ -11,8 +11,6 @@
 #include "board.h"
 #include <stdint.h>
 
-int16_t ENGINE_EvaluatePosition(BOARD_BoardState *board);
-
 void ENGINE_PlayTurn(BOARD_Board *board);
 
 #endif
